@@ -15,8 +15,12 @@ from sqlalchemy import text
 load_dotenv()
 
 # Initialize Flask app
+# Note: static_folder needs to be relative to app.py location
+# Since app.py is in root, client/dist is correct for local dev
+# But if running from a subdirectory, we need to adjust
+static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client', 'dist')
 app = Flask(__name__,
-            static_folder='client/dist',
+            static_folder=static_path,
             static_url_path='')
 
 # Configure logging
