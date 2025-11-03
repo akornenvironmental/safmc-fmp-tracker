@@ -14,18 +14,31 @@ from sqlalchemy import text
 # Load environment variables
 load_dotenv()
 
+# Configure logging first
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Initialize Flask app
-# Note: static_folder needs to be relative to app.py location
-# Since app.py is in root, client/dist is correct for local dev
-# But if running from a subdirectory, we need to adjust
-static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client', 'dist')
+# Get the project root (parent of app.py's directory on Render)
+# On Render, __file__ might be /opt/render/project/src/app.py
+# So we need to go up to /opt/render/project, then into client/dist
+app_dir = os.path.dirname(os.path.abspath(__file__))
+
+# If we're in a 'src' subdirectory, go up one level to project root
+if os.path.basename(app_dir) == 'src':
+    project_root = os.path.dirname(app_dir)
+else:
+    project_root = app_dir
+
+static_path = os.path.join(project_root, 'client', 'dist')
+logger.info(f"App directory: {app_dir}")
+logger.info(f"Project root: {project_root}")
+logger.info(f"Static path: {static_path}")
+logger.info(f"Static path exists: {os.path.exists(static_path)}")
+
 app = Flask(__name__,
             static_folder=static_path,
             static_url_path='')
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
