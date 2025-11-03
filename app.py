@@ -45,11 +45,10 @@ from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 
 # Import routes
-from src.routes import api_routes, web_routes
+from src.routes import api_routes
 
 # Register blueprints
 app.register_blueprint(api_routes.bp, url_prefix='/api')
-app.register_blueprint(web_routes.bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
