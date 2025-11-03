@@ -9,6 +9,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
+from sqlalchemy import text
 
 # Load environment variables
 load_dotenv()
@@ -64,7 +65,7 @@ def health_check():
     """Health check endpoint for Render"""
     try:
         # Test database connection
-        db.session.execute('SELECT 1')
+        db.session.execute(text('SELECT 1'))
         return jsonify({
             'status': 'healthy',
             'timestamp': datetime.utcnow().isoformat(),
