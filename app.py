@@ -44,16 +44,7 @@ from src.models.comment import Comment
 from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 
-# Import routes
-from src.routes import api_routes
-
-# Register blueprints
-app.register_blueprint(api_routes.bp, url_prefix='/api')
-
-# Initialize scheduler for automated scraping
-from src.services.scheduler import init_scheduler
-scheduler = init_scheduler(app)
-
+# Health check endpoint (before blueprints)
 @app.route('/health')
 def health_check():
     """Health check endpoint for Render"""
@@ -73,15 +64,35 @@ def health_check():
             'error': str(e)
         }), 500
 
+# Import and register API routes
+from src.routes import api_routes
+app.register_blueprint(api_routes.bp, url_prefix='/api')
+
+# Initialize scheduler for automated scraping
+from src.services.scheduler import init_scheduler
+scheduler = init_scheduler(app)
+
+# Serve React app (MUST be last - catch-all route)
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
     """Serve React app for all non-API routes"""
+    # Check if this is an API route (should not reach here due to blueprint)
+    if path.startswith('api/'):
+        return jsonify({'error': 'Not found'}), 404
+
     # If path is a file in dist (e.g., assets, js, css), serve it directly
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
+
     # Otherwise serve index.html for client-side routing
-    return send_from_directory(app.static_folder, 'index.html')
+    try:
+        return send_from_directory(app.static_folder, 'index.html')
+    except Exception as e:
+        logger.error(f"Error serving index.html: {e}")
+        logger.error(f"Static folder: {app.static_folder}")
+        logger.error(f"Static folder exists: {os.path.exists(app.static_folder)}")
+        return jsonify({'error': 'Frontend not found', 'details': str(e)}), 500
 
 @app.errorhandler(500)
 def internal_error(error):
