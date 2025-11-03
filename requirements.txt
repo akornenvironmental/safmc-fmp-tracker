@@ -7,7 +7,7 @@ Flask-Migrate==4.0.5
 Flask-CORS==4.0.0
 
 # Database
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 SQLAlchemy==2.0.36
 
 # Web Scraping
