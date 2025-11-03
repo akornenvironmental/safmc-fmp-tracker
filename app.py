@@ -64,6 +64,21 @@ def health_check():
             'error': str(e)
         }), 500
 
+# Debug endpoint to check static folder
+@app.route('/debug/static')
+def debug_static():
+    """Debug endpoint to check static folder setup"""
+    import glob
+    static_folder = app.static_folder
+    return jsonify({
+        'static_folder': static_folder,
+        'static_folder_exists': os.path.exists(static_folder) if static_folder else False,
+        'static_folder_absolute': os.path.abspath(static_folder) if static_folder else None,
+        'index_html_exists': os.path.exists(os.path.join(static_folder, 'index.html')) if static_folder else False,
+        'files_in_static': os.listdir(static_folder) if static_folder and os.path.exists(static_folder) else [],
+        'cwd': os.getcwd(),
+    })
+
 # Import and register API routes
 from src.routes import api_routes
 app.register_blueprint(api_routes.bp, url_prefix='/api')
