@@ -16,13 +16,5 @@ services:
         generateValue: true
       - key: DATABASE_URL
         fromDatabase:
-          name: safmc-fmp-db
+          name: safmc-interview-db
           property: connectionString
-
-databases:
-  # PostgreSQL Database
-  - name: safmc-fmp-db
-    databaseName: safmc_fmp_tracker
-    user: safmc_user
-    region: oregon
-    plan: free
