@@ -24,8 +24,5 @@ python-dotenv==1.0.0
 # Date/Time Utilities
 python-dateutil==2.8.2
 
-# Data Processing
-pandas==2.1.4
-
 # Development
 gunicorn==21.2.0
