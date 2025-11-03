@@ -4,7 +4,7 @@ services:
     name: safmc-fmp-tracker
     env: python
     region: oregon
-    plan: free
+    plan: starter
     buildCommand: "pip install -r requirements.txt && chmod +x start.sh"
     startCommand: "./start.sh"
     envVars:
