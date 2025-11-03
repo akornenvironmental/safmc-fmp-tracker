@@ -1,0 +1,28 @@
+services:
+  # Web Service
+  - type: web
+    name: safmc-fmp-tracker
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r requirements.txt && flask db upgrade"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: ENABLE_SCHEDULER
+        value: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safmc-fmp-db
+          property: connectionString
+
+databases:
+  # PostgreSQL Database
+  - name: safmc-fmp-db
+    databaseName: safmc_fmp_tracker
+    user: safmc_user
+    region: oregon
+    plan: free

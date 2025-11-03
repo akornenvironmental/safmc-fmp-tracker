@@ -1,0 +1,31 @@
+# SAFMC FMP Tracker - Python Dependencies
+
+# Web Framework
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-CORS==4.0.0
+
+# Database
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.23
+
+# Web Scraping
+beautifulsoup4==4.12.2
+requests==2.31.0
+lxml==4.9.3
+
+# Scheduling
+APScheduler==3.10.4
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Date/Time Utilities
+python-dateutil==2.8.2
+
+# Data Processing
+pandas==2.1.4
+
+# Development
+gunicorn==21.2.0
