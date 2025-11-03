@@ -4,7 +4,7 @@ Comprehensive tracking system for South Atlantic Fishery Management Plan amendme
 """
 
 import os
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import datetime
@@ -16,8 +16,8 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__,
-            template_folder='public',
-            static_folder='public/assets')
+            static_folder='client/dist',
+            static_url_path='')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -55,11 +55,6 @@ app.register_blueprint(web_routes.bp)
 from src.services.scheduler import init_scheduler
 scheduler = init_scheduler(app)
 
-@app.route('/')
-def index():
-    """Serve the main dashboard"""
-    return render_template('index.html')
-
 @app.route('/health')
 def health_check():
     """Health check endpoint for Render"""
@@ -79,9 +74,15 @@ def health_check():
             'error': str(e)
         }), 500
 
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({'error': 'Not found'}), 404
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    """Serve React app for all non-API routes"""
+    # If path is a file in dist (e.g., assets, js, css), serve it directly
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    # Otherwise serve index.html for client-side routing
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.errorhandler(500)
 def internal_error(error):

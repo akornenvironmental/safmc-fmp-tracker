@@ -1,0 +1,210 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
+import { RefreshCw } from 'lucide-react';
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalActions: 0,
+    pendingReview: 0,
+    upcomingMeetings: 0,
+    recentComments: 0
+  });
+  const [recentActions, setRecentActions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [scraping, setScraping] = useState(false);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch stats
+      const statsResponse = await fetch(`${API_BASE_URL}/api/stats`);
+      const statsData = await statsResponse.json();
+
+      if (statsData.success) {
+        setStats({
+          totalActions: statsData.total_actions || 0,
+          pendingReview: statsData.pending_review || 0,
+          upcomingMeetings: statsData.upcoming_meetings || 0,
+          recentComments: statsData.recent_comments || 0
+        });
+      }
+
+      // Fetch recent actions
+      const actionsResponse = await fetch(`${API_BASE_URL}/api/actions?limit=10`);
+      const actionsData = await actionsResponse.json();
+
+      if (actionsData.success) {
+        setRecentActions(actionsData.actions || []);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setLoading(false);
+    }
+  };
+
+  const triggerScrape = async () => {
+    try {
+      setScraping(true);
+      const response = await fetch(`${API_BASE_URL}/api/scrape/trigger`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Scraping started! Data will be updated shortly.');
+        // Refresh dashboard after a delay
+        setTimeout(() => {
+          fetchDashboardData();
+        }, 3000);
+      } else {
+        alert('Failed to trigger scraping: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error triggering scrape:', error);
+      alert('Error triggering scrape');
+    } finally {
+      setScraping(false);
+    }
+  };
+
+  return (
+    <div>
+      {/* Header with Update Button */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-6">
+        <div className="sm:flex-auto">
+          <h1 className="font-heading text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-sm text-gray-700">
+            Overview of FMP actions, meetings, and public comments
+          </p>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <button
+            onClick={triggerScrape}
+            disabled={scraping}
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${scraping ? 'animate-spin' : ''}`} />
+            {scraping ? 'Updating...' : 'Update Data'}
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow">
+          <div className="text-3xl font-bold text-brand-blue mb-2">
+            {loading ? '-' : stats.totalActions}
+          </div>
+          <div className="text-sm text-gray-500">Total Actions</div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow">
+          <div className="text-3xl font-bold text-yellow-600 mb-2">
+            {loading ? '-' : stats.pendingReview}
+          </div>
+          <div className="text-sm text-gray-500">Pending Review</div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow">
+          <div className="text-3xl font-bold text-green-600 mb-2">
+            {loading ? '-' : stats.upcomingMeetings}
+          </div>
+          <div className="text-sm text-gray-500">Upcoming Meetings</div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow">
+          <div className="text-3xl font-bold text-purple-600 mb-2">
+            {loading ? '-' : stats.recentComments}
+          </div>
+          <div className="text-sm text-gray-500">Recent Comments</div>
+        </div>
+      </div>
+
+      {/* Recent Actions */}
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:px-6">
+          <h2 className="font-heading text-lg font-medium text-gray-900">Recent Actions</h2>
+        </div>
+        <div className="border-t border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Title
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  FMP
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Progress Stage
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Progress
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Last Updated
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-500">
+                    Loading actions...
+                  </td>
+                </tr>
+              ) : recentActions.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-500">
+                    No actions found. Click "Update Data" to scrape SAFMC website.
+                  </td>
+                </tr>
+              ) : (
+                recentActions.map((action, index) => (
+                  <tr key={action.id || index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{action.title}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{action.fmp || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {action.progress_stage || 'Unknown'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+                          <div
+                            className="bg-brand-blue h-2 rounded-full"
+                            style={{ width: `${action.progress || 0}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-700">{action.progress || 0}%</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

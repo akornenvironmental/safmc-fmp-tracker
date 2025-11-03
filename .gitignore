@@ -44,3 +44,8 @@ temp/
 dist/
 build/
 *.egg-info/
+
+# Node / React
+node_modules/
+client/dist/
+client/.vite/
