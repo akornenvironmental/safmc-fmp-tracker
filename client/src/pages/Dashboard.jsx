@@ -24,17 +24,15 @@ const Dashboard = () => {
       setLoading(true);
 
       // Fetch stats
-      const statsResponse = await fetch(`${API_BASE_URL}/api/stats`);
+      const statsResponse = await fetch(`${API_BASE_URL}/api/dashboard/stats`);
       const statsData = await statsResponse.json();
 
-      if (statsData.success) {
-        setStats({
-          totalActions: statsData.total_actions || 0,
-          pendingReview: statsData.pending_review || 0,
-          upcomingMeetings: statsData.upcoming_meetings || 0,
-          recentComments: statsData.recent_comments || 0
-        });
-      }
+      setStats({
+        totalActions: statsData.totalActions || 0,
+        pendingReview: statsData.pendingReview || 0,
+        upcomingMeetings: statsData.upcomingMeetings || 0,
+        recentComments: statsData.recentComments || 0
+      });
 
       // Fetch recent actions
       const actionsResponse = await fetch(`${API_BASE_URL}/api/actions?limit=10`);
