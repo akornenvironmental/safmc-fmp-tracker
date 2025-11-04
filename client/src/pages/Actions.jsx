@@ -137,19 +137,19 @@ const Actions = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 FMP
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Progress Stage
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Progress
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Last Updated
               </th>
             </tr>
@@ -157,20 +157,20 @@ const Actions = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan="5" className="px-3 py-8 text-center text-sm text-gray-500">
                   Loading actions...
                 </td>
               </tr>
             ) : filteredActions.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan="5" className="px-3 py-8 text-center text-sm text-gray-500">
                   No actions found
                 </td>
               </tr>
             ) : (
               filteredActions.map((action, index) => (
                 <tr key={action.id || index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2">
                     {action.source_url ? (
                       <a
                         href={action.source_url}
@@ -184,29 +184,29 @@ const Actions = () => {
                       <div className="text-sm font-medium text-gray-900">{action.title}</div>
                     )}
                     {action.description && (
-                      <div className="text-sm text-gray-500 mt-1">{action.description.substring(0, 100)}...</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{action.fmp || 'N/A'}</div>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-900">{action.fmp || 'N/A'}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
                       {action.progress_stage || 'Unknown'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
                         <div
-                          className="bg-brand-blue h-2 rounded-full"
+                          className="bg-brand-blue h-1.5 rounded-full"
                           style={{ width: `${action.progress || 0}%` }}
                         ></div>
                       </div>
-                      <span className="text-sm text-gray-700">{action.progress || 0}%</span>
+                      <span className="text-xs text-gray-700">{action.progress || 0}%</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                     {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

@@ -85,16 +85,16 @@ const Meetings = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Location
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Type
               </th>
             </tr>
@@ -102,30 +102,30 @@ const Meetings = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan="4" className="px-3 py-8 text-center text-sm text-gray-500">
                   Loading meetings...
                 </td>
               </tr>
             ) : meetings.length === 0 ? (
               <tr>
-                <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan="4" className="px-3 py-8 text-center text-sm text-gray-500">
                   No meetings found
                 </td>
               </tr>
             ) : (
               meetings.map((meeting, index) => (
                 <tr key={meeting.id || index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2">
                     <div className="text-sm font-medium text-gray-900">{meeting.title}</div>
                     {meeting.description && (
-                      <div className="text-sm text-gray-500 mt-1">{meeting.description.substring(0, 100)}...</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{meeting.description.substring(0, 100)}...</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <div>
-                        <div className="text-sm text-gray-900">
+                        <div className="text-xs text-gray-900">
                           {meeting.start_date ? new Date(meeting.start_date).toLocaleDateString() : 'TBD'}
                         </div>
                         {meeting.end_date && meeting.end_date !== meeting.start_date && (
@@ -136,14 +136,14 @@ const Meetings = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <div className="text-sm text-gray-900">{meeting.location || 'TBD'}</div>
+                      <div className="text-xs text-gray-900">{meeting.location || 'TBD'}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(meeting.type)}`}>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getTypeColor(meeting.type)}`}>
                       {meeting.type || 'Meeting'}
                     </span>
                   </td>

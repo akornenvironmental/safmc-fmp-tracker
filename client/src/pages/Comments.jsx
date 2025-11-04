@@ -132,46 +132,46 @@ const Comments = () => {
       </div>
 
       {/* Comments List */}
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-3">
         {loading ? (
-          <div className="bg-white shadow sm:rounded-lg p-12 text-center text-sm text-gray-500">
+          <div className="bg-white shadow sm:rounded-lg p-8 text-center text-sm text-gray-500">
             Loading comments...
           </div>
         ) : filteredComments.length === 0 ? (
-          <div className="bg-white shadow sm:rounded-lg p-12 text-center text-sm text-gray-500">
+          <div className="bg-white shadow sm:rounded-lg p-8 text-center text-sm text-gray-500">
             No comments found
           </div>
         ) : (
           filteredComments.map((comment, index) => (
-            <div key={comment.id || index} className="bg-white shadow sm:rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div key={comment.id || index} className="bg-white shadow sm:rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-2">
+                  <div className="flex items-center gap-3 mb-1.5">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-400" />
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3 className="text-base font-medium text-gray-900">
                         {comment.name || 'Anonymous'}
                       </h3>
                     </div>
                     {comment.state && (
-                      <span className="text-sm text-gray-500">• {comment.state}</span>
+                      <span className="text-xs text-gray-500">• {comment.state}</span>
                     )}
                   </div>
                   {comment.organization && (
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-2">
                       <Building2 className="w-4 h-4 text-gray-400" />
-                      <p className="text-sm text-gray-600">{comment.organization}</p>
+                      <p className="text-xs text-gray-600">{comment.organization}</p>
                     </div>
                   )}
-                  <p className="text-sm text-gray-900 mb-3">{comment.comment_text}</p>
+                  <p className="text-sm text-gray-900 mb-2">{comment.comment_text}</p>
                   {comment.submitted_date && (
                     <p className="text-xs text-gray-500">
                       Submitted: {new Date(comment.submitted_date).toLocaleDateString()}
                     </p>
                   )}
                 </div>
-                <div className="ml-4">
-                  <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getPositionColor(comment.position)}`}>
+                <div className="ml-3">
+                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getPositionColor(comment.position)}`}>
                     {comment.position || 'No Position'}
                   </span>
                 </div>
