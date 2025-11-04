@@ -29,8 +29,7 @@ logger.info(f"Static path: {static_path}")
 logger.info(f"Static path exists: {os.path.exists(static_path)}")
 
 app = Flask(__name__,
-            static_folder=static_path,
-            static_url_path='')
+            static_folder=None)
 
 # Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -79,7 +78,7 @@ def health_check():
 def debug_static():
     """Debug endpoint to check static folder setup"""
     import glob
-    static_folder = app.static_folder
+    static_folder = static_path
 
     # Check various possible locations
     possible_locations = [
@@ -127,16 +126,16 @@ def serve(path):
         return jsonify({'error': 'Not found'}), 404
 
     # If path is a file in dist (e.g., assets, js, css), serve it directly
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
+    if path != "" and os.path.exists(os.path.join(static_path, path)):
+        return send_from_directory(static_path, path)
 
     # Otherwise serve index.html for client-side routing
     try:
-        return send_from_directory(app.static_folder, 'index.html')
+        return send_from_directory(static_path, 'index.html')
     except Exception as e:
         logger.error(f"Error serving index.html: {e}")
-        logger.error(f"Static folder: {app.static_folder}")
-        logger.error(f"Static folder exists: {os.path.exists(app.static_folder)}")
+        logger.error(f"Static folder: {static_path}")
+        logger.error(f"Static folder exists: {os.path.exists(static_path)}")
         return jsonify({'error': 'Frontend not found', 'details': str(e)}), 500
 
 @app.errorhandler(500)
