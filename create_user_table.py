@@ -78,8 +78,8 @@ with engine.connect() as conn:
 
         user_id = str(uuid.uuid4())
         conn.execute(text("""
-            INSERT INTO users (id, email, name, role, is_active)
-            VALUES (:id, :email, :name, 'admin', true)
+            INSERT INTO users (id, email, name, role, is_active, created_at, updated_at)
+            VALUES (:id, :email, :name, 'admin', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         """), {"id": user_id, "email": admin_email, "name": admin_name})
         conn.commit()
         print(f"✓ Admin user created: {admin_email}")
