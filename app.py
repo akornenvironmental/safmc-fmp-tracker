@@ -52,6 +52,7 @@ from src.models.meeting import Meeting
 from src.models.comment import Comment
 from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
+from src.models.user import User
 
 # Health check endpoint (before blueprints)
 @app.route('/health')
