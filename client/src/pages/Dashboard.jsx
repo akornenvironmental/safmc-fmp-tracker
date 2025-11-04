@@ -52,7 +52,7 @@ const Dashboard = () => {
   const triggerScrape = async () => {
     try {
       setScraping(true);
-      const response = await fetch(`${API_BASE_URL}/api/scrape/trigger`, {
+      const response = await fetch(`${API_BASE_URL}/api/scrape/all`, {
         method: 'POST',
       });
       const data = await response.json();
