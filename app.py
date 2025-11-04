@@ -29,7 +29,8 @@ logger.info(f"Static path: {static_path}")
 logger.info(f"Static path exists: {os.path.exists(static_path)}")
 
 app = Flask(__name__,
-            static_folder=None)
+            static_folder=static_path,
+            static_url_path='/static-internal')
 
 # Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -72,6 +73,19 @@ def health_check():
             'timestamp': datetime.utcnow().isoformat(),
             'error': str(e)
         }), 500
+
+# Debug endpoint to list all routes
+@app.route('/debug/routes')
+def debug_routes():
+    """List all registered routes"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'path': str(rule)
+        })
+    return jsonify({'routes': sorted(routes, key=lambda x: x['path'])})
 
 # Debug endpoint to check static folder
 @app.route('/debug/static')
@@ -121,8 +135,11 @@ scheduler = init_scheduler(app)
 @app.route('/<path:path>')
 def serve(path):
     """Serve React app for all non-API routes"""
+    logger.info(f"Serve function called with path: '{path}'")
+
     # Check if this is an API route (should not reach here due to blueprint)
     if path.startswith('api/'):
+        logger.info(f"Rejecting API path: {path}")
         return jsonify({'error': 'Not found'}), 404
 
     # If path is a file in dist (e.g., assets, js, css), serve it directly
