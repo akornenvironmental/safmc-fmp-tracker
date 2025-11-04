@@ -1,198 +1,194 @@
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { MessageSquare, X, Send } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 const AIAssistant = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      type: 'assistant',
-      content: 'Hello! I\'m your SAFMC FMP Tracker AI assistant. I can help you understand fishery management processes, track amendment progress, and answer questions about FMP development. How can I help you today?'
-    }
-  ]);
-  const [input, setInput] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const [response, setResponse] = useState(null);
   const inputRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const exampleQueries = [
+    'What is the FMP development process?',
+    'Show me current amendments in review',
+    'What are the typical timelines for amendments?',
+    'Explain SAFMC\'s jurisdiction',
+    'How does the public comment process work?',
+    'What are the stages of amendment development?'
+  ];
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
 
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isOpen]);
-
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-
-    const userMessage = input.trim();
-    setInput('');
-    setMessages(prev => [...prev, { type: 'user', content: userMessage }]);
     setLoading(true);
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/ai/query`, {
+      const res = await fetch(`${API_BASE_URL}/api/ai/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userMessage })
+        body: JSON.stringify({ question: query })
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
       if (data.success) {
-        setMessages(prev => [...prev, { type: 'assistant', content: data.answer }]);
+        setResponse({
+          type: 'success',
+          title: 'Response',
+          message: data.answer
+        });
       } else {
-        setMessages(prev => [...prev, {
-          type: 'assistant',
-          content: data.answer || 'I apologize, but I encountered an error. Please try again or visit safmc.net for more information.'
-        }]);
+        setResponse({
+          type: 'error',
+          title: 'Error',
+          message: data.answer || 'Failed to process query'
+        });
       }
-    } catch (error) {
-      console.error('Error querying AI:', error);
-      setMessages(prev => [...prev, {
-        type: 'assistant',
-        content: 'I apologize, but I\'m having trouble connecting. Please try again later or visit safmc.net for more information.'
-      }]);
+    } catch (err) {
+      setResponse({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to connect to AI service. Please try again later.'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const quickQuestions = [
-    'What is the FMP development process?',
-    'Show me current amendments in review',
-    'What are the typical timelines?',
-    'Explain SAFMC\'s jurisdiction'
-  ];
-
-  const handleQuickQuestion = (question) => {
-    setInput(question);
+  const handleExampleClick = (example) => {
+    setQuery(example);
     inputRef.current?.focus();
   };
 
   return (
-    <>
-      {/* Floating Button */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-brand-blue hover:bg-brand-blue-light text-white rounded-full shadow-lg flex items-center justify-center transition-all z-50 hover:scale-110"
-          title="Open AI Assistant"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </button>
-      )}
-
-      {/* AI Chat Panel */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-brand-blue to-brand-blue-dark text-white p-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              <div>
-                <h3 className="font-semibold">AI Assistant</h3>
-                <p className="text-xs text-blue-100">SAFMC FMP Tracker</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="hover:bg-white/20 rounded p-1 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.type === 'user'
-                      ? 'bg-brand-blue text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+    <div className="fixed top-0 right-0 bottom-0 z-50">
+      {isExpanded && (
+        <div className="bg-white dark:bg-gray-800 border-l-2 border-brand-blue shadow-2xl h-full" style={{ width: '450px' }}>
+          <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-blue to-brand-green rounded-lg flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">AI Assistant</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Ask questions about FMP development</p>
                 </div>
               </div>
-            ))}
-
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-900 p-3 rounded-lg">
-                  <Loader className="w-5 h-5 animate-spin" />
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Quick Questions */}
-          {messages.length === 1 && !loading && (
-            <div className="px-4 pb-3 space-y-2">
-              <p className="text-xs text-gray-500 font-medium">Quick questions:</p>
-              <div className="flex flex-wrap gap-2">
-                {quickQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickQuestion(question)}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full transition-colors"
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Input */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex gap-2">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask about FMP development..."
-                className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-                rows={2}
-                disabled={loading}
-              />
               <button
-                onClick={handleSend}
-                disabled={!input.trim() || loading}
-                className="self-end bg-brand-blue hover:bg-brand-blue-light text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setIsExpanded(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                <Send className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Powered by Claude • All information should be verified with official SAFMC sources
-            </p>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {!response && !loading && (
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Try asking:</p>
+                  <div className="space-y-2">
+                    {exampleQueries.map((example, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleExampleClick(example)}
+                        className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-brand-blue/10 dark:hover:bg-brand-blue/20 rounded-lg text-sm text-gray-700 dark:text-gray-300 transition-colors border border-gray-200 dark:border-gray-600"
+                      >
+                        <span className="text-brand-blue mr-2">→</span>
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {loading && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400">Analyzing...</p>
+                  </div>
+                </div>
+              )}
+
+              {response && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-bold text-lg text-gray-900 dark:text-white">{response.title || 'Response'}</h4>
+                    <button
+                      onClick={() => {
+                        setResponse(null);
+                        setQuery('');
+                      }}
+                      className="text-sm text-brand-blue hover:text-brand-blue-dark"
+                    >
+                      New Query
+                    </button>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      {response.message}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Powered by Claude • All information should be verified with official SAFMC sources
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Input */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+              <form onSubmit={handleSubmit}>
+                <div className="flex gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Ask about FMP development..."
+                    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading || !query.trim()}
+                    className="px-6 py-3 bg-brand-blue text-white rounded-lg hover:bg-brand-blue-dark disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed font-medium transition-colors"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
-    </>
+
+      {/* Collapsed Button */}
+      {!isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-b from-brand-blue to-brand-green text-white shadow-lg hover:from-brand-blue-dark hover:to-brand-green-dark transition-all"
+          style={{
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            padding: '20px 12px',
+            borderTopLeftRadius: '8px',
+            borderBottomLeftRadius: '8px',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            <span className="font-medium whitespace-nowrap">AI Assistant</span>
+            <span className="ml-2">←</span>
+          </div>
+        </button>
+      )}
+    </div>
   );
 };
 
