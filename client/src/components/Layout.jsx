@@ -1,13 +1,22 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { Type, Moon, Sun } from 'lucide-react';
+import { Type, Moon, Sun, User, LogOut } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import Footer from './Footer';
 
 const Layout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme, textSize, cycleTextSize, isDark } = useTheme();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -88,6 +97,41 @@ const Layout = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2 flex-shrink-0">
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 px-3 h-9 text-gray-700 hover:text-brand-blue hover:bg-gray-100 rounded-lg transition-colors"
+                  title={user?.email}
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm font-medium">{user?.name || user?.email}</span>
+                  {user?.role === 'admin' && (
+                    <span className="hidden sm:inline text-xs px-2 py-1 bg-brand-blue text-white rounded">Admin</span>
+                  )}
+                </button>
+
+                {/* User dropdown menu */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <div className="px-4 py-3 border-b border-gray-200">
+                      <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                      {user?.role && (
+                        <p className="text-xs text-brand-blue mt-1 capitalize">{user.role}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Text Size Toggle */}
               <button
                 onClick={cycleTextSize}
