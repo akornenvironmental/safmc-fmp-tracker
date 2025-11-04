@@ -50,13 +50,6 @@ const Footer = () => {
                 Issues? Suggestions? <a href="mailto:aaron.kornbluth@gmail.com?subject=SAFMC%20FMP%20Tracker%20Feedback" className="hover:text-brand-green transition-colors underline">Contact Aaron</a>
               </p>
             </div>
-
-            {/* Links */}
-            <div className="flex gap-4 text-base">
-              <a href="https://safmc.net" target="_blank" rel="noopener noreferrer" className="text-blue-100 hover:text-brand-green transition-colors whitespace-nowrap">SAFMC.net ↗</a>
-              <a href="https://safmc.net/regulations/fishery-management-plans/" target="_blank" rel="noopener noreferrer" className="text-blue-100 hover:text-brand-green transition-colors whitespace-nowrap">FMPs ↗</a>
-              <a href="https://safmc.net/regulations/regulatory-amendments/" target="_blank" rel="noopener noreferrer" className="text-blue-100 hover:text-brand-green transition-colors whitespace-nowrap">Amendments ↗</a>
-            </div>
           </div>
         </div>
       </div>
