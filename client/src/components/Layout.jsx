@@ -4,6 +4,7 @@ import { Type, Moon, Sun, User, LogOut } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from './Footer';
+import AIAssistant from './AIAssistant';
 
 const Layout = () => {
   const location = useLocation();
@@ -211,6 +212,9 @@ const Layout = () => {
       </main>
 
       <Footer />
+
+      {/* AI Assistant - Available on all pages */}
+      <AIAssistant />
     </div>
   );
 };
