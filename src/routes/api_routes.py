@@ -76,6 +76,7 @@ def recent_amendments():
         actions = Action.query.order_by(desc(Action.updated_at)).limit(limit).all()
 
         return jsonify({
+            'success': True,
             'actions': [action.to_dict() for action in actions]
         })
 
@@ -110,6 +111,7 @@ def get_actions():
         actions = query.order_by(desc(Action.updated_at)).all()
 
         return jsonify({
+            'success': True,
             'actions': [action.to_dict() for action in actions],
             'total': len(actions)
         })
@@ -163,6 +165,7 @@ def get_meetings():
         meetings = query.order_by(Meeting.start_date).all()
 
         return jsonify({
+            'success': True,
             'meetings': [meeting.to_dict() for meeting in meetings],
             'total': len(meetings)
         })
@@ -202,6 +205,7 @@ def get_comments():
         comments = query.order_by(desc(Comment.comment_date)).all()
 
         return jsonify({
+            'success': True,
             'comments': [comment.to_dict() for comment in comments],
             'total': len(comments)
         })
