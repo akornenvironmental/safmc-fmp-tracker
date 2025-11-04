@@ -238,8 +238,11 @@ def scrape_amendments():
                 action.type = amendment_data['type']
                 action.fmp = amendment_data['fmp']
                 action.progress_stage = amendment_data['progress_stage']
+                action.progress_percentage = amendment_data.get('progress_percentage', 0)
+                action.phase = amendment_data.get('phase', '')
                 action.description = amendment_data['description']
                 action.lead_staff = amendment_data['lead_staff']
+                action.source_url = amendment_data.get('source_url', action.source_url)
                 action.last_scraped = datetime.utcnow()
                 action.updated_at = datetime.utcnow()
                 items_updated += 1
@@ -251,6 +254,8 @@ def scrape_amendments():
                     type=amendment_data['type'],
                     fmp=amendment_data['fmp'],
                     progress_stage=amendment_data['progress_stage'],
+                    progress_percentage=amendment_data.get('progress_percentage', 0),
+                    phase=amendment_data.get('phase', ''),
                     description=amendment_data['description'],
                     lead_staff=amendment_data['lead_staff'],
                     source_url=amendment_data['source_url'],

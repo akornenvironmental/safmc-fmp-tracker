@@ -171,7 +171,18 @@ const Actions = () => {
               filteredActions.map((action, index) => (
                 <tr key={action.id || index} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{action.title}</div>
+                    {action.source_url ? (
+                      <a
+                        href={action.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
+                      >
+                        {action.title}
+                      </a>
+                    ) : (
+                      <div className="text-sm font-medium text-gray-900">{action.title}</div>
+                    )}
                     {action.description && (
                       <div className="text-sm text-gray-500 mt-1">{action.description.substring(0, 100)}...</div>
                     )}

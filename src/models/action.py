@@ -53,19 +53,19 @@ class Action(db.Model):
             'type': self.type,
             'fmp': self.fmp,
             'status': self.status,
-            'progressStage': self.progress_stage,
+            'progress_stage': self.progress_stage,
             'progress': self.progress_percentage,
             'phase': self.phase,
-            'startDate': self.start_date.isoformat() if self.start_date else None,
-            'targetDate': self.target_date.isoformat() if self.target_date else None,
-            'completionDate': self.completion_date.isoformat() if self.completion_date else None,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'target_date': self.target_date.isoformat() if self.target_date else None,
+            'completion_date': self.completion_date.isoformat() if self.completion_date else None,
             'description': self.description,
-            'leadStaff': self.lead_staff,
+            'lead_staff': self.lead_staff,
             'committee': self.committee,
-            'sourceUrl': self.source_url,
-            'documentsFound': self.documents_found,
-            'lastScraped': self.last_scraped.isoformat() if self.last_scraped else None,
-            'updatedAt': self.updated_at.isoformat() if self.updated_at else None
+            'source_url': self.source_url,
+            'documents_found': self.documents_found,
+            'last_scraped': self.last_scraped.isoformat() if self.last_scraped else None,
+            'last_updated': self.updated_at.isoformat() if self.updated_at else None
         }
 
     def __repr__(self):

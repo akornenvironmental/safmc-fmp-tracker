@@ -144,7 +144,10 @@ class AmendmentsScraper:
         # Get surrounding content for additional details
         content = self._get_surrounding_content(heading)
 
-        return self._create_amendment_object(text, content)
+        # Try to find source URL from links in or near the heading
+        source_url = self._extract_source_url(heading)
+
+        return self._create_amendment_object(text, content, source_url)
 
     def _parse_amendment_from_text(self, text: str, element, fmp_override: str = None) -> Optional[Dict]:
         """Parse amendment data from text"""
@@ -153,26 +156,32 @@ class AmendmentsScraper:
 
         content = self._get_surrounding_content(element)
 
-        amendment = self._create_amendment_object(text, content)
+        # Try to find source URL from links in or near the element
+        source_url = self._extract_source_url(element)
+
+        amendment = self._create_amendment_object(text, content, source_url)
         if fmp_override:
             amendment['fmp'] = fmp_override
 
         return amendment
 
-    def _create_amendment_object(self, title: str, content: str) -> Dict:
+    def _create_amendment_object(self, title: str, content: str, source_url: str = None) -> Dict:
         """Create amendment object from title and content"""
+        progress_stage = self._extract_progress_stage(content, title)
+        progress_percentage = self._calculate_progress_percentage(progress_stage)
+
         return {
             'action_id': self._generate_action_id(title),
             'title': title,
             'type': self._determine_action_type(title),
             'fmp': self._extract_fmp(title, content),
-            'progress_stage': self._extract_progress_stage(content, title),
-            'progress_percentage': 0,  # Will be calculated from stage
-            'phase': '',  # Will be calculated from stage
+            'progress_stage': progress_stage,
+            'progress_percentage': progress_percentage,
+            'phase': self._determine_phase(progress_stage),
             'description': self._extract_description(content),
             'lead_staff': self._extract_staff(content),
             'committee': '',  # Will be determined from FMP
-            'source_url': self.AMENDMENTS_URL,
+            'source_url': source_url or self.AMENDMENTS_URL,
             'documents_found': 0
         }
 
@@ -320,3 +329,71 @@ class AmendmentsScraper:
             return match.group(1)
 
         return ''
+
+    def _extract_source_url(self, element) -> Optional[str]:
+        """Extract source URL from element or nearby links"""
+        # Check if element itself is a link
+        if element.name == 'a' and element.get('href'):
+            return element.get('href')
+
+        # Check for links within element
+        link = element.find('a', href=True)
+        if link:
+            return link.get('href')
+
+        # Check parent elements
+        parent = element.parent
+        if parent:
+            link = parent.find('a', href=True)
+            if link:
+                return link.get('href')
+
+        # Check next siblings for links
+        for sibling in element.find_next_siblings(limit=3):
+            link = sibling.find('a', href=True) if hasattr(sibling, 'find') else None
+            if link:
+                return link.get('href')
+
+        return None
+
+    def _calculate_progress_percentage(self, stage: str) -> int:
+        """Calculate progress percentage from stage"""
+        if not stage:
+            return 0
+
+        stage_lower = stage.lower()
+
+        # Check against known stages
+        for stage_key, percentage in self.PROGRESS_STAGES.items():
+            if stage_key in stage_lower:
+                return percentage
+
+        # Default based on common patterns
+        if 'implement' in stage_lower:
+            return 95
+        if 'review' in stage_lower:
+            return 75
+        if 'approval' in stage_lower:
+            return 65
+        if 'hearing' in stage_lower:
+            return 45
+        if 'scoping' in stage_lower:
+            return 25
+
+        return 0
+
+    def _determine_phase(self, stage: str) -> str:
+        """Determine phase from progress stage"""
+        if not stage:
+            return 'Development'
+
+        stage_lower = stage.lower()
+
+        if 'implement' in stage_lower:
+            return 'Implementation'
+        if 'rule' in stage_lower or 'secretarial' in stage_lower:
+            return 'Federal Review'
+        if 'approval' in stage_lower or 'hearing' in stage_lower:
+            return 'Review'
+
+        return 'Development'
