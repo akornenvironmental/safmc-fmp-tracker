@@ -87,6 +87,23 @@ def debug_static():
     """Debug endpoint to check static folder setup"""
     import glob
     static_folder = app.static_folder
+    project_root = os.path.dirname(app_dir) if os.path.basename(app_dir) == 'src' else app_dir
+
+    # Check various possible locations
+    possible_locations = [
+        os.path.join(project_root, 'client', 'dist'),
+        os.path.join(project_root, 'client'),
+        os.path.join(os.getcwd(), 'client', 'dist'),
+        os.path.join(os.getcwd(), 'client'),
+    ]
+
+    location_checks = {}
+    for loc in possible_locations:
+        location_checks[loc] = {
+            'exists': os.path.exists(loc),
+            'files': os.listdir(loc) if os.path.exists(loc) else None
+        }
+
     return jsonify({
         'static_folder': static_folder,
         'static_folder_exists': os.path.exists(static_folder) if static_folder else False,
@@ -94,6 +111,10 @@ def debug_static():
         'index_html_exists': os.path.exists(os.path.join(static_folder, 'index.html')) if static_folder else False,
         'files_in_static': os.listdir(static_folder) if static_folder and os.path.exists(static_folder) else [],
         'cwd': os.getcwd(),
+        'app_dir': app_dir,
+        'project_root': project_root,
+        'possible_client_locations': location_checks,
+        'root_files': os.listdir(project_root) if os.path.exists(project_root) else []
     })
 
 # Import and register API routes
