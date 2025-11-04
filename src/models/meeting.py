@@ -15,6 +15,10 @@ class Meeting(db.Model):
     title = db.Column(db.String(500), nullable=False)
     type = db.Column(db.String(100))  # Council Meeting, Committee Meeting, Public Hearing, etc.
 
+    # Organization/Council
+    council = db.Column(db.String(100))  # SAFMC, NEFMC, MAFMC, GFMC, etc.
+    organization_type = db.Column(db.String(50))  # Regional Council, Interstate Commission, State Agency
+
     # Date and time
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
@@ -28,6 +32,7 @@ class Meeting(db.Model):
     description = db.Column(db.Text)
     agenda_url = db.Column(db.String(500))
     source_url = db.Column(db.String(500))
+    rss_feed_url = db.Column(db.String(500))  # Source RSS feed
 
     # Status
     status = db.Column(db.String(100))  # Scheduled, Completed, Cancelled
@@ -46,17 +51,19 @@ class Meeting(db.Model):
             'id': self.meeting_id,
             'title': self.title,
             'type': self.type,
-            'startDate': self.start_date.isoformat() if self.start_date else None,
-            'endDate': self.end_date.isoformat() if self.end_date else None,
+            'council': self.council,
+            'organization_type': self.organization_type,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
             'time': self.time,
             'location': self.location,
-            'virtualLink': self.virtual_link,
+            'virtual_link': self.virtual_link,
             'description': self.description,
-            'agendaUrl': self.agenda_url,
-            'sourceUrl': self.source_url,
+            'agenda_url': self.agenda_url,
+            'source_url': self.source_url,
             'status': self.status,
-            'relatedActions': self.related_actions.split(',') if self.related_actions else [],
-            'updatedAt': self.updated_at.isoformat() if self.updated_at else None
+            'related_actions': self.related_actions.split(',') if self.related_actions else [],
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
     def __repr__(self):

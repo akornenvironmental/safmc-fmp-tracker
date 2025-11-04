@@ -89,6 +89,9 @@ const Meetings = () => {
                 Title
               </th>
               <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Council
+              </th>
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
               <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -102,13 +105,13 @@ const Meetings = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan="4" className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan="5" className="px-3 py-8 text-center text-sm text-gray-500">
                   Loading meetings...
                 </td>
               </tr>
             ) : meetings.length === 0 ? (
               <tr>
-                <td colSpan="4" className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan="5" className="px-3 py-8 text-center text-sm text-gray-500">
                   No meetings found
                 </td>
               </tr>
@@ -116,9 +119,26 @@ const Meetings = () => {
               meetings.map((meeting, index) => (
                 <tr key={meeting.id || index} className="hover:bg-gray-50">
                   <td className="px-3 py-2">
-                    <div className="text-sm font-medium text-gray-900">{meeting.title}</div>
+                    {meeting.source_url ? (
+                      <a
+                        href={meeting.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
+                      >
+                        {meeting.title}
+                      </a>
+                    ) : (
+                      <div className="text-sm font-medium text-gray-900">{meeting.title}</div>
+                    )}
                     {meeting.description && (
                       <div className="text-xs text-gray-500 mt-0.5">{meeting.description.substring(0, 100)}...</div>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs font-semibold text-brand-blue">{meeting.council || 'SAFMC'}</div>
+                    {meeting.organization_type && (
+                      <div className="text-xs text-gray-500">{meeting.organization_type}</div>
                     )}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">

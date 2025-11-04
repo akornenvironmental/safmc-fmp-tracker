@@ -16,6 +16,7 @@ from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 from src.scrapers.amendments_scraper import AmendmentsScraper
 from src.scrapers.meetings_scraper import MeetingsScraper
+from src.scrapers.multi_council_scraper import MultiCouncilScraper
 from src.scrapers.comments_scraper import CommentsScraper
 from src.services.ai_service import AIService
 
@@ -298,12 +299,13 @@ def scrape_amendments():
 
 @bp.route('/scrape/meetings', methods=['POST'])
 def scrape_meetings():
-    """Manually trigger meetings scraping"""
+    """Manually trigger meetings scraping from all councils"""
     try:
         start_time = datetime.utcnow()
 
-        scraper = MeetingsScraper()
-        results = scraper.scrape_meetings()
+        # Use multi-council scraper for comprehensive calendar integration
+        multi_scraper = MultiCouncilScraper()
+        results = multi_scraper.scrape_all_councils()
 
         # Save or update meetings in database
         items_new = 0
@@ -316,10 +318,16 @@ def scrape_meetings():
                 # Update existing
                 meeting.title = meeting_data['title']
                 meeting.type = meeting_data['type']
+                meeting.council = meeting_data.get('council')
+                meeting.organization_type = meeting_data.get('organization_type')
                 meeting.start_date = meeting_data['start_date']
+                meeting.end_date = meeting_data['end_date']
                 meeting.location = meeting_data['location']
                 meeting.description = meeting_data['description']
                 meeting.agenda_url = meeting_data.get('agenda_url')
+                meeting.source_url = meeting_data['source_url']
+                meeting.rss_feed_url = meeting_data.get('rss_feed_url')
+                meeting.status = meeting_data['status']
                 meeting.last_scraped = datetime.utcnow()
                 meeting.updated_at = datetime.utcnow()
                 items_updated += 1
@@ -329,12 +337,15 @@ def scrape_meetings():
                     meeting_id=meeting_data['meeting_id'],
                     title=meeting_data['title'],
                     type=meeting_data['type'],
+                    council=meeting_data.get('council'),
+                    organization_type=meeting_data.get('organization_type'),
                     start_date=meeting_data['start_date'],
                     end_date=meeting_data['end_date'],
                     location=meeting_data['location'],
                     description=meeting_data['description'],
                     agenda_url=meeting_data.get('agenda_url'),
                     source_url=meeting_data['source_url'],
+                    rss_feed_url=meeting_data.get('rss_feed_url'),
                     status=meeting_data['status'],
                     last_scraped=datetime.utcnow()
                 )
