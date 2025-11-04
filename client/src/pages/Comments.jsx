@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
-import { User, Building2 } from 'lucide-react';
+import { User, Building2, RefreshCw } from 'lucide-react';
 
 const Comments = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterPosition, setFilterPosition] = useState('all');
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     fetchComments();
@@ -23,6 +24,28 @@ const Comments = () => {
     } catch (error) {
       console.error('Error fetching comments:', error);
       setLoading(false);
+    }
+  };
+
+  const syncComments = async () => {
+    try {
+      setSyncing(true);
+      const response = await fetch(`${API_BASE_URL}/api/scrape/comments`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Sync complete! Found ${data.itemsFound} items, ${data.itemsNew} new, ${data.itemsUpdated} updated.`);
+        fetchComments();
+      } else {
+        alert('Failed to sync: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error syncing comments:', error);
+      alert('Error syncing comments');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -49,6 +72,16 @@ const Comments = () => {
           <p className="mt-2 text-sm text-gray-700">
             {comments.length} comments total • {filteredComments.length} displayed
           </p>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <button
+            onClick={syncComments}
+            disabled={syncing}
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync Comments'}
+          </button>
         </div>
       </div>
 

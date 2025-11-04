@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
-import { Calendar, MapPin } from 'lucide-react';
+import { Calendar, MapPin, RefreshCw } from 'lucide-react';
 
 const Meetings = () => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     fetchMeetings();
@@ -22,6 +23,28 @@ const Meetings = () => {
     } catch (error) {
       console.error('Error fetching meetings:', error);
       setLoading(false);
+    }
+  };
+
+  const syncMeetings = async () => {
+    try {
+      setSyncing(true);
+      const response = await fetch(`${API_BASE_URL}/api/scrape/meetings`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Sync complete! Found ${data.itemsFound} items, ${data.itemsNew} new, ${data.itemsUpdated} updated.`);
+        fetchMeetings();
+      } else {
+        alert('Failed to sync: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error syncing meetings:', error);
+      alert('Error syncing meetings');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -44,6 +67,16 @@ const Meetings = () => {
           <p className="mt-2 text-sm text-gray-700">
             {meetings.length} meetings scheduled
           </p>
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <button
+            onClick={syncMeetings}
+            disabled={syncing}
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync Meetings'}
+          </button>
         </div>
       </div>
 
