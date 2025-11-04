@@ -1,6 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Custom Brand Colors */
+  --color-brand-blue: #08306b;
+  --color-brand-green: #209d5c;
+  --color-brand-blue-light: #2171b5;
+  --color-brand-blue-dark: #081d42;
+  --color-brand-green-light: #41b883;
+  --color-brand-green-dark: #1a7d47;
+
+  /* Font Families */
+  --font-sans: "Josefin Sans", sans-serif;
+  --font-heading: "Josefin Sans", sans-serif;
+}
 
 :root {
   /* Body font: Josefin Sans */
