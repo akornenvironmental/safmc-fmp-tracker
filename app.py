@@ -19,20 +19,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize Flask app
-# Get the project root (parent of app.py's directory on Render)
-# On Render, __file__ might be /opt/render/project/src/app.py
-# So we need to go up to /opt/render/project, then into client/dist
+# Get the directory where app.py is located
 app_dir = os.path.dirname(os.path.abspath(__file__))
 
-# If we're in a 'src' subdirectory, go up one level to project root
-if os.path.basename(app_dir) == 'src':
-    project_root = os.path.dirname(app_dir)
-else:
-    project_root = app_dir
-
-static_path = os.path.join(project_root, 'client', 'dist')
+# Client folder is in the same directory as app.py (both in src/ on Render)
+static_path = os.path.join(app_dir, 'client', 'dist')
 logger.info(f"App directory: {app_dir}")
-logger.info(f"Project root: {project_root}")
 logger.info(f"Static path: {static_path}")
 logger.info(f"Static path exists: {os.path.exists(static_path)}")
 
@@ -87,12 +79,11 @@ def debug_static():
     """Debug endpoint to check static folder setup"""
     import glob
     static_folder = app.static_folder
-    project_root = os.path.dirname(app_dir) if os.path.basename(app_dir) == 'src' else app_dir
 
     # Check various possible locations
     possible_locations = [
-        os.path.join(project_root, 'client', 'dist'),
-        os.path.join(project_root, 'client'),
+        os.path.join(app_dir, 'client', 'dist'),
+        os.path.join(app_dir, 'client'),
         os.path.join(os.getcwd(), 'client', 'dist'),
         os.path.join(os.getcwd(), 'client'),
     ]
@@ -112,9 +103,8 @@ def debug_static():
         'files_in_static': os.listdir(static_folder) if static_folder and os.path.exists(static_folder) else [],
         'cwd': os.getcwd(),
         'app_dir': app_dir,
-        'project_root': project_root,
         'possible_client_locations': location_checks,
-        'root_files': os.listdir(project_root) if os.path.exists(project_root) else []
+        'app_dir_files': os.listdir(app_dir) if os.path.exists(app_dir) else []
     })
 
 # Import and register API routes

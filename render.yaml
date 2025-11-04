@@ -5,7 +5,7 @@ services:
     env: python
     region: oregon
     plan: starter
-    buildCommand: "pip install -r requirements.txt && cd client && npm install && npm run build && cd .. && chmod +x start.sh"
+    buildCommand: "pip install -r requirements.txt && cd client && npm install && npm run build && ls -la dist/ && cd .. && chmod +x start.sh"
     startCommand: "./start.sh"
     envVars:
       - key: FLASK_ENV
