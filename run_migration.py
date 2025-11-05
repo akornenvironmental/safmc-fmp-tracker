@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run database migration to add meeting council fields
+Run comprehensive tracking features migration
 """
 
 import os
@@ -9,7 +9,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 def run_migration():
-    """Run the migration SQL"""
+    """Run the comprehensive migration SQL"""
 
     # Get database URL from environment
     database_url = os.getenv('DATABASE_URL')
@@ -26,52 +26,59 @@ def run_migration():
         cursor = conn.cursor()
 
         # Read migration SQL
-        migration_file = os.path.join(os.path.dirname(__file__), 'migrations', 'add_meeting_council_fields.sql')
+        migration_file = os.path.join(os.path.dirname(__file__), 'migrations', 'add_comprehensive_tracking_features.sql')
+
+        if not os.path.exists(migration_file):
+            print(f"ERROR: Migration file not found: {migration_file}")
+            sys.exit(1)
+
         with open(migration_file, 'r') as f:
             migration_sql = f.read()
 
-        print("Running migration...")
+        print("Running comprehensive tracking features migration...")
+        print("This will create 18 new tables for roll call voting, white papers,")
+        print("executive orders, legislation, stock assessments, AP/SSC reports, and documents.")
         print("-" * 60)
 
-        # Remove comment lines and split by semicolons
-        lines = [line for line in migration_sql.split('\n') if line.strip() and not line.strip().startswith('--')]
-        sql_without_comments = '\n'.join(lines)
-        statements = [s.strip() for s in sql_without_comments.split(';') if s.strip()]
-
-        for i, statement in enumerate(statements, 1):
-            if statement:
-                print(f"{i}. Executing: {statement[:80]}...")
-                try:
-                    cursor.execute(statement)
-                    print("   ✓ Success")
-                except Exception as e:
-                    print(f"   ✗ Error: {e}")
-                    raise
+        # Execute the entire migration as one transaction
+        cursor.execute(migration_sql)
 
         print("-" * 60)
         print("Migration completed successfully!")
 
-        # Verify columns were added
+        # Verify tables were created
         cursor.execute("""
-            SELECT column_name, data_type
-            FROM information_schema.columns
-            WHERE table_name = 'meetings'
-            AND column_name IN ('council', 'organization_type', 'rss_feed_url')
-            ORDER BY column_name
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_name IN (
+                'council_members', 'motions', 'votes',
+                'white_papers', 'scoping_items',
+                'executive_orders',
+                'legislation', 'regulations',
+                'stock_assessments', 'assessment_comments',
+                'ap_reports', 'ssc_reports',
+                'documents', 'action_documents', 'meeting_documents',
+                'action_topics', 'meeting_topics',
+                'audit_log'
+            )
+            ORDER BY table_name
         """)
 
-        columns = cursor.fetchall()
-        print("\nVerification - New columns:")
-        for col_name, col_type in columns:
-            print(f"  • {col_name}: {col_type}")
+        tables = cursor.fetchall()
+        print(f"\n✅ Created {len(tables)} new tables:")
+        for table in tables:
+            print(f"  • {table[0]}")
 
         cursor.close()
         conn.close()
 
-        print("\n✅ Migration complete! The meetings table now has council tracking fields.")
+        print("\n✅ Migration complete! Comprehensive tracking features database is ready.")
 
     except Exception as e:
         print(f"\n❌ ERROR running migration: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == '__main__':
