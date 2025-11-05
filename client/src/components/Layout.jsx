@@ -41,11 +41,7 @@ const Layout = () => {
     }
   ];
 
-  const customFooterContent = (
-    <div className="text-blue-200 italic text-sm">
-      Desktop optimized
-    </div>
-  );
+  const customFooterContent = null;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
