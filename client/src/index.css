@@ -155,3 +155,195 @@ html.text-size-large {
 .dark .border-blue-500 {
   border-color: #60a5fa !important;
 }
+
+/* ============================================ */
+/* 508 COMPLIANCE & ACCESSIBILITY STYLES */
+/* ============================================ */
+
+/* Screen Reader Only - Visually hidden but accessible to screen readers */
+.sr-only,
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border-width: 0 !important;
+}
+
+/* Focus visible for keyboard navigation - Enhanced visibility */
+*:focus-visible {
+  outline: 3px solid #209d5c !important; /* Brand green */
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(32, 157, 92, 0.2) !important;
+}
+
+/* Ensure focus is always visible on interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #209d5c !important;
+  outline-offset: 2px !important;
+}
+
+/* Skip links - positioned off-screen until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: auto;
+  height: auto;
+  padding: 12px 20px;
+  background: #08306b;
+  color: white;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+
+  *:focus-visible {
+    outline-width: 4px !important;
+  }
+}
+
+/* Reduced motion support for users with motion sensitivities */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Ensure text is selectable for screen readers */
+*:not(input):not(textarea) {
+  user-select: text;
+}
+
+/* ARIA live regions styling */
+[aria-live] {
+  position: relative;
+}
+
+/* Ensure sufficient color contrast for links */
+a {
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+/* Focus trap styling for modals */
+[role="dialog"],
+[role="alertdialog"] {
+  position: relative;
+}
+
+/* Landmark region identification for development */
+[role="main"]:focus,
+[role="navigation"]:focus,
+[role="banner"]:focus,
+[role="contentinfo"]:focus,
+[role="complementary"]:focus {
+  outline: 2px dashed #209d5c !important;
+}
+
+/* Table accessibility */
+table caption {
+  padding: 8px;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Ensure all clickable elements have sufficient touch target size (min 44x44px) */
+button,
+a,
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"],
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exception for inline links in paragraphs */
+p a,
+li a,
+td a {
+  min-height: auto;
+  min-width: auto;
+}
+
+/* Loading/busy indicator */
+[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+/* Disabled state clear indication */
+[aria-disabled="true"],
+[disabled] {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+/* Error messaging */
+[aria-invalid="true"] {
+  border: 2px solid #dc2626 !important;
+}
+
+.error-message {
+  color: #dc2626;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Dark mode focus adjustments */
+.dark *:focus-visible {
+  outline-color: #41b883 !important; /* Lighter green for dark mode */
+  box-shadow: 0 0 0 3px rgba(65, 184, 131, 0.3) !important;
+}
+
+.dark .skip-link:focus {
+  background: #2171b5;
+}
+
+/* Ensure adequate spacing for readability */
+p, li, td, th {
+  line-height: 1.5;
+}
+
+/* Headings hierarchy visual distinction */
+h1 { font-size: 2em; margin: 0.67em 0; }
+h2 { font-size: 1.5em; margin: 0.75em 0; }
+h3 { font-size: 1.17em; margin: 0.83em 0; }
+h4 { font-size: 1em; margin: 1em 0; }
+h5 { font-size: 0.83em; margin: 1.17em 0; }
+h6 { font-size: 0.67em; margin: 1.33em 0; }

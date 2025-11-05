@@ -431,6 +431,7 @@ const CommentsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Search comments by name, organization, position, or comment text"
         />
         <select
           value={sortField}
@@ -439,6 +440,7 @@ const CommentsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Sort comments by"
         >
           <option value="submitted_date">Sort by Date</option>
           <option value="name">Sort by Name</option>
@@ -448,6 +450,7 @@ const CommentsEnhanced = () => {
         <button
           onClick={() => setSortDirection(d => d === 'asc' ? 'desc' : 'asc')}
           className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          aria-label={`Sort direction: ${sortDirection === 'asc' ? 'Ascending' : 'Descending'}. Click to toggle.`}
         >
           {sortDirection === 'asc' ? '↑ Asc' : '↓ Desc'}
         </button>
@@ -458,6 +461,7 @@ const CommentsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Number of comments to display per page"
         >
           <option value={20}>Show 20</option>
           <option value={50}>Show 50</option>
@@ -474,6 +478,7 @@ const CommentsEnhanced = () => {
             checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
             onChange={toggleSelectAll}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            aria-label={`Select all ${paginatedComments.length} comments on this page`}
           />
           <span className="text-sm text-gray-700">
             Select all {paginatedComments.length} on this page
@@ -506,6 +511,7 @@ const CommentsEnhanced = () => {
                   checked={selectedComments.has(comment.id)}
                   onChange={() => toggleSelectComment(comment)}
                   className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  aria-label={`Select comment from ${comment.name || 'Anonymous'}`}
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1.5">

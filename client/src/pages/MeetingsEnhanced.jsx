@@ -389,6 +389,7 @@ const MeetingsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Search meetings by title, council, location, or type"
         />
         <select
           value={pageSize}
@@ -397,6 +398,7 @@ const MeetingsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Number of meetings to display per page"
         >
           <option value={20}>Show 20</option>
           <option value={50}>Show 50</option>
@@ -408,6 +410,9 @@ const MeetingsEnhanced = () => {
       {/* Meetings Table */}
       <div className="mt-6 bg-white shadow overflow-x-auto sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
+          <caption className="sr-only">
+            Meeting calendar with {filteredAndSortedMeetings.length} meetings. Table includes columns for selection, title, council, date, location, and type. Click column headers to sort.
+          </caption>
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
@@ -416,6 +421,7 @@ const MeetingsEnhanced = () => {
                   checked={selectedMeetings.size === paginatedMeetings.length && paginatedMeetings.length > 0}
                   onChange={toggleSelectAll}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  aria-label={`Select all ${paginatedMeetings.length} meetings on this page`}
                 />
               </th>
               {getDisplayColumns().map(col => (
@@ -459,6 +465,7 @@ const MeetingsEnhanced = () => {
                       checked={selectedMeetings.has(meeting.id)}
                       onChange={() => toggleSelectMeeting(meeting)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      aria-label={`Select meeting: ${meeting.title}`}
                     />
                   </td>
                   {getDisplayColumns().map(col => (
@@ -533,16 +540,18 @@ const MeetingsEnhanced = () => {
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Go to previous page"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700">
+            <span className="px-4 py-2 text-sm text-gray-700" aria-current="page" aria-label={`Page ${currentPage} of ${totalPages}`}>
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Go to next page"
             >
               Next
             </button>

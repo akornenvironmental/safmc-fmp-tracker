@@ -45,6 +45,14 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Skip Navigation Links for 508 Compliance */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <a href="#footer" className="skip-link">
+        Skip to footer
+      </a>
+
       <ReusableHeader
         appName="SAFMC FMP Tracker"
         logoSrc={safmcLogo}
@@ -61,7 +69,12 @@ const Layout = () => {
         containerClassName="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"
       />
 
-      <main className="max-w-[1600px] mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
+      <main
+        id="main-content"
+        role="main"
+        aria-label="Main content"
+        className="max-w-[1600px] mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full"
+      >
         <Outlet />
       </main>
 

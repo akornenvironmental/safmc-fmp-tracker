@@ -72,7 +72,7 @@ export default function ReusableFooter({
   const allBadges = showAIPoweredBadge ? [defaultAIBadge, ...featureBadges] : featureBadges;
 
   return (
-    <footer className={footerClassName}>
+    <footer id="footer" role="contentinfo" className={footerClassName}>
       <div className={containerClassName}>
         <div className="flex flex-col gap-3">
           {/* Top Row: Title, Version, and Badges */}

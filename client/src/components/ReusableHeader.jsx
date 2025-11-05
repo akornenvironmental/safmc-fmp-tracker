@@ -74,8 +74,9 @@ export default function ReusableHeader({
   };
 
   return (
-    <nav className={headerClassName}>
-      <div className={containerClassName}>
+    <header role="banner">
+      <nav role="navigation" aria-label="Primary navigation" className={headerClassName}>
+        <div className={containerClassName}>
         <div className="flex justify-between h-16">
           <div className="flex">
             {/* Logo and App Name */}
@@ -152,8 +153,11 @@ export default function ReusableHeader({
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="sm:hidden p-1 text-white/80 hover:text-white"
+              aria-label={mobileMenuOpen ? 'Close mobile menu' : 'Open mobile menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 {mobileMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -167,7 +171,13 @@ export default function ReusableHeader({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div ref={mobileMenuRef} className={mobileMenuClassName}>
+        <div
+          id="mobile-menu"
+          ref={mobileMenuRef}
+          className={mobileMenuClassName}
+          role="navigation"
+          aria-label="Mobile navigation"
+        >
           <div className="pt-2 pb-3 space-y-1">
             {navLinks.map((link, index) => {
               const isActiveLink = isActive(link.to);
@@ -211,6 +221,7 @@ export default function ReusableHeader({
           </div>
         </div>
       )}
-    </nav>
+      </nav>
+    </header>
   );
 }

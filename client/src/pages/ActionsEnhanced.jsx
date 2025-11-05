@@ -438,6 +438,7 @@ const ActionsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Search actions by title, FMP, progress stage, or description"
         />
         <select
           value={pageSize}
@@ -446,6 +447,7 @@ const ActionsEnhanced = () => {
             setCurrentPage(1);
           }}
           className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Number of actions to display per page"
         >
           <option value={20}>Show 20</option>
           <option value={50}>Show 50</option>
@@ -457,6 +459,9 @@ const ActionsEnhanced = () => {
       {/* Actions Table */}
       <div className="mt-6 bg-white shadow overflow-x-auto sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
+          <caption className="sr-only">
+            Actions tracker with {filteredAndSortedActions.length} actions. Table includes columns for selection, title, FMP, progress stage, progress percentage, and last updated date. Click column headers to sort.
+          </caption>
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
@@ -465,6 +470,7 @@ const ActionsEnhanced = () => {
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
                   onChange={toggleSelectAll}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  aria-label={`Select all ${paginatedActions.length} actions on this page`}
                 />
               </th>
               {getDisplayColumns().map(col => (
@@ -508,6 +514,7 @@ const ActionsEnhanced = () => {
                       checked={selectedActions.has(action.id)}
                       onChange={() => toggleSelectAction(action)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      aria-label={`Select action: ${action.title}`}
                     />
                   </td>
                   {getDisplayColumns().map(col => (
