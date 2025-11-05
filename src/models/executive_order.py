@@ -1,9 +1,9 @@
 """
 Executive Order Model
 """
-from src.database import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import ARRAY
+from src.config.extensions import db
 
 class ExecutiveOrder(db.Model):
     """Executive Order model"""

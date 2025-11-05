@@ -1,8 +1,8 @@
 """
 Stock Assessment Models
 """
-from src.database import db
 from datetime import datetime
+from src.config.extensions import db
 
 class StockAssessment(db.Model):
     """Stock Assessment model for SEDAR data"""

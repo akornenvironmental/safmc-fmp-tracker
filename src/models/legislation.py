@@ -1,9 +1,9 @@
 """
 Legislation and Regulation Models
 """
-from src.database import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import ARRAY
+from src.config.extensions import db
 
 class Legislation(db.Model):
     """Legislation model"""

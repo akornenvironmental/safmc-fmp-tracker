@@ -1,9 +1,9 @@
 """
 Document Management and Cross-Reference Models
 """
-from src.database import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import ARRAY
+from src.config.extensions import db
 
 class Document(db.Model):
     """Document model for centralized document management"""

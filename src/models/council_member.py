@@ -1,8 +1,8 @@
 """
 Council Member and Voting Models
 """
-from src.database import db
 from datetime import datetime
+from src.config.extensions import db
 
 class CouncilMember(db.Model):
     """Council member model"""

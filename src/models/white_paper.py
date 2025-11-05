@@ -1,8 +1,8 @@
 """
 White Paper and Scoping Models
 """
-from src.database import db
 from datetime import datetime
+from src.config.extensions import db
 
 class WhitePaper(db.Model):
     """White paper model"""
