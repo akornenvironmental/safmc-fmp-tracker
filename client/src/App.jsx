@@ -7,9 +7,9 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AIAssistant from './components/AIAssistant';
 import Dashboard from './pages/Dashboard';
-import Actions from './pages/Actions';
-import Meetings from './pages/Meetings';
-import Comments from './pages/Comments';
+import ActionsEnhanced from './pages/ActionsEnhanced';
+import MeetingsEnhanced from './pages/MeetingsEnhanced';
+import CommentsEnhanced from './pages/CommentsEnhanced';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
@@ -33,9 +33,9 @@ function App() {
               }
             >
               <Route index element={<Dashboard />} />
-              <Route path="actions" element={<Actions />} />
-              <Route path="meetings" element={<Meetings />} />
-              <Route path="comments" element={<Comments />} />
+              <Route path="actions" element={<ActionsEnhanced />} />
+              <Route path="meetings" element={<MeetingsEnhanced />} />
+              <Route path="comments" element={<CommentsEnhanced />} />
             </Route>
           </Routes>
           <AIAssistant />

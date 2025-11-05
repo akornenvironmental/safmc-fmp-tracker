@@ -7,8 +7,9 @@
  * - User menu with dropdown
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Sun, Moon, Type, User, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 export default function HeaderControls({
   theme,
@@ -27,6 +28,7 @@ export default function HeaderControls({
   additionalMenuItems = []
 }) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const userMenuRef = useRef(null);
 
   const cycleTextSize = () => {
     const sizes = ['small', 'medium', 'large'];
@@ -37,17 +39,8 @@ export default function HeaderControls({
 
   const toggleUserMenu = () => setShowUserDropdown(!showUserDropdown);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const target = event.target;
-      if (showUserDropdown && !target.closest('.user-menu-container')) {
-        setShowUserDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showUserDropdown]);
+  // Close dropdown when clicking outside or pressing Escape
+  useClickOutside(userMenuRef, () => setShowUserDropdown(false), showUserDropdown);
 
   return (
     <div className="flex items-center space-x-2">
@@ -75,7 +68,7 @@ export default function HeaderControls({
 
       {/* User Menu */}
       {showUserMenu && (
-        <div className="relative user-menu-container border-l border-white/20 pl-4 ml-2">
+        <div ref={userMenuRef} className="relative user-menu-container border-l border-white/20 pl-4 ml-2">
           <button
             onClick={toggleUserMenu}
             className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-brand-blue to-blue-600 text-white hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"

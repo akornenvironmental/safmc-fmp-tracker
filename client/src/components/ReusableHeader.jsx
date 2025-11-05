@@ -5,9 +5,10 @@
  * Can be used across multiple projects with different branding and navigation needs.
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import HeaderControls from './HeaderControls';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 export default function ReusableHeader({
   // Branding
@@ -54,9 +55,13 @@ export default function ReusableHeader({
   onMobileMenuToggle,
 }) {
   const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
 
   const mobileMenuOpen = externalMobileMenuOpen !== undefined ? externalMobileMenuOpen : internalMobileMenuOpen;
   const setMobileMenuOpen = onMobileMenuToggle || setInternalMobileMenuOpen;
+
+  // Close mobile menu when clicking outside or pressing Escape
+  useClickOutside(mobileMenuRef, () => setMobileMenuOpen(false), mobileMenuOpen);
 
   const isActive = (path) => {
     if (currentPath) {
@@ -162,7 +167,7 @@ export default function ReusableHeader({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className={mobileMenuClassName}>
+        <div ref={mobileMenuRef} className={mobileMenuClassName}>
           <div className="pt-2 pb-3 space-y-1">
             {navLinks.map((link, index) => {
               const isActiveLink = isActive(link.to);

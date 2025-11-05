@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { MessageSquare, X, Send } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 const AIAssistant = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -8,6 +9,10 @@ const AIAssistant = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const inputRef = useRef(null);
+  const panelRef = useRef(null);
+
+  // Close panel when clicking outside or pressing Escape
+  useClickOutside(panelRef, () => setIsExpanded(false), isExpanded);
 
   const exampleQueries = [
     'What is the FMP development process?',
@@ -64,7 +69,7 @@ const AIAssistant = () => {
   return (
     <div className="fixed top-0 right-0 bottom-0 z-50">
       {isExpanded && (
-        <div className="bg-white dark:bg-gray-800 border-l-2 border-brand-blue shadow-2xl h-full" style={{ width: '450px' }}>
+        <div ref={panelRef} className="bg-white dark:bg-gray-800 border-l-2 border-brand-blue shadow-2xl h-full" style={{ width: '450px' }}>
           <div className="h-full flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
