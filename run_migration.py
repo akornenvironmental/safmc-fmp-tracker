@@ -33,14 +33,20 @@ def run_migration():
         print("Running migration...")
         print("-" * 60)
 
-        # Split by semicolons and execute each statement
-        statements = [s.strip() for s in migration_sql.split(';') if s.strip() and not s.strip().startswith('--')]
+        # Remove comment lines and split by semicolons
+        lines = [line for line in migration_sql.split('\n') if line.strip() and not line.strip().startswith('--')]
+        sql_without_comments = '\n'.join(lines)
+        statements = [s.strip() for s in sql_without_comments.split(';') if s.strip()]
 
-        for statement in statements:
+        for i, statement in enumerate(statements, 1):
             if statement:
-                print(f"Executing: {statement[:100]}...")
-                cursor.execute(statement)
-                print("  ✓ Success")
+                print(f"{i}. Executing: {statement[:80]}...")
+                try:
+                    cursor.execute(statement)
+                    print("   ✓ Success")
+                except Exception as e:
+                    print(f"   ✗ Error: {e}")
+                    raise
 
         print("-" * 60)
         print("Migration completed successfully!")
