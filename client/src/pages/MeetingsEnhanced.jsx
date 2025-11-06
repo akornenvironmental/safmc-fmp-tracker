@@ -431,6 +431,12 @@ const MeetingsEnhanced = () => {
             <option value="gsmfc">GSMFC</option>
             <option value="psmfc">PSMFC</option>
             <option value="noaa">NOAA</option>
+            <optgroup label="State Agencies">
+              <option value="ncdmf">NC Marine Fisheries</option>
+              <option value="scdnr">SC DNR</option>
+              <option value="gadnr">GA DNR</option>
+              <option value="fwc">FL FWC</option>
+            </optgroup>
           </select>
         </div>
         <div className="flex items-center gap-2">
@@ -455,6 +461,10 @@ const MeetingsEnhanced = () => {
             <option value="atlantic coast">Atlantic Coast</option>
             <option value="gulf states">Gulf States</option>
             <option value="pacific states">Pacific States</option>
+            <option value="north carolina">North Carolina</option>
+            <option value="south carolina">South Carolina</option>
+            <option value="georgia">Georgia</option>
+            <option value="florida">Florida</option>
           </select>
         </div>
         {(organizationFilter !== 'all' || regionFilter !== 'all') && (

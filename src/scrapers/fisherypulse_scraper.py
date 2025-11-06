@@ -102,6 +102,38 @@ SOURCES = {
         'feed_url': None,
         'region': 'Pacific States',
         'color': '#9333ea'
+    },
+    'ncdmf': {
+        'name': 'North Carolina Division of Marine Fisheries',
+        'short': 'NCDMF',
+        'url': 'https://deq.nc.gov/about/divisions/marine-fisheries/calendar',
+        'feed_url': None,
+        'region': 'North Carolina',
+        'color': '#7c3aed'
+    },
+    'scdnr': {
+        'name': 'South Carolina Department of Natural Resources',
+        'short': 'SCDNR',
+        'url': 'https://www.dnr.sc.gov/news/calendar.html',
+        'feed_url': None,
+        'region': 'South Carolina',
+        'color': '#db2777'
+    },
+    'gadnr': {
+        'name': 'Georgia Department of Natural Resources',
+        'short': 'GADNR',
+        'url': 'https://coastalgadnr.org/Calendar',
+        'feed_url': None,
+        'region': 'Georgia',
+        'color': '#ea580c'
+    },
+    'fwc': {
+        'name': 'Florida Fish and Wildlife Conservation Commission',
+        'short': 'FWC',
+        'url': 'https://myfwc.com/about/events/',
+        'feed_url': 'https://myfwc.com/about/events/rss/',
+        'region': 'Florida',
+        'color': '#f59e0b'
     }
 }
 
