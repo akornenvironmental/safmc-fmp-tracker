@@ -456,13 +456,13 @@ const MeetingsEnhanced = () => {
               setShowOrgDropdown(!showOrgDropdown);
               setShowRegionDropdown(false);
             }}
-            className="min-w-[180px] flex items-center justify-between gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green"
+            className="min-w-[200px] flex items-center justify-between gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green"
           >
             <span className="truncate">
               {organizationFilter.length === 0
                 ? 'Organization'
                 : organizationFilter.length === 1
-                  ? organizationFilter[0].toUpperCase()
+                  ? organizationFilter[0].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
                   : `${organizationFilter.length} selected`}
             </span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,14 +470,14 @@ const MeetingsEnhanced = () => {
             </svg>
           </button>
           {showOrgDropdown && (
-            <div className="absolute z-50 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+            <div className="absolute z-50 mt-1 w-80 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
               <div className="p-2 space-y-1">
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('safmc')}
+                    checked={organizationFilter.includes('south atlantic')}
                     onChange={(e) => {
-                      const val = 'safmc';
+                      const val = 'south atlantic';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -485,14 +485,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">SAFMC</span>
+                  <span className="text-sm">South Atlantic Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('nefmc')}
+                    checked={organizationFilter.includes('new england')}
                     onChange={(e) => {
-                      const val = 'nefmc';
+                      const val = 'new england';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -500,14 +500,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">NEFMC</span>
+                  <span className="text-sm">New England Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('mafmc')}
+                    checked={organizationFilter.includes('mid-atlantic')}
                     onChange={(e) => {
-                      const val = 'mafmc';
+                      const val = 'mid-atlantic';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -515,14 +515,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">MAFMC</span>
+                  <span className="text-sm">Mid-Atlantic Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('gmfmc')}
+                    checked={organizationFilter.includes('gulf of mexico')}
                     onChange={(e) => {
-                      const val = 'gmfmc';
+                      const val = 'gulf of mexico';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -530,14 +530,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">GMFMC</span>
+                  <span className="text-sm">Gulf of Mexico Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('cfmc')}
+                    checked={organizationFilter.includes('caribbean')}
                     onChange={(e) => {
-                      const val = 'cfmc';
+                      const val = 'caribbean';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -545,14 +545,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">CFMC</span>
+                  <span className="text-sm">Caribbean Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('pfmc')}
+                    checked={organizationFilter.includes('pacific fishery')}
                     onChange={(e) => {
-                      const val = 'pfmc';
+                      const val = 'pacific fishery';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -560,14 +560,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">PFMC</span>
+                  <span className="text-sm">Pacific Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('npfmc')}
+                    checked={organizationFilter.includes('north pacific')}
                     onChange={(e) => {
-                      const val = 'npfmc';
+                      const val = 'north pacific';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -575,14 +575,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">NPFMC</span>
+                  <span className="text-sm">North Pacific Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('wpfmc')}
+                    checked={organizationFilter.includes('western pacific')}
                     onChange={(e) => {
-                      const val = 'wpfmc';
+                      const val = 'western pacific';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -590,14 +590,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">WPFMC</span>
+                  <span className="text-sm">Western Pacific Fishery Management Council</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('asmfc')}
+                    checked={organizationFilter.includes('atlantic states')}
                     onChange={(e) => {
-                      const val = 'asmfc';
+                      const val = 'atlantic states';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -605,14 +605,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">ASMFC</span>
+                  <span className="text-sm">Atlantic States Marine Fisheries Commission</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('gsmfc')}
+                    checked={organizationFilter.includes('gulf states')}
                     onChange={(e) => {
-                      const val = 'gsmfc';
+                      const val = 'gulf states';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -620,14 +620,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">GSMFC</span>
+                  <span className="text-sm">Gulf States Marine Fisheries Commission</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('psmfc')}
+                    checked={organizationFilter.includes('pacific states')}
                     onChange={(e) => {
-                      const val = 'psmfc';
+                      const val = 'pacific states';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -635,7 +635,7 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">PSMFC</span>
+                  <span className="text-sm">Pacific States Marine Fisheries Commission</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
@@ -650,16 +650,16 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">NOAA</span>
+                  <span className="text-sm">NOAA Fisheries</span>
                 </label>
                 <div className="border-t border-gray-200 my-1"></div>
                 <div className="px-2 py-1 text-xs font-medium text-gray-500">State Agencies</div>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('ncdmf')}
+                    checked={organizationFilter.includes('north carolina')}
                     onChange={(e) => {
-                      const val = 'ncdmf';
+                      const val = 'north carolina';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -667,14 +667,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">NC Marine Fisheries</span>
+                  <span className="text-sm">North Carolina Division of Marine Fisheries</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('scdnr')}
+                    checked={organizationFilter.includes('south carolina')}
                     onChange={(e) => {
-                      const val = 'scdnr';
+                      const val = 'south carolina';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -682,14 +682,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">SC DNR</span>
+                  <span className="text-sm">South Carolina Department of Natural Resources</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('gadnr')}
+                    checked={organizationFilter.includes('georgia')}
                     onChange={(e) => {
-                      const val = 'gadnr';
+                      const val = 'georgia';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -697,14 +697,14 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">GA DNR</span>
+                  <span className="text-sm">Georgia Department of Natural Resources</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={organizationFilter.includes('fwc')}
+                    checked={organizationFilter.includes('florida')}
                     onChange={(e) => {
-                      const val = 'fwc';
+                      const val = 'florida';
                       setOrganizationFilter(prev =>
                         e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
                       );
@@ -712,7 +712,7 @@ const MeetingsEnhanced = () => {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
                   />
-                  <span className="text-sm">FL FWC</span>
+                  <span className="text-sm">Florida Fish and Wildlife Conservation Commission</span>
                 </label>
                 {organizationFilter.length > 0 && (
                   <div className="border-t border-gray-200 mt-2 pt-2">
