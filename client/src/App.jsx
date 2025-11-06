@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import ActionsEnhanced from './pages/ActionsEnhanced';
 import MeetingsEnhanced from './pages/MeetingsEnhanced';
 import CommentsEnhanced from './pages/CommentsEnhanced';
+import StockAssessments from './pages/StockAssessments';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="actions" element={<ActionsEnhanced />} />
               <Route path="meetings" element={<MeetingsEnhanced />} />
               <Route path="comments" element={<CommentsEnhanced />} />
+              <Route path="assessments" element={<StockAssessments />} />
             </Route>
           </Routes>
           <AIAssistant />

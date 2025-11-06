@@ -21,7 +21,8 @@ const Layout = () => {
     { to: '/', label: 'Dashboard' },
     { to: '/actions', label: 'Actions' },
     { to: '/meetings', label: 'Meetings' },
-    { to: '/comments', label: 'Comments' }
+    { to: '/comments', label: 'Comments' },
+    { to: '/assessments', label: 'Stock Assessments' }
   ];
 
   const customDescription = (
