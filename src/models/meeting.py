@@ -18,6 +18,8 @@ class Meeting(db.Model):
     # Organization/Council
     council = db.Column(db.String(100))  # SAFMC, NEFMC, MAFMC, GFMC, etc.
     organization_type = db.Column(db.String(50))  # Regional Council, Interstate Commission, State Agency
+    region = db.Column(db.String(100))  # Northeast, Mid-Atlantic, Southeast, etc.
+    source = db.Column(db.String(100))  # Federal Register, NOAA Events, RSS Feed, etc.
 
     # Date and time
     start_date = db.Column(db.DateTime)
@@ -27,6 +29,7 @@ class Meeting(db.Model):
     # Location
     location = db.Column(db.String(500))
     virtual_link = db.Column(db.String(500))
+    is_virtual = db.Column(db.Boolean, default=False)
 
     # Details
     description = db.Column(db.Text)
@@ -53,11 +56,14 @@ class Meeting(db.Model):
             'type': self.type,
             'council': self.council,
             'organization_type': self.organization_type,
+            'region': self.region,
+            'source': self.source,
             'start_date': self.start_date.isoformat() if self.start_date else None,
             'end_date': self.end_date.isoformat() if self.end_date else None,
             'time': self.time,
             'location': self.location,
             'virtual_link': self.virtual_link,
+            'is_virtual': self.is_virtual,
             'description': self.description,
             'agenda_url': self.agenda_url,
             'source_url': self.source_url,
