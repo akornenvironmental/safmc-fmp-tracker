@@ -367,7 +367,7 @@ const MeetingsEnhanced = () => {
                   checked={visibleColumns[col.key]}
                   onChange={() => toggleColumn(col.key)}
                   disabled={col.core}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
                   {col.label} {col.core && '(required)'}
@@ -420,7 +420,7 @@ const MeetingsEnhanced = () => {
                   type="checkbox"
                   checked={selectedMeetings.size === paginatedMeetings.length && paginatedMeetings.length > 0}
                   onChange={toggleSelectAll}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   aria-label={`Select all ${paginatedMeetings.length} meetings on this page`}
                 />
               </th>
@@ -464,7 +464,7 @@ const MeetingsEnhanced = () => {
                       type="checkbox"
                       checked={selectedMeetings.has(meeting.id)}
                       onChange={() => toggleSelectMeeting(meeting)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       aria-label={`Select meeting: ${meeting.title}`}
                     />
                   </td>

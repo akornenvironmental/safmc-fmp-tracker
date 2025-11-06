@@ -370,7 +370,7 @@ const ActionsEnhanced = () => {
                   checked={visibleColumns[col.key]}
                   onChange={() => toggleColumn(col.key)}
                   disabled={col.core}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
                   {col.label} {col.core && '(required)'}
@@ -469,7 +469,7 @@ const ActionsEnhanced = () => {
                   type="checkbox"
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
                   onChange={toggleSelectAll}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   aria-label={`Select all ${paginatedActions.length} actions on this page`}
                 />
               </th>
@@ -513,7 +513,7 @@ const ActionsEnhanced = () => {
                       type="checkbox"
                       checked={selectedActions.has(action.id)}
                       onChange={() => toggleSelectAction(action)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       aria-label={`Select action: ${action.title}`}
                     />
                   </td>
