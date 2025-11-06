@@ -14,8 +14,10 @@ const MeetingsEnhanced = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedMeetings, setSelectedMeetings] = useState(new Set());
-  const [organizationFilter, setOrganizationFilter] = useState('all');
-  const [regionFilter, setRegionFilter] = useState('all');
+  const [organizationFilter, setOrganizationFilter] = useState([]);
+  const [regionFilter, setRegionFilter] = useState([]);
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
+  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -46,6 +48,21 @@ const MeetingsEnhanced = () => {
   useEffect(() => {
     fetchMeetings();
   }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.relative')) {
+        setShowOrgDropdown(false);
+        setShowRegionDropdown(false);
+      }
+    };
+
+    if (showOrgDropdown || showRegionDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showOrgDropdown, showRegionDropdown]);
 
   const fetchMeetings = async () => {
     try {
@@ -114,8 +131,8 @@ const MeetingsEnhanced = () => {
     setCurrentPage(1);
     setSelectedMeetings(new Set());
     setShowColumnSelector(false);
-    setOrganizationFilter('all');
-    setRegionFilter('all');
+    setOrganizationFilter([]);
+    setRegionFilter([]);
   };
 
   // Handle sorting
@@ -142,13 +159,13 @@ const MeetingsEnhanced = () => {
         meeting.region?.toLowerCase().includes(searchLower)
       );
 
-      // Organization filter
-      const matchesOrganization = organizationFilter === 'all' ||
-        meeting.council?.toLowerCase().includes(organizationFilter.toLowerCase());
+      // Organization filter (multi-select)
+      const matchesOrganization = organizationFilter.length === 0 ||
+        organizationFilter.some(org => meeting.council?.toLowerCase().includes(org.toLowerCase()));
 
-      // Region filter
-      const matchesRegion = regionFilter === 'all' ||
-        meeting.region?.toLowerCase() === regionFilter.toLowerCase();
+      // Region filter (multi-select)
+      const matchesRegion = regionFilter.length === 0 ||
+        regionFilter.some(reg => meeting.region?.toLowerCase() === reg.toLowerCase());
 
       return matchesSearch && matchesOrganization && matchesRegion;
     });
@@ -406,80 +423,6 @@ const MeetingsEnhanced = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="mt-4 flex flex-wrap gap-3 items-center">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Organization:</label>
-          <select
-            value={organizationFilter}
-            onChange={(e) => {
-              setOrganizationFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="rounded-md border-gray-300 shadow-sm focus:border-brand-green focus:ring-brand-green text-sm"
-          >
-            <option value="all">All Organizations</option>
-            <option value="safmc">SAFMC</option>
-            <option value="nefmc">NEFMC</option>
-            <option value="mafmc">MAFMC</option>
-            <option value="gmfmc">GMFMC</option>
-            <option value="cfmc">CFMC</option>
-            <option value="pfmc">PFMC</option>
-            <option value="npfmc">NPFMC</option>
-            <option value="wpfmc">WPFMC</option>
-            <option value="asmfc">ASMFC</option>
-            <option value="gsmfc">GSMFC</option>
-            <option value="psmfc">PSMFC</option>
-            <option value="noaa">NOAA</option>
-            <optgroup label="State Agencies">
-              <option value="ncdmf">NC Marine Fisheries</option>
-              <option value="scdnr">SC DNR</option>
-              <option value="gadnr">GA DNR</option>
-              <option value="fwc">FL FWC</option>
-            </optgroup>
-          </select>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Region:</label>
-          <select
-            value={regionFilter}
-            onChange={(e) => {
-              setRegionFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="rounded-md border-gray-300 shadow-sm focus:border-brand-green focus:ring-brand-green text-sm"
-          >
-            <option value="all">All Regions</option>
-            <option value="northeast">Northeast</option>
-            <option value="mid-atlantic">Mid-Atlantic</option>
-            <option value="southeast">Southeast</option>
-            <option value="gulf of mexico">Gulf of Mexico</option>
-            <option value="caribbean">Caribbean</option>
-            <option value="west coast">West Coast</option>
-            <option value="alaska">Alaska</option>
-            <option value="pacific islands">Pacific Islands</option>
-            <option value="atlantic coast">Atlantic Coast</option>
-            <option value="gulf states">Gulf States</option>
-            <option value="pacific states">Pacific States</option>
-            <option value="north carolina">North Carolina</option>
-            <option value="south carolina">South Carolina</option>
-            <option value="georgia">Georgia</option>
-            <option value="florida">Florida</option>
-          </select>
-        </div>
-        {(organizationFilter !== 'all' || regionFilter !== 'all') && (
-          <button
-            onClick={() => {
-              setOrganizationFilter('all');
-              setRegionFilter('all');
-              setCurrentPage(1);
-            }}
-            className="text-xs text-gray-600 hover:text-brand-blue underline"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
 
       {/* Column selector */}
       {showColumnSelector && (
@@ -504,8 +447,349 @@ const MeetingsEnhanced = () => {
         </div>
       )}
 
-      {/* Search and page size */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
+      {/* Filters, Search and page size */}
+      <div className="mt-6 flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+        {/* Organization multi-select filter */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowOrgDropdown(!showOrgDropdown);
+              setShowRegionDropdown(false);
+            }}
+            className="min-w-[180px] flex items-center justify-between gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green"
+          >
+            <span className="truncate">
+              {organizationFilter.length === 0
+                ? 'Organization'
+                : organizationFilter.length === 1
+                  ? organizationFilter[0].toUpperCase()
+                  : `${organizationFilter.length} selected`}
+            </span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {showOrgDropdown && (
+            <div className="absolute z-50 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+              <div className="p-2 space-y-1">
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('safmc')}
+                    onChange={(e) => {
+                      const val = 'safmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">SAFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('nefmc')}
+                    onChange={(e) => {
+                      const val = 'nefmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">NEFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('mafmc')}
+                    onChange={(e) => {
+                      const val = 'mafmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">MAFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('gmfmc')}
+                    onChange={(e) => {
+                      const val = 'gmfmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">GMFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('cfmc')}
+                    onChange={(e) => {
+                      const val = 'cfmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">CFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('pfmc')}
+                    onChange={(e) => {
+                      const val = 'pfmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">PFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('npfmc')}
+                    onChange={(e) => {
+                      const val = 'npfmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">NPFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('wpfmc')}
+                    onChange={(e) => {
+                      const val = 'wpfmc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">WPFMC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('asmfc')}
+                    onChange={(e) => {
+                      const val = 'asmfc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">ASMFC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('gsmfc')}
+                    onChange={(e) => {
+                      const val = 'gsmfc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">GSMFC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('psmfc')}
+                    onChange={(e) => {
+                      const val = 'psmfc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">PSMFC</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('noaa')}
+                    onChange={(e) => {
+                      const val = 'noaa';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">NOAA</span>
+                </label>
+                <div className="border-t border-gray-200 my-1"></div>
+                <div className="px-2 py-1 text-xs font-medium text-gray-500">State Agencies</div>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('ncdmf')}
+                    onChange={(e) => {
+                      const val = 'ncdmf';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">NC Marine Fisheries</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('scdnr')}
+                    onChange={(e) => {
+                      const val = 'scdnr';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">SC DNR</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('gadnr')}
+                    onChange={(e) => {
+                      const val = 'gadnr';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">GA DNR</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={organizationFilter.includes('fwc')}
+                    onChange={(e) => {
+                      const val = 'fwc';
+                      setOrganizationFilter(prev =>
+                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                  />
+                  <span className="text-sm">FL FWC</span>
+                </label>
+                {organizationFilter.length > 0 && (
+                  <div className="border-t border-gray-200 mt-2 pt-2">
+                    <button
+                      onClick={() => {
+                        setOrganizationFilter([]);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full text-xs text-brand-blue hover:text-brand-green px-2 py-1 text-center"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Region multi-select filter */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowRegionDropdown(!showRegionDropdown);
+              setShowOrgDropdown(false);
+            }}
+            className="min-w-[180px] flex items-center justify-between gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green"
+          >
+            <span className="truncate">
+              {regionFilter.length === 0
+                ? 'Region'
+                : regionFilter.length === 1
+                  ? regionFilter[0].charAt(0).toUpperCase() + regionFilter[0].slice(1)
+                  : `${regionFilter.length} selected`}
+            </span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {showRegionDropdown && (
+            <div className="absolute z-50 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+              <div className="p-2 space-y-1">
+                {['northeast', 'mid-atlantic', 'southeast', 'gulf of mexico', 'caribbean', 'west coast', 'alaska', 'pacific islands', 'atlantic coast', 'gulf states', 'pacific states', 'north carolina', 'south carolina', 'georgia', 'florida'].map(region => (
+                  <label key={region} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={regionFilter.includes(region)}
+                      onChange={(e) => {
+                        setRegionFilter(prev =>
+                          e.target.checked ? [...prev, region] : prev.filter(v => v !== region)
+                        );
+                        setCurrentPage(1);
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                    />
+                    <span className="text-sm capitalize">{region}</span>
+                  </label>
+                ))}
+                {regionFilter.length > 0 && (
+                  <div className="border-t border-gray-200 mt-2 pt-2">
+                    <button
+                      onClick={() => {
+                        setRegionFilter([]);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full text-xs text-brand-blue hover:text-brand-green px-2 py-1 text-center"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Search input */}
         <input
           type="text"
           placeholder="Search meetings..."
@@ -514,9 +798,11 @@ const MeetingsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="flex-1 min-w-[200px] rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
           aria-label="Search meetings by title, council, location, or type"
         />
+
+        {/* Page size selector */}
         <select
           value={pageSize}
           onChange={(e) => {
