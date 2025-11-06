@@ -12,7 +12,7 @@
 
   /* Font Families */
   --font-sans: "Josefin Sans", sans-serif;
-  --font-heading: "Josefin Sans", sans-serif;
+  --font-heading: "orpheus-pro", serif;
 }
 
 :root {
@@ -39,11 +39,11 @@ body {
   min-height: 100vh;
 }
 
-/* Headings: Josefin Sans (using same font for consistency with FMP branding) */
+/* Headings: Orpheus Pro */
 h1, h2, h3, h4, h5, h6,
 .heading,
 .font-heading {
-  font-family: "Josefin Sans", sans-serif;
+  font-family: "orpheus-pro", serif;
   font-weight: 600;
   font-style: normal;
 }
