@@ -135,9 +135,43 @@ def init_stock_assessment_tables():
         logger.error(f"Error initializing stock assessment tables: {e}")
         db.session.rollback()
 
+# Initialize FisheryPulse meeting columns
+def init_fisherypulse_columns():
+    """Add region, source, and is_virtual columns to meetings table if they don't exist"""
+    try:
+        with app.app_context():
+            # Check if columns exist
+            result = db.session.execute(text("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name = 'meetings' AND column_name IN ('region', 'source', 'is_virtual');
+            """))
+            existing_columns = [row[0] for row in result.fetchall()]
+
+            columns_to_add = []
+            if 'region' not in existing_columns:
+                columns_to_add.append("ADD COLUMN region VARCHAR(100)")
+            if 'source' not in existing_columns:
+                columns_to_add.append("ADD COLUMN source VARCHAR(100)")
+            if 'is_virtual' not in existing_columns:
+                columns_to_add.append("ADD COLUMN is_virtual BOOLEAN DEFAULT FALSE")
+
+            if columns_to_add:
+                logger.info(f"Adding {len(columns_to_add)} new columns to meetings table...")
+                for column_sql in columns_to_add:
+                    db.session.execute(text(f"ALTER TABLE meetings {column_sql}"))
+                db.session.commit()
+                logger.info("✓ FisheryPulse columns added successfully")
+            else:
+                logger.info("FisheryPulse columns already exist")
+
+    except Exception as e:
+        logger.error(f"Error adding FisheryPulse columns: {e}")
+        db.session.rollback()
+
 # Initialize tables on startup
 with app.app_context():
     init_stock_assessment_tables()
+    init_fisherypulse_columns()
 
 # Health check endpoint (before blueprints)
 @app.route('/health')
