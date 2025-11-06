@@ -5,8 +5,11 @@ Provides REST API endpoints for data access and management
 
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func, desc
+from sqlalchemy.exc import OperationalError, DBAPIError
 from datetime import datetime, timedelta
 import logging
+import time
+from functools import wraps
 
 from src.config.extensions import db
 from src.models.action import Action
@@ -26,9 +29,36 @@ logger = logging.getLogger(__name__)
 # Initialize services
 ai_service = AIService()
 
+# Database retry decorator
+def retry_on_db_error(max_retries=3, delay=0.5):
+    """Decorator to retry database operations on connection errors"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except (OperationalError, DBAPIError) as e:
+                    last_exception = e
+                    logger.warning(f"Database error on attempt {attempt + 1}/{max_retries}: {e}")
+
+                    # Remove stale session
+                    db.session.remove()
+
+                    if attempt < max_retries - 1:
+                        time.sleep(delay * (attempt + 1))  # Exponential backoff
+                    else:
+                        logger.error(f"All {max_retries} attempts failed for {func.__name__}")
+                        raise last_exception
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 # ==================== DASHBOARD ENDPOINTS ====================
 
 @bp.route('/dashboard/stats')
+@retry_on_db_error(max_retries=3, delay=0.5)
 def dashboard_stats():
     """Get dashboard statistics"""
     try:
@@ -147,6 +177,7 @@ def get_action(action_id):
 # ==================== MEETINGS ENDPOINTS ====================
 
 @bp.route('/meetings')
+@retry_on_db_error(max_retries=3, delay=0.5)
 def get_meetings():
     """Get all meetings"""
     try:

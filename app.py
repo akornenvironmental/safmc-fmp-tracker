@@ -40,6 +40,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 
+# Database connection pool settings to handle timeouts
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,  # Verify connections before using them
+    'pool_recycle': 300,    # Recycle connections after 5 minutes
+    'pool_size': 10,        # Number of connections to maintain
+    'max_overflow': 20,     # Additional connections when pool is full
+    'connect_args': {
+        'connect_timeout': 10,
+        'options': '-c statement_timeout=30000'  # 30 second query timeout
+    }
+}
+
 # Initialize extensions
 from src.config.extensions import db, migrate
 db.init_app(app)
