@@ -289,7 +289,7 @@ const CommentsEnhanced = () => {
             className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
           >
             <Settings size={14} />
-            Export Columns
+            Columns
           </button>
           <div className="relative">
             <button
@@ -342,7 +342,7 @@ const CommentsEnhanced = () => {
       {/* Column selector for export */}
       {showColumnSelector && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Export Columns</h3>
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Columns</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {allColumns.map(col => (
               <label key={col.key} className="flex items-center gap-2">
@@ -351,7 +351,7 @@ const CommentsEnhanced = () => {
                   checked={visibleColumns[col.key]}
                   onChange={() => toggleColumn(col.key)}
                   disabled={col.core}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
                   {col.label} {col.core && '(required)'}
@@ -477,7 +477,7 @@ const CommentsEnhanced = () => {
             type="checkbox"
             checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
             onChange={toggleSelectAll}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             aria-label={`Select all ${paginatedComments.length} comments on this page`}
           />
           <span className="text-sm text-gray-700">
@@ -510,7 +510,7 @@ const CommentsEnhanced = () => {
                   type="checkbox"
                   checked={selectedComments.has(comment.id)}
                   onChange={() => toggleSelectComment(comment)}
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   aria-label={`Select comment from ${comment.name || 'Anonymous'}`}
                 />
                 <div className="flex-1">
