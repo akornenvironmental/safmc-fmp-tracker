@@ -54,6 +54,91 @@ from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 from src.models.user import User
 
+# Initialize stock assessment tables if they don't exist
+def init_stock_assessment_tables():
+    """Create stock assessment tables on startup if they don't exist"""
+    try:
+        with app.app_context():
+            # Check if stock_assessments table exists
+            result = db.session.execute(text("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'stock_assessments'
+                );
+            """))
+            table_exists = result.scalar()
+
+            if not table_exists:
+                logger.info("Creating stock assessment tables...")
+
+                # Create stock_assessments table
+                db.session.execute(text("""
+                    CREATE TABLE stock_assessments (
+                        id SERIAL PRIMARY KEY,
+                        sedar_number VARCHAR(50),
+                        species VARCHAR(255) NOT NULL,
+                        scientific_name VARCHAR(255),
+                        stock_name VARCHAR(255),
+                        assessment_type VARCHAR(100),
+                        status VARCHAR(50),
+                        start_date DATE,
+                        completion_date DATE,
+                        stock_status VARCHAR(100),
+                        overfishing_occurring BOOLEAN DEFAULT FALSE,
+                        overfished BOOLEAN DEFAULT FALSE,
+                        biomass_current DECIMAL(15, 2),
+                        biomass_msy DECIMAL(15, 2),
+                        fishing_mortality_current DECIMAL(10, 4),
+                        fishing_mortality_msy DECIMAL(10, 4),
+                        overfishing_limit DECIMAL(15, 2),
+                        acceptable_biological_catch DECIMAL(15, 2),
+                        annual_catch_limit DECIMAL(15, 2),
+                        keywords TEXT[],
+                        fmps_affected TEXT[],
+                        source_url TEXT,
+                        document_url TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """))
+
+                # Create assessment_comments table
+                db.session.execute(text("""
+                    CREATE TABLE assessment_comments (
+                        id SERIAL PRIMARY KEY,
+                        assessment_id INTEGER REFERENCES stock_assessments(id) ON DELETE CASCADE,
+                        commenter_name VARCHAR(255),
+                        organization VARCHAR(255),
+                        comment_date DATE,
+                        comment_type VARCHAR(100),
+                        comment_text TEXT,
+                        source_url TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """))
+
+                # Create indexes
+                db.session.execute(text("""
+                    CREATE INDEX idx_stock_assessments_species ON stock_assessments(species);
+                    CREATE INDEX idx_stock_assessments_sedar ON stock_assessments(sedar_number);
+                    CREATE INDEX idx_stock_assessments_status ON stock_assessments(status);
+                    CREATE INDEX idx_stock_assessments_updated ON stock_assessments(updated_at);
+                    CREATE INDEX idx_assessment_comments_assessment ON assessment_comments(assessment_id);
+                """))
+
+                db.session.commit()
+                logger.info("✓ Stock assessment tables created successfully")
+            else:
+                logger.info("Stock assessment tables already exist")
+
+    except Exception as e:
+        logger.error(f"Error initializing stock assessment tables: {e}")
+        db.session.rollback()
+
+# Initialize tables on startup
+with app.app_context():
+    init_stock_assessment_tables()
+
 # Health check endpoint (before blueprints)
 @app.route('/health')
 def health_check():
