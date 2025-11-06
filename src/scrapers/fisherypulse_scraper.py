@@ -163,13 +163,18 @@ class FisheryPulseScraper:
         except Exception as e:
             logger.error(f"Error scraping NOAA Events: {e}")
 
-        # 3. Regional Councils RSS Feeds
+        # 3. Regional Councils RSS Feeds and HTML Scraping
         for source_key, source in SOURCES.items():
             try:
                 if source['feed_url']:
                     source_meetings = self.scrape_rss_feed(source_key, source)
                     self.meetings.extend(source_meetings)
-                    logger.info(f"Fetched {len(source_meetings)} meetings from {source['short']}")
+                    logger.info(f"Fetched {len(source_meetings)} meetings from {source['short']} (RSS)")
+                else:
+                    # HTML scraping for sources without RSS feeds
+                    source_meetings = self.scrape_html_calendar(source_key, source)
+                    self.meetings.extend(source_meetings)
+                    logger.info(f"Fetched {len(source_meetings)} meetings from {source['short']} (HTML)")
             except Exception as e:
                 logger.error(f"Error scraping {source['short']}: {e}")
 
@@ -352,6 +357,134 @@ class FisheryPulseScraper:
             'meeting_type': self.determine_meeting_type(f"{title} {description}"),
             'region': source['region']
         }
+
+    def scrape_html_calendar(self, source_key: str, source: Dict) -> List[Dict]:
+        """Scrape HTML calendar pages for councils without RSS feeds"""
+        meetings = []
+
+        try:
+            headers = {'User-Agent': 'FisheryPulse/1.0 (Fisheries Meeting Calendar)'}
+            response = requests.get(source['url'], headers=headers, timeout=30)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Try different calendar HTML patterns
+            # Pattern 1: Table-based calendars
+            calendar_tables = soup.find_all('table', class_=re.compile('calendar|event|meeting', re.I))
+            for table in calendar_tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    meeting = self.parse_calendar_row(row, source_key, source)
+                    if meeting:
+                        meetings.append(meeting)
+
+            # Pattern 2: List/div-based calendars
+            event_containers = soup.find_all(['div', 'article', 'li'], class_=re.compile('event|meeting|calendar|item', re.I))
+            for container in event_containers[:50]:  # Limit to first 50 to avoid noise
+                meeting = self.parse_calendar_container(container, source_key, source)
+                if meeting:
+                    meetings.append(meeting)
+
+            # Pattern 3: Links with date patterns in text
+            links = soup.find_all('a', href=True)
+            for link in links:
+                link_text = link.get_text(strip=True)
+                if re.search(r'(meeting|council|hearing|workshop|webinar)', link_text, re.I):
+                    meeting_date = self.extract_date_from_text(link_text)
+                    if meeting_date and meeting_date > datetime.now() - timedelta(days=365):
+                        meetings.append({
+                            'source': source['short'],
+                            'organization': source['name'],
+                            'title': link_text,
+                            'description': '',
+                            'date': meeting_date,
+                            'location': 'TBD',
+                            'is_virtual': bool(re.search(r'virtual|webinar|online', link_text, re.I)),
+                            'url': link['href'] if link['href'].startswith('http') else source['url'] + link['href'],
+                            'meeting_type': self.determine_meeting_type(link_text),
+                            'region': source['region']
+                        })
+
+        except Exception as e:
+            logger.error(f"Error scraping HTML calendar from {source['short']}: {e}")
+
+        return meetings
+
+    def parse_calendar_row(self, row, source_key: str, source: Dict) -> Optional[Dict]:
+        """Parse a table row that might contain meeting info"""
+        try:
+            cells = row.find_all(['td', 'th'])
+            if len(cells) < 2:
+                return None
+
+            # Try to extract date and title from cells
+            text = ' '.join([cell.get_text(strip=True) for cell in cells])
+
+            if not re.search(r'(meeting|council|hearing|workshop|session)', text, re.I):
+                return None
+
+            meeting_date = self.extract_date_from_text(text)
+            if not meeting_date or meeting_date < datetime.now() - timedelta(days=365):
+                return None
+
+            link = row.find('a', href=True)
+            url = link['href'] if link else source['url']
+            if not url.startswith('http'):
+                url = source['url'] + url
+
+            return {
+                'source': source['short'],
+                'organization': source['name'],
+                'title': text[:200],  # Limit title length
+                'description': '',
+                'date': meeting_date,
+                'location': 'TBD',
+                'is_virtual': bool(re.search(r'virtual|webinar|online', text, re.I)),
+                'url': url,
+                'meeting_type': self.determine_meeting_type(text),
+                'region': source['region']
+            }
+        except Exception:
+            return None
+
+    def parse_calendar_container(self, container, source_key: str, source: Dict) -> Optional[Dict]:
+        """Parse a div/article container that might contain meeting info"""
+        try:
+            text = container.get_text(strip=True)
+
+            # Must contain meeting-related keywords
+            if not re.search(r'(meeting|council|hearing|workshop|webinar|session)', text, re.I):
+                return None
+
+            # Must have a date
+            meeting_date = self.extract_date_from_text(text)
+            if not meeting_date or meeting_date < datetime.now() - timedelta(days=365):
+                return None
+
+            # Try to extract title from heading
+            title_elem = container.find(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'b'])
+            title = title_elem.get_text(strip=True) if title_elem else text[:200]
+
+            link = container.find('a', href=True)
+            url = link['href'] if link else source['url']
+            if not url.startswith('http'):
+                url = source['url'] + url
+
+            return {
+                'source': source['short'],
+                'organization': source['name'],
+                'title': title,
+                'description': text[:500] if len(text) > 200 else '',
+                'date': meeting_date,
+                'location': 'TBD',
+                'is_virtual': bool(re.search(r'virtual|webinar|online', text, re.I)),
+                'url': url,
+                'meeting_type': self.determine_meeting_type(text),
+                'region': source['region']
+            }
+        except Exception:
+            return None
 
     def extract_meeting_date_from_title(self, title: str, description: str = '') -> Optional[datetime]:
         """Extract meeting date from title (e.g., 'December 2025 Council Meeting')"""
