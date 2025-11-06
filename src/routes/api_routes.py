@@ -396,8 +396,8 @@ def scrape_fisherypulse():
         scraper = FisheryPulseScraper()
         meetings = scraper.scrape_all()
 
-        # Save meetings to database (scraper handles this)
-        saved_count = scraper.save_to_database(meetings)
+        # Save meetings to database (pass db object)
+        saved_count = scraper.save_to_database(meetings, db)
 
         # Log the scrape
         duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
@@ -424,6 +424,8 @@ def scrape_fisherypulse():
 
     except Exception as e:
         logger.error(f"Error in scrape_fisherypulse: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 

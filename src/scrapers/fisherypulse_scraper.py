@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 import feedparser
 import re
 from typing import List, Dict, Optional
-from src.database import get_db_connection
 
 logger = logging.getLogger(__name__)
 
@@ -420,58 +419,56 @@ class FisheryPulseScraper:
 
         return unique
 
-    def save_to_database(self, meetings: List[Dict]) -> int:
-        """Save scraped meetings to database"""
-        conn = get_db_connection()
-        cur = conn.cursor()
+    def save_to_database(self, meetings: List[Dict], db) -> int:
+        """Save scraped meetings to database using SQLAlchemy"""
+        from src.models.meeting import Meeting
+
         saved_count = 0
 
-        for meeting in meetings:
+        for meeting_data in meetings:
             try:
                 # Generate unique meeting_id
-                meeting_id = f"{meeting.get('source', 'fp')}_{meeting['date'].strftime('%Y%m%d')}_{meeting['title'][:50]}"
-                meeting_id = meeting_id.replace(' ', '_').replace('/', '_').lower()
+                meeting_id = f"{meeting_data.get('source', 'fp')}_{meeting_data['date'].strftime('%Y%m%d')}_{meeting_data['title'][:50]}"
+                meeting_id = meeting_id.replace(' ', '_').replace('/', '_').replace('(', '').replace(')', '').lower()
+                meeting_id = re.sub(r'[^a-z0-9_-]', '', meeting_id)
 
                 # Check if meeting already exists
-                cur.execute("""
-                    SELECT id FROM meetings
-                    WHERE title = %s AND start_date = %s AND council = %s
-                """, (meeting['title'], meeting['date'], meeting.get('organization')))
+                existing = Meeting.query.filter_by(
+                    meeting_id=meeting_id
+                ).first()
 
-                if cur.fetchone():
+                if existing:
                     continue  # Skip duplicate
 
-                # Insert new meeting using Meeting model column names
-                cur.execute("""
-                    INSERT INTO meetings (
-                        meeting_id, title, description, start_date, location, type,
-                        council, region, is_virtual, source_url, source, status, created_at
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-                """, (
-                    meeting_id,
-                    meeting['title'],
-                    meeting.get('description', ''),
-                    meeting['date'],
-                    meeting.get('location', ''),
-                    meeting.get('meeting_type', 'Meeting'),
-                    meeting.get('organization', ''),
-                    meeting.get('region', ''),
-                    meeting.get('is_virtual', False),
-                    meeting.get('url', ''),
-                    meeting.get('source', ''),
-                    'Scheduled'
-                ))
+                # Create new meeting using SQLAlchemy ORM
+                new_meeting = Meeting(
+                    meeting_id=meeting_id,
+                    title=meeting_data['title'],
+                    description=meeting_data.get('description', ''),
+                    start_date=meeting_data['date'],
+                    location=meeting_data.get('location', ''),
+                    type=meeting_data.get('meeting_type', 'Meeting'),
+                    council=meeting_data.get('organization', ''),
+                    region=meeting_data.get('region', ''),
+                    is_virtual=meeting_data.get('is_virtual', False),
+                    source_url=meeting_data.get('url', ''),
+                    source=meeting_data.get('source', ''),
+                    status='Scheduled'
+                )
 
+                db.session.add(new_meeting)
                 saved_count += 1
 
             except Exception as e:
-                logger.error(f"Error saving meeting '{meeting.get('title')}': {e}")
-                conn.rollback()
+                logger.error(f"Error saving meeting '{meeting_data.get('title')}': {e}")
+                db.session.rollback()
                 continue
 
-        conn.commit()
-        cur.close()
-        conn.close()
+        try:
+            db.session.commit()
+            logger.info(f"Saved {saved_count} new meetings to database")
+        except Exception as e:
+            logger.error(f"Error committing meetings: {e}")
+            db.session.rollback()
 
-        logger.info(f"Saved {saved_count} new meetings to database")
         return saved_count
