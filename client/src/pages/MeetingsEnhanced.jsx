@@ -6,6 +6,7 @@ const MeetingsEnhanced = () => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [syncingFisheryPulse, setSyncingFisheryPulse] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('start_date');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -13,6 +14,8 @@ const MeetingsEnhanced = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedMeetings, setSelectedMeetings] = useState(new Set());
+  const [organizationFilter, setOrganizationFilter] = useState('all');
+  const [regionFilter, setRegionFilter] = useState('all');
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -21,6 +24,8 @@ const MeetingsEnhanced = () => {
     start_date: true,
     location: true,
     type: true,
+    region: true,
+    source: false,
     description: false,
     organization_type: false,
   });
@@ -28,10 +33,12 @@ const MeetingsEnhanced = () => {
   // Define all available columns
   const allColumns = [
     { key: 'title', label: 'Title', core: true },
-    { key: 'council', label: 'Council', core: true },
+    { key: 'council', label: 'Organization', core: true },
+    { key: 'region', label: 'Region', core: true },
     { key: 'start_date', label: 'Date', core: true },
     { key: 'location', label: 'Location', core: true },
     { key: 'type', label: 'Type', core: true },
+    { key: 'source', label: 'Source', core: false },
     { key: 'description', label: 'Description', core: false },
     { key: 'organization_type', label: 'Org Type', core: false },
   ];
@@ -77,6 +84,28 @@ const MeetingsEnhanced = () => {
     }
   };
 
+  const syncFisheryPulse = async () => {
+    try {
+      setSyncingFisheryPulse(true);
+      const response = await fetch(`${API_BASE_URL}/api/scrape/fisherypulse`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert(data.message || `Sync complete! Found ${data.itemsFound} meetings, ${data.itemsNew} new.`);
+        fetchMeetings();
+      } else {
+        alert('Failed to sync: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error syncing FisheryPulse:', error);
+      alert('Error syncing FisheryPulse meetings');
+    } finally {
+      setSyncingFisheryPulse(false);
+    }
+  };
+
   // Reset all filters and sorting
   const handleReset = () => {
     setSearchTerm('');
@@ -85,6 +114,8 @@ const MeetingsEnhanced = () => {
     setCurrentPage(1);
     setSelectedMeetings(new Set());
     setShowColumnSelector(false);
+    setOrganizationFilter('all');
+    setRegionFilter('all');
   };
 
   // Handle sorting
@@ -100,14 +131,26 @@ const MeetingsEnhanced = () => {
   // Filter and sort meetings
   const filteredAndSortedMeetings = useMemo(() => {
     const filtered = meetings.filter(meeting => {
+      // Text search filter
       const searchLower = searchTerm.toLowerCase();
-      return (
+      const matchesSearch = (
         meeting.title?.toLowerCase().includes(searchLower) ||
         meeting.council?.toLowerCase().includes(searchLower) ||
         meeting.location?.toLowerCase().includes(searchLower) ||
         meeting.type?.toLowerCase().includes(searchLower) ||
-        meeting.description?.toLowerCase().includes(searchLower)
+        meeting.description?.toLowerCase().includes(searchLower) ||
+        meeting.region?.toLowerCase().includes(searchLower)
       );
+
+      // Organization filter
+      const matchesOrganization = organizationFilter === 'all' ||
+        meeting.council?.toLowerCase().includes(organizationFilter.toLowerCase());
+
+      // Region filter
+      const matchesRegion = regionFilter === 'all' ||
+        meeting.region?.toLowerCase() === regionFilter.toLowerCase();
+
+      return matchesSearch && matchesOrganization && matchesRegion;
     });
 
     return [...filtered].sort((a, b) => {
@@ -127,7 +170,7 @@ const MeetingsEnhanced = () => {
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [meetings, searchTerm, sortField, sortDirection]);
+  }, [meetings, searchTerm, sortField, sortDirection, organizationFilter, regionFilter]);
 
   // Pagination
   const paginatedMeetings = useMemo(() => {
@@ -350,9 +393,82 @@ const MeetingsEnhanced = () => {
             className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Meetings'}
+            {syncing ? 'Syncing...' : 'Sync SAFMC'}
+          </button>
+          <button
+            onClick={syncFisheryPulse}
+            disabled={syncingFisheryPulse}
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-gradient-to-r from-brand-green to-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncingFisheryPulse ? 'animate-spin' : ''}`} />
+            {syncingFisheryPulse ? 'Syncing...' : 'Sync All Councils'}
           </button>
         </div>
+      </div>
+
+      {/* Filters */}
+      <div className="mt-4 flex flex-wrap gap-3 items-center">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Organization:</label>
+          <select
+            value={organizationFilter}
+            onChange={(e) => {
+              setOrganizationFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded-md border-gray-300 shadow-sm focus:border-brand-green focus:ring-brand-green text-sm"
+          >
+            <option value="all">All Organizations</option>
+            <option value="safmc">SAFMC</option>
+            <option value="nefmc">NEFMC</option>
+            <option value="mafmc">MAFMC</option>
+            <option value="gmfmc">GMFMC</option>
+            <option value="cfmc">CFMC</option>
+            <option value="pfmc">PFMC</option>
+            <option value="npfmc">NPFMC</option>
+            <option value="wpfmc">WPFMC</option>
+            <option value="asmfc">ASMFC</option>
+            <option value="gsmfc">GSMFC</option>
+            <option value="psmfc">PSMFC</option>
+            <option value="noaa">NOAA</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Region:</label>
+          <select
+            value={regionFilter}
+            onChange={(e) => {
+              setRegionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded-md border-gray-300 shadow-sm focus:border-brand-green focus:ring-brand-green text-sm"
+          >
+            <option value="all">All Regions</option>
+            <option value="northeast">Northeast</option>
+            <option value="mid-atlantic">Mid-Atlantic</option>
+            <option value="southeast">Southeast</option>
+            <option value="gulf of mexico">Gulf of Mexico</option>
+            <option value="caribbean">Caribbean</option>
+            <option value="west coast">West Coast</option>
+            <option value="alaska">Alaska</option>
+            <option value="pacific islands">Pacific Islands</option>
+            <option value="atlantic coast">Atlantic Coast</option>
+            <option value="gulf states">Gulf States</option>
+            <option value="pacific states">Pacific States</option>
+          </select>
+        </div>
+        {(organizationFilter !== 'all' || regionFilter !== 'all') && (
+          <button
+            onClick={() => {
+              setOrganizationFilter('all');
+              setRegionFilter('all');
+              setCurrentPage(1);
+            }}
+            className="text-xs text-gray-600 hover:text-brand-blue underline"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {/* Column selector */}
