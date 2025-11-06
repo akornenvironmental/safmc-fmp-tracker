@@ -123,8 +123,10 @@ def debug_static():
 
 # Import and register API routes
 from src.routes import api_routes, auth_routes
+from src.routes.stock_assessment_routes import stock_assessment_bp
 app.register_blueprint(api_routes.bp, url_prefix='/api')
 app.register_blueprint(auth_routes.bp)
+app.register_blueprint(stock_assessment_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
