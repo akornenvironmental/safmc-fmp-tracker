@@ -384,6 +384,49 @@ def scrape_meetings():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@bp.route('/scrape/fisherypulse', methods=['POST'])
+def scrape_fisherypulse():
+    """Trigger comprehensive FisheryPulse meeting scraping from Federal Register, NOAA, and all councils"""
+    try:
+        start_time = datetime.utcnow()
+
+        # Import FisheryPulse scraper
+        from src.scrapers.fisherypulse_scraper import FisheryPulseScraper
+
+        scraper = FisheryPulseScraper()
+        meetings = scraper.scrape_all()
+
+        # Save meetings to database (scraper handles this)
+        saved_count = scraper.save_to_database(meetings)
+
+        # Log the scrape
+        duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+        log = ScrapeLog(
+            source='fisherypulse',
+            action_type='scrape_fisherypulse',
+            status='success',
+            items_found=len(meetings),
+            items_new=saved_count,
+            items_updated=0,
+            duration_ms=duration_ms,
+            completed_at=datetime.utcnow()
+        )
+        db.session.add(log)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'itemsFound': len(meetings),
+            'itemsNew': saved_count,
+            'duration': duration_ms,
+            'message': f'Synced {saved_count} new meetings from Federal Register, NOAA, and regional councils'
+        })
+
+    except Exception as e:
+        logger.error(f"Error in scrape_fisherypulse: {e}")
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 @bp.route('/scrape/all', methods=['POST'])
 def scrape_all():
     """Trigger scraping of all data"""

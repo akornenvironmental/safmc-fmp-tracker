@@ -428,22 +428,27 @@ class FisheryPulseScraper:
 
         for meeting in meetings:
             try:
+                # Generate unique meeting_id
+                meeting_id = f"{meeting.get('source', 'fp')}_{meeting['date'].strftime('%Y%m%d')}_{meeting['title'][:50]}"
+                meeting_id = meeting_id.replace(' ', '_').replace('/', '_').lower()
+
                 # Check if meeting already exists
                 cur.execute("""
                     SELECT id FROM meetings
-                    WHERE title = %s AND date = %s AND organization = %s
+                    WHERE title = %s AND start_date = %s AND council = %s
                 """, (meeting['title'], meeting['date'], meeting.get('organization')))
 
                 if cur.fetchone():
                     continue  # Skip duplicate
 
-                # Insert new meeting
+                # Insert new meeting using Meeting model column names
                 cur.execute("""
                     INSERT INTO meetings (
-                        title, description, date, location, meeting_type,
-                        organization, region, is_virtual, url, source, created_at
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                        meeting_id, title, description, start_date, location, type,
+                        council, region, is_virtual, source_url, source, status, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
                 """, (
+                    meeting_id,
                     meeting['title'],
                     meeting.get('description', ''),
                     meeting['date'],
@@ -453,7 +458,8 @@ class FisheryPulseScraper:
                     meeting.get('region', ''),
                     meeting.get('is_virtual', False),
                     meeting.get('url', ''),
-                    meeting.get('source', '')
+                    meeting.get('source', ''),
+                    'Scheduled'
                 ))
 
                 saved_count += 1
