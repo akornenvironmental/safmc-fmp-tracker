@@ -146,10 +146,13 @@ class AIService:
 SAFMC manages federal fisheries from North Carolina to Florida through eight fishery management plans. The FMP development process typically involves: Scoping → Development → Review → Final Action → Submitted to NOAA.
 
 Your responses should be:
-- Accurate and based on the provided data
+- Accurate and based ONLY on the provided data - do not make assumptions or extrapolate
 - Clear and accessible to both fishery professionals and the public
 - Focused on SAFMC-specific processes and information
 - Helpful for tracking FMP development progress
+- If you don't have specific information, clearly state that rather than guessing
+
+IMPORTANT: Minimize hallucinations and over-interpretations. Stick strictly to the data provided. If uncertain, say so explicitly.
 
 Current SAFMC Context:
 {safmc_info}
@@ -163,10 +166,11 @@ Additional Context:
         return {
             'model': self.model,
             'max_tokens': self.max_tokens,
+            'temperature': 0,  # Set to 0 to minimize hallucinations
             'messages': [
                 {
                     'role': 'user',
-                    'content': f"{system_prompt}\n\nUser Question: {question}\n\nPlease provide a comprehensive, helpful response based on the SAFMC data and context provided above."
+                    'content': f"{system_prompt}\n\nUser Question: {question}\n\nPlease provide a comprehensive, helpful response based ONLY on the SAFMC data and context provided above. If the data doesn't contain the answer, clearly state that."
                 }
             ]
         }

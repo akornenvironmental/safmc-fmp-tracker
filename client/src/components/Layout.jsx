@@ -83,13 +83,26 @@ const Layout = () => {
         version="1.0.0"
         companyName="akorn environmental consulting, LLC"
         companyUrl="https://akornenvironmental.com/"
-        description={customDescription}
-        aiNotice="This system uses AI-powered analysis to assist with tracking and summarization. All information should be verified against official SAFMC sources."
+        description={(
+          <>
+            <strong className="text-white">Fishery Management Plan Tracking System.</strong> This system tracks amendments, meetings, public comments, and stock assessments for South Atlantic FMPs. All data is sourced from publicly available information on SAFMC.net, SEDAR, and NOAA sources.
+          </>
+        )}
+        aiNotice="This system uses AI-powered tools to assist with data analysis and summarization. All AI-generated information should be reviewed for accuracy and verified against official SAFMC sources."
         contactEmail="aaron.kornbluth@gmail.com"
         contactSubject="SAFMC FMP Tracker Feedback"
         featureBadges={featureBadges}
         showAIPoweredBadge={false}
-        customContent={customFooterContent}
+        customContent={(
+          <div className="text-xs text-blue-100 pb-2 border-b border-blue-300/30">
+            <strong>Desktop optimized</strong> • Authorized users only • This system contains fishery management data collected from public sources for research and tracking purposes.
+          </div>
+        )}
+        footerLinks={[
+          { to: '/privacy', label: 'Privacy' },
+          { to: '/terms', label: 'Terms' },
+          { to: 'https://safmc.net', label: 'SAFMC ↗', external: true }
+        ]}
         containerClassName="max-w-[1600px] mx-auto py-5 px-4 sm:px-6 lg:px-8"
       />
 
