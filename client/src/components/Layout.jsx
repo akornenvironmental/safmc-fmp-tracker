@@ -56,6 +56,7 @@ const Layout = () => {
 
       <ReusableHeader
         appName="SAFMC FMP Tracker"
+        appSubtitle="Fishery Management Plan Development Tracking"
         logoSrc={safmcLogo}
         logoAlt="SAFMC Logo"
         navLinks={navLinks}
