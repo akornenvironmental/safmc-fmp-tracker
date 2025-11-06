@@ -43,12 +43,12 @@ export default function HeaderControls({
   useClickOutside(userMenuRef, () => setShowUserDropdown(false), showUserDropdown);
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1">
       {/* Text Size Toggle */}
       {showTextSize && (
         <button
           onClick={cycleTextSize}
-          className="flex items-center justify-center w-9 h-9 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 rounded-lg transition-colors"
           title={`Text size: ${textSize} (click to cycle)`}
           aria-label={`Text size: ${textSize}. Click to cycle through sizes.`}
         >
@@ -60,7 +60,7 @@ export default function HeaderControls({
       {showTheme && (
         <button
           onClick={toggleTheme}
-          className="flex items-center justify-center w-9 h-9 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 rounded-lg transition-colors"
           title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
         >
@@ -70,7 +70,7 @@ export default function HeaderControls({
 
       {/* User Menu */}
       {showUserMenu && (
-        <div ref={userMenuRef} className="relative user-menu-container border-l border-white/20 pl-4 ml-2">
+        <div ref={userMenuRef} className="relative user-menu-container border-l border-gray-300 pl-2 ml-1">
           <button
             onClick={toggleUserMenu}
             className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-brand-blue to-blue-600 text-white hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
