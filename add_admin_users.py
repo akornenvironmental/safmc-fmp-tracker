@@ -25,7 +25,8 @@ import psycopg2
 admin_users = [
     ("Jake Spencer", "jakespencer6596@gmail.com"),
     ("Lily Maddox", "lilymaddox14@gmail.com"),
-    ("Jessie Mandirola", "mandiroj@gmail.com")
+    ("Jessie Mandirola", "mandiroj@gmail.com"),
+    ("Sarah Gaichas", "sgaichas@gmail.com")
 ]
 
 def add_admin_users():
