@@ -301,6 +301,17 @@ td a {
   min-width: auto;
 }
 
+/* Exception for checkboxes in tables */
+td input[type="checkbox"],
+th input[type="checkbox"],
+td input[type="radio"],
+th input[type="radio"] {
+  min-height: auto;
+  min-width: auto;
+  width: 1rem;
+  height: 1rem;
+}
+
 /* Loading/busy indicator */
 [aria-busy="true"] {
   cursor: wait;
