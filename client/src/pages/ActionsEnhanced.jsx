@@ -26,16 +26,18 @@ const ActionsEnhanced = () => {
     type: false,
   });
 
-  // Define all available columns
-  const allColumns = [
-    { key: 'title', label: 'Title', core: true },
-    { key: 'fmp', label: 'FMP', core: true },
-    { key: 'progress_stage', label: 'Progress Stage', core: true },
-    { key: 'progress', label: 'Progress', core: true },
-    { key: 'last_updated', label: 'Last Updated', core: true },
-    { key: 'description', label: 'Description', core: false },
-    { key: 'type', label: 'Type', core: false },
-  ];
+  // Define all available columns with widths
+  const [columnOrder, setColumnOrder] = useState([
+    { key: 'title', label: 'Title', core: true, locked: true, width: '300px' },
+    { key: 'fmp', label: 'FMP', core: true, width: '150px' },
+    { key: 'progress_stage', label: 'Stage', core: true, width: '180px' },
+    { key: 'progress', label: 'Progress', core: true, width: '120px' },
+    { key: 'last_updated', label: 'Updated', core: true, width: '140px' },
+    { key: 'description', label: 'Description', core: false, width: '300px' },
+    { key: 'type', label: 'Type', core: false, width: '120px' },
+  ]);
+
+  const [draggedColumn, setDraggedColumn] = useState(null);
 
   useEffect(() => {
     fetchActions();
@@ -257,7 +259,7 @@ const ActionsEnhanced = () => {
 
   // Helper to get columns that should be displayed
   const getDisplayColumns = () => {
-    return allColumns.filter(col => {
+    return columnOrder.filter(col => {
       if (col.key === 'title' || col.key === 'fmp') return true;
       return visibleColumns[col.key];
     });
@@ -265,13 +267,60 @@ const ActionsEnhanced = () => {
 
   const toggleColumn = (columnKey) => {
     if (columnKey === 'title' || columnKey === 'fmp') return;
-    const column = allColumns.find(col => col.key === columnKey);
+    const column = columnOrder.find(col => col.key === columnKey);
     if (column && !column.core) {
       setVisibleColumns(prev => ({
         ...prev,
         [columnKey]: !prev[columnKey]
       }));
     }
+  };
+
+  // Column reordering handlers
+  const handleDragStart = (e, columnIndex) => {
+    const col = getDisplayColumns()[columnIndex];
+    if (col.locked) {
+      e.preventDefault();
+      return;
+    }
+    setDraggedColumn(columnIndex);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, columnIndex) => {
+    e.preventDefault();
+    const col = getDisplayColumns()[columnIndex];
+    if (col.locked) return;
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    const displayedCols = getDisplayColumns();
+    const dropCol = displayedCols[dropIndex];
+
+    if (dropCol.locked || draggedColumn === null || draggedColumn === dropIndex) {
+      setDraggedColumn(null);
+      return;
+    }
+
+    const newOrder = [...columnOrder];
+    const draggedCol = displayedCols[draggedColumn];
+
+    // Find actual indices in full column order
+    const draggedIndex = newOrder.findIndex(c => c.key === draggedCol.key);
+    const targetIndex = newOrder.findIndex(c => c.key === dropCol.key);
+
+    // Remove dragged column and insert at new position
+    const [removed] = newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, removed);
+
+    setColumnOrder(newOrder);
+    setDraggedColumn(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedColumn(null);
   };
 
   const getStageColor = (stage) => {
@@ -410,7 +459,7 @@ const ActionsEnhanced = () => {
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <h3 className="text-sm font-medium text-gray-900 mb-3">Show/Hide Columns</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {allColumns.map(col => (
+            {columnOrder.map(col => (
               <label key={col.key} className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -474,11 +523,19 @@ const ActionsEnhanced = () => {
                   aria-label={`Select all ${paginatedActions.length} actions on this page`}
                 />
               </th>
-              {getDisplayColumns().map(col => (
+              {getDisplayColumns().map((col, index) => (
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  draggable={!col.locked}
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  style={{ width: col.width }}
+                  className={`px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${
+                    !col.locked ? 'cursor-grab hover:bg-gray-200' : 'cursor-pointer hover:bg-gray-100'
+                  } ${draggedColumn === index ? 'opacity-50 bg-gray-200' : ''}`}
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -519,7 +576,7 @@ const ActionsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-3 py-2">
+                    <td key={col.key} className="px-3 py-2" style={{ width: col.width }}>
                       {col.key === 'title' ? (
                         <>
                           {action.source_url ? (

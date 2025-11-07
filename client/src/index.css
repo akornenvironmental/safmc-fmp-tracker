@@ -301,11 +301,15 @@ td a {
   min-width: auto;
 }
 
-/* Exception for checkboxes in tables */
+/* Exception for checkboxes in tables and compact UI elements */
 td input[type="checkbox"],
 th input[type="checkbox"],
 td input[type="radio"],
-th input[type="radio"] {
+th input[type="radio"],
+label input[type="checkbox"],
+label input[type="radio"],
+.checkbox-compact input[type="checkbox"],
+.checkbox-compact input[type="radio"] {
   min-height: auto;
   min-width: auto;
   width: 1rem;

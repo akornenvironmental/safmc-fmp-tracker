@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, X } from 'lucide-react';
 
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
@@ -13,6 +13,10 @@ const CommentsEnhanced = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedComments, setSelectedComments] = useState(new Set());
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [profileType, setProfileType] = useState(null); // 'contact' or 'organization'
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -185,6 +189,58 @@ const CommentsEnhanced = () => {
     }
   };
 
+  // Profile modal functions
+  const fetchContactProfile = async (contactId) => {
+    try {
+      setLoadingProfile(true);
+      const response = await fetch(`${API_BASE_URL}/api/contacts/${contactId}`);
+      const data = await response.json();
+      if (data.success) {
+        setProfileData(data.contact);
+        setProfileType('contact');
+        setShowProfileModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching contact:', error);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  const fetchOrganizationProfile = async (orgId) => {
+    try {
+      setLoadingProfile(true);
+      const response = await fetch(`${API_BASE_URL}/api/organizations/${orgId}`);
+      const data = await response.json();
+      if (data.success) {
+        setProfileData(data.organization);
+        setProfileType('organization');
+        setShowProfileModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching organization:', error);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  const closeProfileModal = () => {
+    setShowProfileModal(false);
+    setProfileData(null);
+    setProfileType(null);
+  };
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && showProfileModal) {
+        closeProfileModal();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showProfileModal]);
+
   return (
     <div>
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -338,9 +394,27 @@ const CommentsEnhanced = () => {
                   {getDisplayColumns().map(col => (
                     <td key={col.key} className="px-3 py-2">
                       {col.key === 'name' ? (
-                        <div className="text-sm font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
+                        comment.contactId ? (
+                          <button
+                            onClick={() => fetchContactProfile(comment.contactId)}
+                            className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
+                          >
+                            {comment.name || 'Anonymous'}
+                          </button>
+                        ) : (
+                          <div className="text-sm font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
+                        )
                       ) : col.key === 'organization' ? (
-                        <div className="text-sm text-gray-700">{comment.organization || '—'}</div>
+                        comment.organizationId ? (
+                          <button
+                            onClick={() => fetchOrganizationProfile(comment.organizationId)}
+                            className="text-sm text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
+                          >
+                            {comment.organization || '—'}
+                          </button>
+                        ) : (
+                          <div className="text-sm text-gray-700">{comment.organization || '—'}</div>
+                        )
                       ) : col.key === 'state' ? (
                         <div className="text-sm text-gray-700">{comment.state || '—'}</div>
                       ) : col.key === 'position' ? (
@@ -386,6 +460,145 @@ const CommentsEnhanced = () => {
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={closeProfileModal}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-modal-title"
+          >
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 id="profile-modal-title" className="font-heading text-2xl font-bold text-gray-900">
+                {profileType === 'contact' ? 'Contact Profile' : 'Organization Profile'}
+              </h2>
+              <button
+                onClick={closeProfileModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close profile modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="px-6 py-4">
+              {loadingProfile ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+              ) : profileData ? (
+                profileType === 'contact' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Name</h3>
+                      <p className="mt-1 text-base text-gray-900">{profileData.name || '—'}</p>
+                    </div>
+                    {profileData.email && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Email</h3>
+                        <p className="mt-1 text-base text-gray-900">
+                          <a href={`mailto:${profileData.email}`} className="text-brand-blue hover:text-brand-green hover:underline">
+                            {profileData.email}
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                    {profileData.phone && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Phone</h3>
+                        <p className="mt-1 text-base text-gray-900">{profileData.phone}</p>
+                      </div>
+                    )}
+                    {(profileData.city || profileData.state) && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Location</h3>
+                        <p className="mt-1 text-base text-gray-900">
+                          {[profileData.city, profileData.state].filter(Boolean).join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {profileData.affiliation && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Affiliation</h3>
+                        <p className="mt-1 text-base text-gray-900">{profileData.affiliation}</p>
+                      </div>
+                    )}
+                    {profileData.comment_count > 0 && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Total Comments</h3>
+                        <p className="mt-1 text-base text-gray-900">{profileData.comment_count}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Organization Name</h3>
+                      <p className="mt-1 text-base text-gray-900">{profileData.name || '—'}</p>
+                    </div>
+                    {profileData.type && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Type</h3>
+                        <p className="mt-1 text-base text-gray-900">{profileData.type}</p>
+                      </div>
+                    )}
+                    {(profileData.city || profileData.state) && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Location</h3>
+                        <p className="mt-1 text-base text-gray-900">
+                          {[profileData.city, profileData.state].filter(Boolean).join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {profileData.website && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Website</h3>
+                        <p className="mt-1 text-base text-gray-900">
+                          <a
+                            href={profileData.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-blue hover:text-brand-green hover:underline"
+                          >
+                            {profileData.website}
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                    {profileData.description && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Description</h3>
+                        <p className="mt-1 text-base text-gray-900">{profileData.description}</p>
+                      </div>
+                    )}
+                    {profileData.comment_count > 0 && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Total Comments</h3>
+                        <p className="mt-1 text-base text-gray-900">{profileData.comment_count}</p>
+                      </div>
+                    )}
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-8 text-gray-500">No profile data available</div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4">
+              <button
+                onClick={closeProfileModal}
+                className="w-full px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-blue-light transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

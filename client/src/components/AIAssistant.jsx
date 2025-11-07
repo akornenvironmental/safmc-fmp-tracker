@@ -177,7 +177,7 @@ const AIAssistant = () => {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-b from-brand-blue to-brand-green text-white shadow-lg hover:from-brand-blue-dark hover:to-brand-green-dark transition-all"
+          className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-b from-brand-blue to-brand-green text-white shadow-lg hover:from-brand-blue-dark hover:to-brand-green-dark transition-all flex items-center justify-center"
           style={{
             writingMode: 'vertical-rl',
             textOrientation: 'mixed',
@@ -186,8 +186,8 @@ const AIAssistant = () => {
             borderBottomLeftRadius: '8px',
           }}
         >
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
+          <div className="flex flex-col items-center justify-center gap-2">
+            <MessageSquare className="w-5 h-5" style={{ transform: 'rotate(-90deg)' }} />
             <span className="font-medium whitespace-nowrap">AI Assistant</span>
           </div>
         </button>
