@@ -68,6 +68,7 @@ const Layout = () => {
         userName={user?.name || user?.email}
         userEmail={user?.email}
         onLogoutClick={handleLogout}
+        headerClassName="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50"
         containerClassName="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"
       />
 

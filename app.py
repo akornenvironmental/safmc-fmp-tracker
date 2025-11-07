@@ -147,6 +147,48 @@ def init_stock_assessment_tables():
         logger.error(f"Error initializing stock assessment tables: {e}")
         db.session.rollback()
 
+def ensure_stock_assessment_columns():
+    """Ensure all required columns exist in stock_assessments table"""
+    try:
+        with app.app_context():
+            # Check which columns exist
+            result = db.session.execute(text("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name = 'stock_assessments';
+            """))
+            existing_columns = {row[0] for row in result.fetchall()}
+
+            if not existing_columns:
+                logger.info("Stock assessments table doesn't exist yet, skipping column check")
+                return
+
+            required_columns = {
+                'last_scraped': "ADD COLUMN last_scraped TIMESTAMP",
+                'overfishing_occurring': "ADD COLUMN overfishing_occurring BOOLEAN DEFAULT FALSE",
+                'overfished': "ADD COLUMN overfished BOOLEAN DEFAULT FALSE",
+                'fmps_affected': "ADD COLUMN fmps_affected TEXT[]",
+                'keywords': "ADD COLUMN keywords TEXT[]"
+            }
+
+            columns_to_add = []
+            for col_name, col_sql in required_columns.items():
+                if col_name not in existing_columns:
+                    columns_to_add.append(col_sql)
+                    logger.info(f"Will add missing column: {col_name}")
+
+            if columns_to_add:
+                logger.info(f"Adding {len(columns_to_add)} missing columns to stock_assessments table...")
+                for column_sql in columns_to_add:
+                    db.session.execute(text(f"ALTER TABLE stock_assessments {column_sql}"))
+                db.session.commit()
+                logger.info("✓ Missing stock assessment columns added successfully")
+            else:
+                logger.info("All required stock assessment columns exist")
+
+    except Exception as e:
+        logger.error(f"Error ensuring stock assessment columns: {e}")
+        db.session.rollback()
+
 # Initialize FisheryPulse meeting columns
 def init_fisherypulse_columns():
     """Add region, source, and is_virtual columns to meetings table if they don't exist"""
@@ -246,6 +288,7 @@ def init_contacts_and_orgs():
 # Initialize tables on startup
 with app.app_context():
     init_stock_assessment_tables()
+    ensure_stock_assessment_columns()
     init_fisherypulse_columns()
     run_comment_migration()
     init_contacts_and_orgs()
