@@ -3,12 +3,13 @@ API Routes for SAFMC FMP Tracker
 Provides REST API endpoints for data access and management
 """
 
-from flask import Blueprint, jsonify, request
-from sqlalchemy import func, desc
+from flask import Blueprint, jsonify, request, session
+from sqlalchemy import func, desc, text
 from sqlalchemy.exc import OperationalError, DBAPIError
 from datetime import datetime, timedelta
 import logging
 import time
+import json
 from functools import wraps
 
 from src.config.extensions import db
@@ -546,6 +547,9 @@ def scrape_all():
 @bp.route('/ai/query', methods=['POST'])
 def ai_query():
     """Query the AI system"""
+    start_time = time.time()
+    query_log_id = None
+
     try:
         data = request.get_json()
         question = data.get('question')
@@ -553,18 +557,109 @@ def ai_query():
         if not question:
             return jsonify({'error': 'Question is required'}), 400
 
+        # Extract user information
+        user_id = session.get('user_id')
+        user_email = session.get('user_email')
+        user_ip = request.remote_addr
+        user_agent = request.headers.get('User-Agent', '')
+        session_id = session.get('session_id')
+
         # Get context from database
         actions = Action.query.order_by(desc(Action.updated_at)).limit(10).all()
         context = {
             'actions': [a.to_dict() for a in actions]
         }
 
+        # Calculate context size
+        context_str = json.dumps(context)
+        context_size = len(context_str)
+
+        # Query AI service
         result = ai_service.query(question, context)
+
+        # Calculate response time
+        response_time_ms = int((time.time() - start_time) * 1000)
+
+        # Extract response info
+        response_text = result.get('answer', '')
+        success = not result.get('error')
+        error_msg = result.get('error') if not success else None
+
+        # Log query to database
+        try:
+            db.session.execute(text("""
+                INSERT INTO ai_query_log (
+                    user_id, user_email, user_ip,
+                    question, response,
+                    context_size_chars,
+                    response_time_ms,
+                    success, error_message,
+                    user_agent, session_id
+                ) VALUES (
+                    :user_id, :user_email, :user_ip,
+                    :question, :response,
+                    :context_size,
+                    :response_time,
+                    :success, :error,
+                    :user_agent, :session_id
+                )
+            """), {
+                'user_id': user_id,
+                'user_email': user_email,
+                'user_ip': user_ip,
+                'question': question,
+                'response': response_text,
+                'context_size': context_size,
+                'response_time': response_time_ms,
+                'success': success,
+                'error': error_msg,
+                'user_agent': user_agent,
+                'session_id': session_id
+            })
+            db.session.commit()
+        except Exception as log_error:
+            logger.error(f"Failed to log AI query: {log_error}")
+            db.session.rollback()
 
         return jsonify(result)
 
     except Exception as e:
         logger.error(f"Error in AI query: {e}")
+
+        # Log failed query
+        try:
+            response_time_ms = int((time.time() - start_time) * 1000)
+            db.session.execute(text("""
+                INSERT INTO ai_query_log (
+                    user_id, user_email, user_ip,
+                    question, response,
+                    response_time_ms,
+                    success, error_message,
+                    user_agent, session_id
+                ) VALUES (
+                    :user_id, :user_email, :user_ip,
+                    :question, :response,
+                    :response_time,
+                    :success, :error,
+                    :user_agent, :session_id
+                )
+            """), {
+                'user_id': session.get('user_id'),
+                'user_email': session.get('user_email'),
+                'user_ip': request.remote_addr,
+                'question': data.get('question', '') if 'data' in locals() else '',
+                'response': None,
+                'response_time': response_time_ms,
+                'success': False,
+                'error': str(e),
+                'user_agent': request.headers.get('User-Agent', ''),
+                'session_id': session.get('session_id')
+            })
+            db.session.commit()
+        except Exception as log_error:
+            logger.error(f"Failed to log failed AI query: {log_error}")
+            db.session.rollback()
+
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/ai/analyze', methods=['POST'])
@@ -621,6 +716,140 @@ def ai_search():
 
     except Exception as e:
         logger.error(f"Error in AI search: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/ai/query-logs', methods=['GET'])
+def get_ai_query_logs():
+    """Get AI query logs for admin review and troubleshooting"""
+    try:
+        # Get query parameters
+        limit = request.args.get('limit', 100, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        success_only = request.args.get('success', None)
+        search = request.args.get('search', '')
+
+        # Build query
+        query = """
+            SELECT
+                id, user_id, user_email, user_ip,
+                question, response,
+                context_size_chars, response_time_ms,
+                success, error_message,
+                created_at
+            FROM ai_query_log
+            WHERE 1=1
+        """
+        params = {}
+
+        # Filter by success status
+        if success_only is not None:
+            query += " AND success = :success"
+            params['success'] = success_only == 'true'
+
+        # Search in questions and responses
+        if search:
+            query += " AND (question ILIKE :search OR response ILIKE :search)"
+            params['search'] = f'%{search}%'
+
+        # Order and pagination
+        query += " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+        params['limit'] = min(limit, 1000)  # Cap at 1000
+        params['offset'] = offset
+
+        result = db.session.execute(text(query), params)
+
+        logs = []
+        for row in result:
+            logs.append({
+                'id': row[0],
+                'user_id': row[1],
+                'user_email': row[2],
+                'user_ip': row[3],
+                'question': row[4],
+                'response': row[5],
+                'context_size_chars': row[6],
+                'response_time_ms': row[7],
+                'success': row[8],
+                'error_message': row[9],
+                'created_at': row[10].isoformat() if row[10] else None
+            })
+
+        # Get total count
+        count_query = "SELECT COUNT(*) FROM ai_query_log WHERE 1=1"
+        count_params = {}
+        if success_only is not None:
+            count_query += " AND success = :success"
+            count_params['success'] = success_only == 'true'
+        if search:
+            count_query += " AND (question ILIKE :search OR response ILIKE :search)"
+            count_params['search'] = f'%{search}%'
+
+        total = db.session.execute(text(count_query), count_params).scalar()
+
+        return jsonify({
+            'success': True,
+            'logs': logs,
+            'total': total,
+            'limit': limit,
+            'offset': offset
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching AI query logs: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/ai/query-stats', methods=['GET'])
+def get_ai_query_stats():
+    """Get AI query statistics for admin dashboard"""
+    try:
+        # Total queries
+        total = db.session.execute(text("SELECT COUNT(*) FROM ai_query_log")).scalar()
+
+        # Success/failure counts
+        success_count = db.session.execute(text(
+            "SELECT COUNT(*) FROM ai_query_log WHERE success = true"
+        )).scalar()
+
+        failure_count = db.session.execute(text(
+            "SELECT COUNT(*) FROM ai_query_log WHERE success = false"
+        )).scalar()
+
+        # Average response time
+        avg_response_time = db.session.execute(text(
+            "SELECT AVG(response_time_ms) FROM ai_query_log WHERE success = true"
+        )).scalar()
+
+        # Recent queries (last 24 hours)
+        recent_count = db.session.execute(text("""
+            SELECT COUNT(*) FROM ai_query_log
+            WHERE created_at > NOW() - INTERVAL '24 hours'
+        """)).scalar()
+
+        # Top users
+        top_users = db.session.execute(text("""
+            SELECT user_email, COUNT(*) as query_count
+            FROM ai_query_log
+            WHERE user_email IS NOT NULL
+            GROUP BY user_email
+            ORDER BY query_count DESC
+            LIMIT 10
+        """)).fetchall()
+
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_queries': total or 0,
+                'successful_queries': success_count or 0,
+                'failed_queries': failure_count or 0,
+                'success_rate': round((success_count / total * 100) if total > 0 else 0, 2),
+                'avg_response_time_ms': round(avg_response_time, 2) if avg_response_time else 0,
+                'queries_24h': recent_count or 0,
+                'top_users': [{'email': row[0], 'count': row[1]} for row in top_users]
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching AI query stats: {e}")
         return jsonify({'error': str(e)}), 500
 
 # ==================== ENHANCED COMMENTS ENDPOINTS ====================

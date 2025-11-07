@@ -285,6 +285,95 @@ def init_contacts_and_orgs():
         logger.error(f"Error creating contacts/orgs tables: {e}")
         db.session.rollback()
 
+def init_ai_query_log():
+    """Create AI query log table for tracking and troubleshooting"""
+    try:
+        with app.app_context():
+            # Check if table already exists
+            result = db.session.execute(text("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'ai_query_log'
+                );
+            """))
+            table_exists = result.scalar()
+
+            if not table_exists:
+                logger.info("Creating ai_query_log table...")
+
+                # Create AI query log table
+                db.session.execute(text("""
+                    CREATE TABLE ai_query_log (
+                        id SERIAL PRIMARY KEY,
+
+                        -- User information
+                        user_id INTEGER,
+                        user_email VARCHAR(255),
+                        user_ip VARCHAR(50),
+
+                        -- Query details
+                        question TEXT NOT NULL,
+                        response TEXT,
+
+                        -- Context provided to AI
+                        context_documents INTEGER[],
+                        context_size_chars INTEGER,
+
+                        -- API details
+                        model VARCHAR(100),
+                        tokens_used INTEGER,
+                        response_time_ms INTEGER,
+
+                        -- Status
+                        success BOOLEAN DEFAULT TRUE,
+                        error_message TEXT,
+
+                        -- Metadata
+                        user_agent TEXT,
+                        session_id VARCHAR(100),
+
+                        -- Timestamps
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                        -- Full text search on queries
+                        search_vector TSVECTOR
+                    );
+                """))
+
+                # Create indices
+                db.session.execute(text("""
+                    CREATE INDEX idx_ai_log_user ON ai_query_log(user_id);
+                    CREATE INDEX idx_ai_log_created ON ai_query_log(created_at DESC);
+                    CREATE INDEX idx_ai_log_success ON ai_query_log(success);
+                    CREATE INDEX idx_ai_log_search ON ai_query_log USING GIN(search_vector);
+                """))
+
+                # Create trigger for search vector
+                db.session.execute(text("""
+                    CREATE OR REPLACE FUNCTION ai_log_search_vector_update() RETURNS TRIGGER AS $$
+                    BEGIN
+                        NEW.search_vector :=
+                            setweight(to_tsvector('english', COALESCE(NEW.question, '')), 'A') ||
+                            setweight(to_tsvector('english', COALESCE(NEW.response, '')), 'B');
+                        RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql;
+
+                    CREATE TRIGGER ai_log_search_vector_trigger
+                    BEFORE INSERT OR UPDATE OF question, response
+                    ON ai_query_log
+                    FOR EACH ROW
+                    EXECUTE FUNCTION ai_log_search_vector_update();
+                """))
+
+                db.session.commit()
+                logger.info("✓ AI query log table created successfully")
+            else:
+                logger.info("AI query log table already exists")
+    except Exception as e:
+        logger.error(f"Error creating AI query log table: {e}")
+        db.session.rollback()
+
 # Initialize tables on startup
 with app.app_context():
     init_stock_assessment_tables()
@@ -292,6 +381,7 @@ with app.app_context():
     init_fisherypulse_columns()
     run_comment_migration()
     init_contacts_and_orgs()
+    init_ai_query_log()
 
 # Health check endpoint (before blueprints)
 @app.route('/health')
