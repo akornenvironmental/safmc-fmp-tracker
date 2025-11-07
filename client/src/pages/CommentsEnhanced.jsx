@@ -1,37 +1,37 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { User, Building2, RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
 
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState('submitted_date');
+  const [sortField, setSortField] = useState('commentDate');
   const [sortDirection, setSortDirection] = useState('desc');
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedComments, setSelectedComments] = useState(new Set());
 
-  // Column visibility state for export
+  // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
     organization: true,
     state: true,
     position: true,
-    comment_text: true,
-    submitted_date: true,
+    commentDate: true,
+    comment_text: false,
   });
 
-  // Define all available columns (for export)
+  // Define all available columns
   const allColumns = [
     { key: 'name', label: 'Name', core: true },
     { key: 'organization', label: 'Organization', core: false },
     { key: 'state', label: 'State', core: false },
-    { key: 'position', label: 'Position', core: true },
-    { key: 'comment_text', label: 'Comment', core: true },
-    { key: 'submitted_date', label: 'Submitted', core: true },
+    { key: 'position', label: 'Position', core: false },
+    { key: 'commentDate', label: 'Date', core: true },
+    { key: 'comment_text', label: 'Comment', core: false },
   ];
 
   useEffect(() => {
@@ -78,11 +78,21 @@ const CommentsEnhanced = () => {
   // Reset all filters and sorting
   const handleReset = () => {
     setSearchTerm('');
-    setSortField('submitted_date');
+    setSortField('commentDate');
     setSortDirection('desc');
     setCurrentPage(1);
     setSelectedComments(new Set());
     setShowColumnSelector(false);
+  };
+
+  // Handle sorting
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
   };
 
   // Filter and sort comments
@@ -94,8 +104,7 @@ const CommentsEnhanced = () => {
         comment.name?.toLowerCase().includes(searchLower) ||
         comment.organization?.toLowerCase().includes(searchLower) ||
         comment.position?.toLowerCase().includes(searchLower) ||
-        comment.comment_text?.toLowerCase().includes(searchLower) ||
-        comment.state?.toLowerCase().includes(searchLower)
+        comment.comment_text?.toLowerCase().includes(searchLower)
       );
     });
 
@@ -105,7 +114,7 @@ const CommentsEnhanced = () => {
       let bVal = b[sortField] || '';
 
       // Handle date sorting
-      if (sortField === 'submitted_date') {
+      if (sortField === 'commentDate') {
         aVal = new Date(aVal || 0).getTime();
         bVal = new Date(bVal || 0).getTime();
       } else if (typeof aVal === 'string') {
@@ -128,24 +137,7 @@ const CommentsEnhanced = () => {
 
   const totalPages = pageSize >= 999999 ? 1 : Math.ceil(filteredAndSortedComments.length / pageSize);
 
-  // Get comments to export (selected or all)
-  const getCommentsToExport = () => {
-    if (selectedComments.size > 0) {
-      return filteredAndSortedComments.filter(c => selectedComments.has(c.id));
-    }
-    return filteredAndSortedComments;
-  };
-
-  // Selection handlers
-  const toggleSelectAll = () => {
-    if (selectedComments.size === paginatedComments.length) {
-      setSelectedComments(new Set());
-    } else {
-      const allKeys = new Set(paginatedComments.map(c => c.id));
-      setSelectedComments(allKeys);
-    }
-  };
-
+  // Toggle selection
   const toggleSelectComment = (comment) => {
     const newSelected = new Set(selectedComments);
     if (newSelected.has(comment.id)) {
@@ -156,89 +148,24 @@ const CommentsEnhanced = () => {
     setSelectedComments(newSelected);
   };
 
-  // Export functions
-  const exportToCSV = () => {
-    const commentsToExport = getCommentsToExport();
-    const visibleCols = getDisplayColumns();
-    const headers = visibleCols.map(col => col.label).join(',');
-    const rows = commentsToExport.map(comment =>
-      visibleCols.map(col => {
-        let value = comment[col.key] || '';
-        if (col.key === 'submitted_date' && value) {
-          value = new Date(value).toLocaleDateString();
-        }
-        return `"${value.toString().replace(/"/g, '""')}"`;
-      }).join(',')
-    );
-
-    const csv = [headers, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `comments-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-  };
-
-  const exportToTSV = () => {
-    const commentsToExport = getCommentsToExport();
-    const visibleCols = getDisplayColumns();
-    const headers = visibleCols.map(col => col.label).join('\t');
-    const rows = commentsToExport.map(comment =>
-      visibleCols.map(col => {
-        let value = comment[col.key] || '';
-        if (col.key === 'submitted_date' && value) {
-          value = new Date(value).toLocaleDateString();
-        }
-        return value;
-      }).join('\t')
-    );
-
-    const tsv = [headers, ...rows].join('\n');
-    const blob = new Blob([tsv], { type: 'text/tab-separated-values' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `comments-${new Date().toISOString().split('T')[0]}.tsv`;
-    a.click();
-  };
-
-  const exportToExcel = () => {
-    const commentsToExport = getCommentsToExport();
-    const visibleCols = getDisplayColumns();
-
-    const headers = visibleCols.map(col => col.label).join('</th><th>');
-    const rows = commentsToExport.map(comment =>
-      '<tr><td>' + visibleCols.map(col => {
-        let value = comment[col.key] || '';
-        if (col.key === 'submitted_date' && value) {
-          value = new Date(value).toLocaleDateString();
-        }
-        return value;
-      }).join('</td><td>') + '</td></tr>'
-    ).join('');
-
-    const html = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
-      <head><meta charset="UTF-8"></head>
-      <body><table><thead><tr><th>${headers}</th></tr></thead><tbody>${rows}</tbody></table></body>
-      </html>
-    `;
-
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `comments-${new Date().toISOString().split('T')[0]}.xls`;
-    a.click();
+  const toggleSelectAll = () => {
+    if (selectedComments.size === paginatedComments.length) {
+      setSelectedComments(new Set());
+    } else {
+      setSelectedComments(new Set(paginatedComments.map(c => c.id)));
+    }
   };
 
   // Helper to get columns that should be displayed
   const getDisplayColumns = () => {
-    return allColumns.filter(col => visibleColumns[col.key]);
+    return allColumns.filter(col => {
+      if (col.key === 'name' || col.key === 'commentDate') return true;
+      return visibleColumns[col.key];
+    });
   };
 
   const toggleColumn = (columnKey) => {
+    if (columnKey === 'name' || columnKey === 'commentDate') return;
     const column = allColumns.find(col => col.key === columnKey);
     if (column && !column.core) {
       setVisibleColumns(prev => ({
@@ -248,14 +175,14 @@ const CommentsEnhanced = () => {
     }
   };
 
-  const getPositionColor = (position) => {
-    if (!position) return 'bg-gray-100 text-gray-800';
-
-    const positionLower = position.toLowerCase();
-    if (positionLower.includes('support')) return 'bg-green-100 text-green-800';
-    if (positionLower.includes('oppose')) return 'bg-red-100 text-red-800';
-    if (positionLower.includes('neutral')) return 'bg-blue-100 text-blue-800';
-    return 'bg-gray-100 text-gray-800';
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return dateStr;
+    }
   };
 
   return (
@@ -283,55 +210,22 @@ const CommentsEnhanced = () => {
             <Settings size={14} />
             Columns
           </button>
-          <div className="relative">
-            <button
-              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
-              onClick={(e) => {
-                const menu = e.currentTarget.nextElementSibling;
-                menu.classList.toggle('hidden');
-              }}
-            >
-              <Download size={14} />
-              Export
-            </button>
-            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-              <div className="py-1">
-                <div className="px-4 py-2 text-xs text-gray-500 border-b">
-                  {selectedComments.size > 0 ? `Export ${selectedComments.size} selected` : 'Export all comments'}
-                </div>
-                <button
-                  onClick={exportToCSV}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                >
-                  CSV Format (.csv)
-                </button>
-                <button
-                  onClick={exportToTSV}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                >
-                  TSV Format (.tsv)
-                </button>
-                <button
-                  onClick={exportToExcel}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                >
-                  Excel Format (.xls)
-                </button>
-              </div>
-            </div>
-          </div>
           <button
             onClick={syncComments}
             disabled={syncing}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
+              syncing
+                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-400'
+            }`}
           >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
             {syncing ? 'Syncing...' : 'Sync Comments'}
           </button>
         </div>
       </div>
 
-      {/* Column selector for export */}
+      {/* Column selector */}
       {showColumnSelector && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <h3 className="text-sm font-medium text-gray-900 mb-3">Columns</h3>
@@ -340,13 +234,13 @@ const CommentsEnhanced = () => {
               <label key={col.key} className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={visibleColumns[col.key]}
+                  checked={visibleColumns[col.key] || col.key === 'name' || col.key === 'commentDate'}
                   onChange={() => toggleColumn(col.key)}
-                  disabled={col.core}
+                  disabled={col.key === 'name' || col.key === 'commentDate'}
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
-                  {col.label} {col.core && '(required)'}
+                <span className={`text-sm ${(col.key === 'name' || col.key === 'commentDate') ? 'text-gray-400' : 'text-gray-700'}`}>
+                  {col.label} {(col.key === 'name' || col.key === 'commentDate') && '(required)'}
                 </span>
               </label>
             ))}
@@ -354,8 +248,7 @@ const CommentsEnhanced = () => {
         </div>
       )}
 
-
-      {/* Search, sort, and page size */}
+      {/* Search and page size */}
       <div className="mt-6 flex flex-col sm:flex-row gap-4">
         <input
           type="text"
@@ -368,27 +261,6 @@ const CommentsEnhanced = () => {
           className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
           aria-label="Search comments by name, organization, position, or comment text"
         />
-        <select
-          value={sortField}
-          onChange={(e) => {
-            setSortField(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
-          aria-label="Sort comments by"
-        >
-          <option value="submitted_date">Sort by Date</option>
-          <option value="name">Sort by Name</option>
-          <option value="organization">Sort by Organization</option>
-          <option value="position">Sort by Position</option>
-        </select>
-        <button
-          onClick={() => setSortDirection(d => d === 'asc' ? 'desc' : 'asc')}
-          className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-          aria-label={`Sort direction: ${sortDirection === 'asc' ? 'Ascending' : 'Descending'}. Click to toggle.`}
-        >
-          {sortDirection === 'asc' ? '↑ Asc' : '↓ Desc'}
-        </button>
         <select
           value={pageSize}
           onChange={(e) => {
@@ -405,106 +277,112 @@ const CommentsEnhanced = () => {
         </select>
       </div>
 
-      {/* Select All Checkbox */}
-      {filteredAndSortedComments.length > 0 && (
-        <div className="mt-4 flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
-            onChange={toggleSelectAll}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            aria-label={`Select all ${paginatedComments.length} comments on this page`}
-          />
-          <span className="text-sm text-gray-700">
-            Select all {paginatedComments.length} on this page
-            {selectedComments.size > 0 && ` (${selectedComments.size} selected)`}
-          </span>
-        </div>
-      )}
-
-      {/* Comments List */}
-      <div className="mt-4 space-y-3">
-        {loading ? (
-          <div className="bg-white shadow sm:rounded-lg p-8 text-center text-sm text-gray-500">
-            Loading comments...
-          </div>
-        ) : paginatedComments.length === 0 ? (
-          <div className="bg-white shadow sm:rounded-lg p-8 text-center text-sm text-gray-500">
-            No comments found
-          </div>
-        ) : (
-          paginatedComments.map((comment, index) => (
-            <div
-              key={comment.id || index}
-              className={`bg-white shadow sm:rounded-lg p-4 hover:shadow-md transition-shadow ${
-                selectedComments.has(comment.id) ? 'ring-2 ring-blue-500' : ''
-              }`}
-            >
-              <div className="flex items-start gap-3">
+      {/* Comments Table */}
+      <div className="mt-6 bg-white shadow overflow-x-auto sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-2 py-1.5 text-left">
                 <input
                   type="checkbox"
-                  checked={selectedComments.has(comment.id)}
-                  onChange={() => toggleSelectComment(comment)}
-                  className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  aria-label={`Select comment from ${comment.name || 'Anonymous'}`}
+                  checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  aria-label={`Select all ${paginatedComments.length} comments on this page`}
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <h3 className="text-base font-medium text-gray-900">
-                        {comment.name || 'Anonymous'}
-                      </h3>
-                    </div>
-                    {comment.state && (
-                      <span className="text-xs text-gray-500">• {comment.state}</span>
+              </th>
+              {getDisplayColumns().map(col => (
+                <th
+                  key={col.key}
+                  scope="col"
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort(col.key)}
+                >
+                  <div className="flex items-center gap-1">
+                    {col.label}
+                    {sortField === col.key && (
+                      <span className="text-blue-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
                     )}
                   </div>
-                  {comment.organization && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <Building2 className="w-4 h-4 text-gray-400" />
-                      <p className="text-xs text-gray-600">{comment.organization}</p>
-                    </div>
-                  )}
-                  <p className="text-sm text-gray-900 mb-2">{comment.comment_text}</p>
-                  {comment.submitted_date && (
-                    <p className="text-xs text-gray-500">
-                      Submitted: {new Date(comment.submitted_date).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-                <div className="ml-3">
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getPositionColor(comment.position)}`}>
-                    {comment.position || 'No Position'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {loading ? (
+              <tr>
+                <td colSpan={getDisplayColumns().length + 1} className="px-3 py-8 text-center text-sm text-gray-500">
+                  Loading comments...
+                </td>
+              </tr>
+            ) : paginatedComments.length === 0 ? (
+              <tr>
+                <td colSpan={getDisplayColumns().length + 1} className="px-3 py-8 text-center text-sm text-gray-500">
+                  No comments found
+                </td>
+              </tr>
+            ) : (
+              paginatedComments.map((comment, index) => (
+                <tr key={comment.id || index} className="hover:bg-gray-50">
+                  <td className="px-2 py-0.5">
+                    <input
+                      type="checkbox"
+                      checked={selectedComments.has(comment.id)}
+                      onChange={() => toggleSelectComment(comment)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      aria-label={`Select comment from ${comment.name || 'Anonymous'}`}
+                    />
+                  </td>
+                  {getDisplayColumns().map(col => (
+                    <td key={col.key} className="px-3 py-2">
+                      {col.key === 'name' ? (
+                        <div className="text-sm font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
+                      ) : col.key === 'organization' ? (
+                        <div className="text-sm text-gray-700">{comment.organization || '—'}</div>
+                      ) : col.key === 'state' ? (
+                        <div className="text-sm text-gray-700">{comment.state || '—'}</div>
+                      ) : col.key === 'position' ? (
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          comment.position?.toLowerCase().includes('support') ? 'bg-green-100 text-green-800' :
+                          comment.position?.toLowerCase().includes('oppose') ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {comment.position || 'Neutral'}
+                        </span>
+                      ) : col.key === 'commentDate' ? (
+                        <div className="text-sm text-gray-500">{formatDate(comment.commentDate)}</div>
+                      ) : col.key === 'comment_text' ? (
+                        <div className="text-sm text-gray-600 max-w-md truncate">{comment.comment_text || '—'}</div>
+                      ) : null}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing {filteredAndSortedComments.length} of {comments.length} comments
+            Page {currentPage} of {totalPages}
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700">
-              Page {currentPage} of {totalPages}
-            </span>
             <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
               Next
             </button>
