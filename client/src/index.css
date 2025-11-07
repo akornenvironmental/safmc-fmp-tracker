@@ -340,6 +340,35 @@ label input[type="radio"],
   margin-top: 4px;
 }
 
+/* Dark mode brand color adjustments for 508 compliance (WCAG AA contrast) */
+.dark .text-brand-blue {
+  color: #60a5fa !important; /* Light blue with 7:1 contrast ratio */
+}
+
+.dark .text-brand-green {
+  color: #41b883 !important; /* Light green with 4.7:1 contrast ratio */
+}
+
+.dark .hover\:text-brand-blue:hover {
+  color: #93c5fd !important; /* Even lighter blue for hover */
+}
+
+.dark .hover\:text-brand-green:hover {
+  color: #6ee7b7 !important; /* Even lighter green for hover */
+}
+
+.dark .border-brand-green {
+  border-color: #41b883 !important;
+}
+
+.dark .bg-brand-blue {
+  background-color: #2171b5 !important;
+}
+
+.dark .bg-brand-green {
+  background-color: #209d5c !important;
+}
+
 /* Dark mode focus adjustments */
 .dark *:focus-visible {
   outline-color: #41b883 !important; /* Lighter green for dark mode */

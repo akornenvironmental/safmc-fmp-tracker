@@ -338,9 +338,12 @@ def get_assessment_stats():
 
         # By FMP
         fmp_result = db.session.execute(text("""
-            SELECT unnest(fmps_affected) as fmp, COUNT(*)
-            FROM stock_assessments
-            WHERE fmps_affected IS NOT NULL
+            SELECT fmp, COUNT(*)
+            FROM (
+                SELECT unnest(fmps_affected) as fmp
+                FROM stock_assessments
+                WHERE fmps_affected IS NOT NULL
+            ) AS unnested_fmps
             GROUP BY fmp
             ORDER BY COUNT(*) DESC
         """))
