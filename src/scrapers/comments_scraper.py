@@ -229,9 +229,23 @@ class CommentsScraper:
             'comment_text': get_field(['comment', 'comments', 'text', 'submission'])
         }
 
-    def _enhance_comment(self, comment: Dict, source: Dict, sequence: int) -> Dict:
-        """Enhance comment with analysis and categorization"""
-        # Generate unique ID using source_id (not action_id)
+    def _enhance_comment(self, comment: Dict, source: Dict, sequence: int, metadata: Dict) -> Dict:
+        """
+        Enhance comment with analysis, categorization, and entity linking
+
+        Uses fuzzy matching to find/create:
+        - Action (from amendment metadata)
+        - Contact (from commenter info)
+        - Organization (from affiliation)
+        """
+        from src.utils.entity_matcher import (
+            find_or_create_action,
+            find_or_create_contact,
+            find_or_create_organization
+        )
+        from src.config.extensions import db
+
+        # Generate unique ID using source_id
         year = datetime.now().year
         comment_id = f"PC-{year}-{source['source_id'].upper()}-{sequence:04d}"
 
@@ -246,22 +260,87 @@ class CommentsScraper:
         position = self._extract_position(comment.get('comment_text', ''))
         topics = self._extract_topics(comment.get('comment_text', ''))
 
+        # Find or create Action from amendment metadata
+        action = None
+        action_id_str = None
+        if metadata.get('title'):
+            try:
+                action = find_or_create_action(
+                    amendment_title=metadata['title'],
+                    description=metadata.get('description'),
+                    phase=source['phase'],
+                    data_source=source['name']
+                )
+                if action:
+                    db.session.flush()  # Get the ID without committing
+                    action_id_str = action.action_id
+            except Exception as e:
+                logger.error(f"Error creating action: {e}")
+
+        # Find or create Contact
+        contact = None
+        contact_id_int = None
+        full_name = comment.get('name', '')
+        email = comment.get('email', '')
+
+        if full_name or email:
+            try:
+                contact = find_or_create_contact(
+                    full_name=full_name,
+                    email=email,
+                    city=city,
+                    state=state,
+                    sector=commenter_type,
+                    data_source=source['name']
+                )
+                if contact:
+                    db.session.flush()
+                    contact_id_int = contact.id
+            except Exception as e:
+                logger.error(f"Error creating contact: {e}")
+
+        # Find or create Organization
+        organization = None
+        organization_id_int = None
+        org_name = comment.get('organization', '')
+
+        if org_name and org_name.strip():
+            try:
+                organization = find_or_create_organization(
+                    org_name=org_name,
+                    state=state,
+                    org_type=commenter_type,
+                    data_source=source['name']
+                )
+                if organization:
+                    db.session.flush()
+                    organization_id_int = organization.id
+
+                    # Link contact to organization if both exist
+                    if contact and not contact.organization_id:
+                        contact.organization_id = organization_id_int
+            except Exception as e:
+                logger.error(f"Error creating organization: {e}")
+
         return {
             'comment_id': comment_id,
             'submit_date': comment.get('date', ''),
-            'amendment_id': None,  # General comments not tied to specific actions
+            'amendment_id': action_id_str,  # Linked to Action
             'amendment_phase': source['phase'],
-            'name': comment.get('name', ''),
-            'organization': comment.get('organization', ''),
+            'name': full_name,
+            'organization': org_name,
             'city': city,
             'state': state,
-            'email': comment.get('email', ''),
+            'email': email,
             'commenter_type': commenter_type,
             'position': position,
             'key_topics': ', '.join(topics),
             'comment_text': comment.get('comment_text', ''),
             'source_url': source['url'],
-            'data_source': source['name']
+            'data_source': source['name'],
+            # Linked entity IDs
+            'contact_id': contact_id_int,
+            'organization_id': organization_id_int
         }
 
     def _parse_location(self, location: str) -> tuple:
