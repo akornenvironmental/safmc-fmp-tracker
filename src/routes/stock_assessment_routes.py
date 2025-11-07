@@ -339,11 +339,8 @@ def get_assessment_stats():
         # By FMP
         fmp_result = db.session.execute(text("""
             SELECT fmp, COUNT(*)
-            FROM (
-                SELECT unnest(fmps_affected) as fmp
-                FROM stock_assessments
-                WHERE fmps_affected IS NOT NULL
-            ) AS unnested_fmps
+            FROM stock_assessments
+            WHERE fmp IS NOT NULL
             GROUP BY fmp
             ORDER BY COUNT(*) DESC
         """))
@@ -353,7 +350,7 @@ def get_assessment_stats():
 
         # Recent assessments (last 5 years)
         recent_result = db.session.execute(text("""
-            SELECT species, sedar_number, completion_date, stock_status
+            SELECT species_common_name, sedar_number, completion_date, stock_status
             FROM stock_assessments
             WHERE completion_date >= (CURRENT_DATE - INTERVAL '5 years')
             ORDER BY completion_date DESC
