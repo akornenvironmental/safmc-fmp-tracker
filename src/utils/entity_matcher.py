@@ -6,7 +6,7 @@ Uses Levenshtein distance to find and deduplicate entities
 import re
 import hashlib
 from typing import Optional, Tuple
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 from datetime import datetime
 
 from src.config.extensions import db

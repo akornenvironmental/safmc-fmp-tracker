@@ -29,8 +29,7 @@ PyJWT==2.8.0
 python-dateutil==2.8.2
 
 # Fuzzy Matching
-fuzzywuzzy==0.18.0
-python-Levenshtein==0.25.1
+rapidfuzz==3.10.1
 
 # Development
 gunicorn==21.2.0
