@@ -1,14 +1,15 @@
 {
   "commit": "NEXT",
-  "description": "FORCE REBUILD: Fix table spacing with new asset hashes",
-  "timestamp": "2025-11-07T22:00:00Z",
-  "build": "force-rebuild-table-fix",
+  "description": "FORCE REBUILD v3: Table spacing fix with executable code change",
+  "timestamp": "2025-11-07T22:15:00Z",
+  "build": "force-rebuild-v3-executable",
   "changes": [
-    "Added build timestamp to main.jsx to force new asset hashes",
+    "Added BUILD_VERSION constant and console.log to App.jsx (actual code change)",
+    "This executable code WILL change the compiled bundle hash",
     "Fixed Actions page table padding (px-4 py-3 sm:px-6)",
     "Fixed Meetings page table padding",
     "Fixed ActionsEnhanced page table padding",
     "Fixed CommentsEnhanced page table padding",
-    "This build WILL have new JS/CSS bundles with different hashes"
+    "Previous attempts failed because comments don't affect Vite hashes"
   ]
 }

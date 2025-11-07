@@ -14,7 +14,16 @@ import StockAssessments from './pages/StockAssessments';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
+// Build version to force new asset hash - DO NOT REMOVE
+const BUILD_VERSION = '2025-11-07-table-fix-v2';
+
 function App() {
+  // Log build version on mount (forces this code into bundle)
+  if (typeof window !== 'undefined' && !window.__BUILD_LOGGED__) {
+    console.log('Build:', BUILD_VERSION);
+    window.__BUILD_LOGGED__ = true;
+  }
+
   return (
     <ThemeProvider>
       <AuthProvider>
