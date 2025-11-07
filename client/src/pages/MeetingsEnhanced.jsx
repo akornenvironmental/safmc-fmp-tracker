@@ -18,6 +18,7 @@ const MeetingsEnhanced = () => {
   const [regionFilter, setRegionFilter] = useState([]);
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [showRegionDropdown, setShowRegionDropdown] = useState(false);
+  const [upcomingOnly, setUpcomingOnly] = useState(false);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -133,6 +134,7 @@ const MeetingsEnhanced = () => {
     setShowColumnSelector(false);
     setOrganizationFilter([]);
     setRegionFilter([]);
+    setUpcomingOnly(false);
   };
 
   // Handle sorting
@@ -167,7 +169,11 @@ const MeetingsEnhanced = () => {
       const matchesRegion = regionFilter.length === 0 ||
         regionFilter.some(reg => meeting.region?.toLowerCase() === reg.toLowerCase());
 
-      return matchesSearch && matchesOrganization && matchesRegion;
+      // Upcoming only filter
+      const matchesUpcoming = !upcomingOnly ||
+        (meeting.start_date && new Date(meeting.start_date) >= new Date());
+
+      return matchesSearch && matchesOrganization && matchesRegion && matchesUpcoming;
     });
 
     return [...filtered].sort((a, b) => {
@@ -187,7 +193,7 @@ const MeetingsEnhanced = () => {
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [meetings, searchTerm, sortField, sortDirection, organizationFilter, regionFilter]);
+  }, [meetings, searchTerm, sortField, sortDirection, organizationFilter, regionFilter, upcomingOnly]);
 
   // Pagination
   const paginatedMeetings = useMemo(() => {
@@ -418,9 +424,14 @@ const MeetingsEnhanced = () => {
             className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-gradient-to-r from-brand-green to-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncingFisheryPulse ? 'animate-spin' : ''}`} />
-            {syncingFisheryPulse ? 'Syncing...' : 'Sync All Councils'}
+            {syncingFisheryPulse ? 'Syncing...' : 'Sync All'}
           </button>
         </div>
+      </div>
+
+      {/* Meeting data sources description */}
+      <div className="mt-2 text-xs text-gray-600">
+        Meeting data aggregated from: Federal Register API, NOAA Events, 8 regional fishery management councils, 3 interstate marine fisheries commissions, and 4 state agencies (NC, SC, GA, FL)
       </div>
 
 
@@ -447,8 +458,21 @@ const MeetingsEnhanced = () => {
         </div>
       )}
 
-      {/* Filters, Search and page size */}
+      {/* Search, Filters and page size */}
       <div className="mt-6 flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+        {/* Search input */}
+        <input
+          type="text"
+          placeholder="Search meetings..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="flex-1 min-w-[200px] rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          aria-label="Search meetings by title, council, location, or type"
+        />
+
         {/* Organization multi-select filter */}
         <div className="relative">
           <button
@@ -789,18 +813,19 @@ const MeetingsEnhanced = () => {
           )}
         </div>
 
-        {/* Search input */}
-        <input
-          type="text"
-          placeholder="Search meetings..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="flex-1 min-w-[200px] rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
-          aria-label="Search meetings by title, council, location, or type"
-        />
+        {/* Upcoming only filter */}
+        <label className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer hover:bg-gray-50">
+          <input
+            type="checkbox"
+            checked={upcomingOnly}
+            onChange={(e) => {
+              setUpcomingOnly(e.target.checked);
+              setCurrentPage(1);
+            }}
+            className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+          />
+          <span className="text-sm whitespace-nowrap">Upcoming only</span>
+        </label>
 
         {/* Page size selector */}
         <select
