@@ -5,7 +5,6 @@ import { User, Building2, RefreshCw, Download, Settings, RotateCcw } from 'lucid
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterPosition, setFilterPosition] = useState('all');
   const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('submitted_date');
@@ -84,19 +83,12 @@ const CommentsEnhanced = () => {
     setCurrentPage(1);
     setSelectedComments(new Set());
     setShowColumnSelector(false);
-    setFilterPosition('all');
   };
 
   // Filter and sort comments
   const filteredAndSortedComments = useMemo(() => {
-    // First apply position filter
-    const positionFiltered = comments.filter(comment => {
-      if (filterPosition === 'all') return true;
-      return comment.position && comment.position.toLowerCase() === filterPosition.toLowerCase();
-    });
-
-    // Then apply search filter
-    const filtered = positionFiltered.filter(comment => {
+    // Apply search filter
+    const filtered = comments.filter(comment => {
       const searchLower = searchTerm.toLowerCase();
       return (
         comment.name?.toLowerCase().includes(searchLower) ||
@@ -125,7 +117,7 @@ const CommentsEnhanced = () => {
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [comments, searchTerm, sortField, sortDirection, filterPosition]);
+  }, [comments, searchTerm, sortField, sortDirection]);
 
   // Pagination
   const paginatedComments = useMemo(() => {
@@ -362,63 +354,6 @@ const CommentsEnhanced = () => {
         </div>
       )}
 
-      {/* Filter Buttons */}
-      <div className="mt-6">
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => {
-              setFilterPosition('all');
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterPosition === 'all'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            All ({comments.length})
-          </button>
-          <button
-            onClick={() => {
-              setFilterPosition('support');
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterPosition === 'support'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Support ({comments.filter(c => c.position?.toLowerCase().includes('support')).length})
-          </button>
-          <button
-            onClick={() => {
-              setFilterPosition('oppose');
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterPosition === 'oppose'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Oppose ({comments.filter(c => c.position?.toLowerCase().includes('oppose')).length})
-          </button>
-          <button
-            onClick={() => {
-              setFilterPosition('neutral');
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterPosition === 'neutral'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Neutral ({comments.filter(c => c.position?.toLowerCase().includes('neutral')).length})
-          </button>
-        </div>
-      </div>
 
       {/* Search, sort, and page size */}
       <div className="mt-6 flex flex-col sm:flex-row gap-4">

@@ -13,12 +13,16 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     comment_id = db.Column(db.String(100), unique=True, nullable=False, index=True)
 
-    # Commenter information
+    # Commenter information (kept for backward compatibility)
     name = db.Column(db.String(200))
     organization = db.Column(db.String(300))
     email = db.Column(db.String(200))
     city = db.Column(db.String(200))
     state = db.Column(db.String(50))
+
+    # Linked entities
+    contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'), nullable=True)
+    organization_id = db.Column(db.Integer, db.ForeignKey('organizations.id'), nullable=True)
 
     # Comment details
     action_id = db.Column(db.String(100), db.ForeignKey('actions.action_id'), nullable=True)
