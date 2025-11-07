@@ -21,6 +21,8 @@ const CommentsEnhanced = () => {
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
+    actionFmp: true,
+    actionTitle: true,
     organization: true,
     state: true,
     position: true,
@@ -31,6 +33,8 @@ const CommentsEnhanced = () => {
   // Define all available columns
   const allColumns = [
     { key: 'name', label: 'Name', core: true },
+    { key: 'actionFmp', label: 'FMP', core: false },
+    { key: 'actionTitle', label: 'Action/Amendment', core: false },
     { key: 'organization', label: 'Organization', core: false },
     { key: 'state', label: 'State', core: false },
     { key: 'position', label: 'Position', core: false },
@@ -108,7 +112,9 @@ const CommentsEnhanced = () => {
         comment.name?.toLowerCase().includes(searchLower) ||
         comment.organization?.toLowerCase().includes(searchLower) ||
         comment.position?.toLowerCase().includes(searchLower) ||
-        comment.comment_text?.toLowerCase().includes(searchLower)
+        comment.comment_text?.toLowerCase().includes(searchLower) ||
+        comment.actionFmp?.toLowerCase().includes(searchLower) ||
+        comment.actionTitle?.toLowerCase().includes(searchLower)
       );
     });
 
@@ -404,6 +410,12 @@ const CommentsEnhanced = () => {
                         ) : (
                           <div className="text-sm font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
                         )
+                      ) : col.key === 'actionFmp' ? (
+                        <div className="text-sm text-gray-700 font-medium">{comment.actionFmp || '—'}</div>
+                      ) : col.key === 'actionTitle' ? (
+                        <div className="text-sm text-gray-700 max-w-xs truncate" title={comment.actionTitle || 'No action specified'}>
+                          {comment.actionTitle || '—'}
+                        </div>
                       ) : col.key === 'organization' ? (
                         comment.organizationId ? (
                           <button

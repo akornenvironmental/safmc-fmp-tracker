@@ -229,21 +229,33 @@ def get_meeting(meeting_id):
 
 @bp.route('/comments')
 def get_comments():
-    """Get all comments"""
+    """Get all comments with action details"""
     try:
         action_id = request.args.get('action_id')
 
-        query = Comment.query
+        # Join comments with actions to get action title and FMP
+        query = db.session.query(Comment, Action).outerjoin(
+            Action, Comment.action_id == Action.action_id
+        )
 
         if action_id:
             query = query.filter(Comment.action_id == action_id)
 
-        comments = query.order_by(desc(Comment.comment_date)).all()
+        results = query.order_by(desc(Comment.comment_date)).all()
+
+        # Build response with action details
+        comments_data = []
+        for comment, action in results:
+            comment_dict = comment.to_dict()
+            # Add action details
+            comment_dict['actionTitle'] = action.title if action else None
+            comment_dict['actionFmp'] = action.fmp if action else None
+            comments_data.append(comment_dict)
 
         return jsonify({
             'success': True,
-            'comments': [comment.to_dict() for comment in comments],
-            'total': len(comments)
+            'comments': comments_data,
+            'total': len(comments_data)
         })
 
     except Exception as e:
