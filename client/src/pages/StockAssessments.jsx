@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Search, ArrowUpDown } from 'lucide-react';
 
 const StockAssessments = () => {
   const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [fmpFilter, setFmpFilter] = useState('all');
+  const [managementFilter, setManagementFilter] = useState('all');
+  const [sortColumn, setSortColumn] = useState('species');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [assessments, setAssessments] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -91,14 +96,90 @@ const StockAssessments = () => {
     }
   };
 
+  // Get unique FMPs for filter dropdown
+  const uniqueFmps = [...new Set(assessments.flatMap(a => a.fmps_affected || []))].sort();
+
+  // Filter and search assessments
   const filteredAssessments = assessments.filter(assessment => {
-    if (filterStatus === 'all') return true;
-    if (filterStatus === 'overfished') return assessment.overfished === true;
-    if (filterStatus === 'overfishing') return assessment.overfishing_occurring === true;
-    if (filterStatus === 'healthy') return !assessment.overfished && !assessment.overfishing_occurring;
-    if (filterStatus === 'in_progress') return assessment.status === 'In Progress' || assessment.status === 'Planning';
+    // Status filter
+    if (filterStatus !== 'all') {
+      if (filterStatus === 'overfished' && !assessment.overfished) return false;
+      if (filterStatus === 'overfishing' && !assessment.overfishing_occurring) return false;
+      if (filterStatus === 'healthy' && (assessment.overfished || assessment.overfishing_occurring)) return false;
+      if (filterStatus === 'in_progress' && assessment.status !== 'In Progress' && assessment.status !== 'Planning') return false;
+    }
+
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSpecies = assessment.species?.toLowerCase().includes(searchLower);
+      const matchesScientific = assessment.scientific_name?.toLowerCase().includes(searchLower);
+      const matchesSedar = assessment.sedar_number?.toString().toLowerCase().includes(searchLower);
+      if (!matchesSpecies && !matchesScientific && !matchesSedar) return false;
+    }
+
+    // FMP filter
+    if (fmpFilter !== 'all') {
+      if (!assessment.fmps_affected || !assessment.fmps_affected.includes(fmpFilter)) return false;
+    }
+
+    // Management filter (SAFMC-only vs Jointly-managed)
+    if (managementFilter !== 'all') {
+      const fmpCount = assessment.fmps_affected?.length || 0;
+      if (managementFilter === 'safmc' && fmpCount > 1) return false;
+      if (managementFilter === 'joint' && fmpCount <= 1) return false;
+    }
+
     return true;
   });
+
+  // Sort assessments
+  const sortedAssessments = [...filteredAssessments].sort((a, b) => {
+    let aVal, bVal;
+
+    switch (sortColumn) {
+      case 'species':
+        aVal = a.species || '';
+        bVal = b.species || '';
+        break;
+      case 'sedar':
+        aVal = a.sedar_number || 0;
+        bVal = b.sedar_number || 0;
+        break;
+      case 'status':
+        aVal = getStatusLabel(a);
+        bVal = getStatusLabel(b);
+        break;
+      case 'b_bmsy':
+        aVal = a.b_bmsy || 0;
+        bVal = b.b_bmsy || 0;
+        break;
+      case 'f_fmsy':
+        aVal = a.f_fmsy || 0;
+        bVal = b.f_fmsy || 0;
+        break;
+      case 'updated':
+        aVal = new Date(a.updated_at || 0);
+        bVal = new Date(b.updated_at || 0);
+        break;
+      default:
+        aVal = a.species || '';
+        bVal = b.species || '';
+    }
+
+    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
 
   const getStatusColor = (assessment) => {
     if (assessment.overfished && assessment.overfishing_occurring) {
@@ -141,10 +222,7 @@ const StockAssessments = () => {
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="sm:flex-auto">
           <h1 className="font-heading text-3xl font-bold text-gray-900">Stock Assessments</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            {stats.total} total stocks • {stats.overfished} overfished • {stats.overfishing} overfishing • {stats.healthy} healthy
-          </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600">
             <span className="font-medium">SAFMC-only:</span> {stats.safmc_only?.total || 0} total ({stats.safmc_only?.overfished || 0} overfished, {stats.safmc_only?.overfishing || 0} overfishing, {stats.safmc_only?.healthy || 0} healthy) •
             <span className="font-medium ml-2">Jointly-managed:</span> {stats.jointly_managed?.total || 0} total ({stats.jointly_managed?.overfished || 0} overfished, {stats.jointly_managed?.overfishing || 0} overfishing, {stats.jointly_managed?.healthy || 0} healthy)
           </p>
@@ -203,6 +281,55 @@ const StockAssessments = () => {
               <div className="text-xs text-gray-500">Healthy</div>
             </div>
             <CheckCircle2 className="w-8 h-8 text-green-600 opacity-50" />
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filter Controls */}
+      <div className="mt-6 bg-white shadow rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search species, scientific name, or SEDAR #..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              />
+            </div>
+          </div>
+
+          {/* FMP Filter */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">FMP</label>
+            <select
+              value={fmpFilter}
+              onChange={(e) => setFmpFilter(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+            >
+              <option value="all">All FMPs</option>
+              {uniqueFmps.map(fmp => (
+                <option key={fmp} value={fmp}>{fmp}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Management Filter */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Management</label>
+            <select
+              value={managementFilter}
+              onChange={(e) => setManagementFilter(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+            >
+              <option value="all">All</option>
+              <option value="safmc">SAFMC-only</option>
+              <option value="joint">Jointly-managed</option>
+            </select>
           </div>
         </div>
       </div>
@@ -268,26 +395,68 @@ const StockAssessments = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Species
+              <th
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('species')}
+              >
+                <div className="flex items-center gap-1">
+                  Species
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                SEDAR #
+              <th
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('sedar')}
+              >
+                <div className="flex items-center gap-1">
+                  SEDAR #
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+              <th
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('status')}
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                B/BMSY
+              <th
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('b_bmsy')}
+              >
+                <div className="flex items-center gap-1">
+                  B/BMSY
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                F/FMSY
+              <th
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('f_fmsy')}
+              >
+                <div className="flex items-center gap-1">
+                  F/FMSY
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
               <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 FMP
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Updated
+              <th
+                scope="col"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('updated')}
+              >
+                <div className="flex items-center gap-1">
+                  Updated
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
             </tr>
           </thead>
@@ -298,14 +467,14 @@ const StockAssessments = () => {
                   Loading assessments...
                 </td>
               </tr>
-            ) : filteredAssessments.length === 0 ? (
+            ) : sortedAssessments.length === 0 ? (
               <tr>
                 <td colSpan="7" className="px-3 py-8 text-center text-sm text-gray-500">
-                  No assessments found. Click "Sync Data" to load data from SEDAR and StockSMART.
+                  No assessments found. Try adjusting your search and filters.
                 </td>
               </tr>
             ) : (
-              filteredAssessments.map((assessment, index) => (
+              sortedAssessments.map((assessment, index) => (
                 <tr key={assessment.id || index} className="hover:bg-gray-50">
                   <td className="px-3 py-2">
                     {assessment.source_url ? (
@@ -379,7 +548,7 @@ const StockAssessments = () => {
       </div>
 
       <div className="mt-4 text-sm text-gray-500">
-        Showing {filteredAssessments.length} of {assessments.length} assessments
+        Showing {sortedAssessments.length} of {assessments.length} assessments
       </div>
 
       {/* Note about data sources */}
