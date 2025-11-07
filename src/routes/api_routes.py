@@ -15,6 +15,8 @@ from src.config.extensions import db
 from src.models.action import Action
 from src.models.meeting import Meeting
 from src.models.comment import Comment
+from src.models.contact import Contact
+from src.models.organization import Organization
 from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 from src.scrapers.amendments_scraper import AmendmentsScraper
@@ -244,6 +246,63 @@ def get_comments():
 
     except Exception as e:
         logger.error(f"Error getting comments: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/contacts')
+def get_contacts():
+    """Get all contacts"""
+    try:
+        # Optional filters
+        state = request.args.get('state')
+        sector = request.args.get('sector')
+        organization_id = request.args.get('organization_id')
+
+        query = Contact.query
+
+        if state:
+            query = query.filter(Contact.state == state)
+        if sector:
+            query = query.filter(Contact.sector == sector)
+        if organization_id:
+            query = query.filter(Contact.organization_id == organization_id)
+
+        contacts = query.order_by(desc(Contact.last_engagement_date)).all()
+
+        return jsonify({
+            'success': True,
+            'contacts': [contact.to_dict() for contact in contacts],
+            'total': len(contacts)
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting contacts: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/organizations')
+def get_organizations():
+    """Get all organizations"""
+    try:
+        # Optional filters
+        state = request.args.get('state')
+        org_type = request.args.get('org_type')
+
+        query = Organization.query
+
+        if state:
+            query = query.filter(Organization.state == state)
+        if org_type:
+            query = query.filter(Organization.org_type == org_type)
+
+        organizations = query.order_by(desc(Organization.total_comments)).all()
+
+        return jsonify({
+            'success': True,
+            'organizations': [org.to_dict() for org in organizations],
+            'total': len(organizations)
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting organizations: {e}")
         return jsonify({'error': str(e)}), 500
 
 # ==================== SCRAPING ENDPOINTS ====================
