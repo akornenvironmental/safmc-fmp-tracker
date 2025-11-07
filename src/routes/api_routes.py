@@ -709,6 +709,9 @@ def scrape_comments():
                 comment.commenter_type = comment_data.get('commenter_type')
                 comment.position = comment_data.get('position')
                 comment.key_topics = comment_data.get('key_topics')
+                comment.contact_id = comment_data.get('contact_id')
+                comment.organization_id = comment_data.get('organization_id')
+                comment.action_id = comment_data.get('amendment_id')
                 comment.updated_at = datetime.utcnow()
                 items_updated += 1
             else:
@@ -716,6 +719,8 @@ def scrape_comments():
                 comment = Comment(
                     comment_id=comment_data['comment_id'],
                     action_id=comment_data.get('amendment_id'),
+                    contact_id=comment_data.get('contact_id'),
+                    organization_id=comment_data.get('organization_id'),
                     name=comment_data.get('name'),
                     organization=comment_data.get('organization'),
                     city=comment_data.get('city'),
