@@ -260,21 +260,69 @@ def get_assessment(assessment_id):
 
 @stock_assessment_bp.route('/api/assessments/stats', methods=['GET'])
 def get_assessment_stats():
-    """Get summary statistics for stock assessments"""
+    """Get summary statistics for stock assessments, separated by SAFMC-only and jointly-managed"""
     try:
         # Total assessments
         total_result = db.session.execute(text("SELECT COUNT(*) FROM stock_assessments"))
         total = total_result.scalar()
 
-        # Overfished stocks
+        # SAFMC-only stocks (array has 1 element or contains only South Atlantic FMP)
+        safmc_only_result = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE array_length(fmps_affected, 1) = 1 OR fmps_affected IS NULL
+        """))
+        safmc_only_total = safmc_only_result.scalar()
+
+        # Jointly-managed stocks (array has more than 1 element)
+        joint_result = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE array_length(fmps_affected, 1) > 1
+        """))
+        joint_total = joint_result.scalar()
+
+        # SAFMC-only stocks breakdown
+        safmc_overfished = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE (array_length(fmps_affected, 1) = 1 OR fmps_affected IS NULL)
+            AND overfished = TRUE
+        """)).scalar()
+
+        safmc_overfishing = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE (array_length(fmps_affected, 1) = 1 OR fmps_affected IS NULL)
+            AND overfishing_occurring = TRUE
+        """)).scalar()
+
+        safmc_healthy = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE (array_length(fmps_affected, 1) = 1 OR fmps_affected IS NULL)
+            AND overfished = FALSE AND overfishing_occurring = FALSE
+        """)).scalar()
+
+        # Jointly-managed stocks breakdown
+        joint_overfished = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE array_length(fmps_affected, 1) > 1 AND overfished = TRUE
+        """)).scalar()
+
+        joint_overfishing = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE array_length(fmps_affected, 1) > 1 AND overfishing_occurring = TRUE
+        """)).scalar()
+
+        joint_healthy = db.session.execute(text("""
+            SELECT COUNT(*) FROM stock_assessments
+            WHERE array_length(fmps_affected, 1) > 1
+            AND overfished = FALSE AND overfishing_occurring = FALSE
+        """)).scalar()
+
+        # Overall totals (for backward compatibility)
         overfished_result = db.session.execute(text("SELECT COUNT(*) FROM stock_assessments WHERE overfished = TRUE"))
         overfished = overfished_result.scalar()
 
-        # Overfishing occurring
         overfishing_result = db.session.execute(text("SELECT COUNT(*) FROM stock_assessments WHERE overfishing_occurring = TRUE"))
         overfishing = overfishing_result.scalar()
 
-        # Healthy stocks (not overfished and no overfishing)
         healthy_result = db.session.execute(text("""
             SELECT COUNT(*) FROM stock_assessments
             WHERE overfished = FALSE AND overfishing_occurring = FALSE
@@ -326,6 +374,18 @@ def get_assessment_stats():
                 'overfishing': overfishing or 0,
                 'healthy': healthy or 0,
                 'in_progress': in_progress or 0,
+                'safmc_only': {
+                    'total': safmc_only_total or 0,
+                    'overfished': safmc_overfished or 0,
+                    'overfishing': safmc_overfishing or 0,
+                    'healthy': safmc_healthy or 0
+                },
+                'jointly_managed': {
+                    'total': joint_total or 0,
+                    'overfished': joint_overfished or 0,
+                    'overfishing': joint_overfishing or 0,
+                    'healthy': joint_healthy or 0
+                },
                 'by_fmp': fmp_counts,
                 'recent_assessments': recent_assessments
             }

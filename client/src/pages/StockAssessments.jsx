@@ -10,7 +10,19 @@ const StockAssessments = () => {
     overfished: 0,
     overfishing: 0,
     healthy: 0,
-    in_progress: 0
+    in_progress: 0,
+    safmc_only: {
+      total: 0,
+      overfished: 0,
+      overfishing: 0,
+      healthy: 0
+    },
+    jointly_managed: {
+      total: 0,
+      overfished: 0,
+      overfishing: 0,
+      healthy: 0
+    }
   });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -131,6 +143,13 @@ const StockAssessments = () => {
           <h1 className="font-heading text-3xl font-bold text-gray-900">Stock Assessments</h1>
           <p className="mt-2 text-sm text-gray-700">
             {stats.total} total stocks • {stats.overfished} overfished • {stats.overfishing} overfishing • {stats.healthy} healthy
+          </p>
+          <p className="mt-1 text-sm text-gray-600">
+            <span className="font-medium">SAFMC-only:</span> {stats.safmc_only?.total || 0} total ({stats.safmc_only?.overfished || 0} overfished, {stats.safmc_only?.overfishing || 0} overfishing, {stats.safmc_only?.healthy || 0} healthy) •
+            <span className="font-medium ml-2">Jointly-managed:</span> {stats.jointly_managed?.total || 0} total ({stats.jointly_managed?.overfished || 0} overfished, {stats.jointly_managed?.overfishing || 0} overfishing, {stats.jointly_managed?.healthy || 0} healthy)
+          </p>
+          <p className="mt-1 text-xs text-gray-500 italic">
+            Stock assessments sync weekly from SEDAR and StockSMART
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">

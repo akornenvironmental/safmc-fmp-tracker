@@ -22,7 +22,7 @@ def init_scheduler(app):
         # Schedule weekly scraping at 2 AM on Sundays
         @scheduler.scheduled_job(CronTrigger(day_of_week='sun', hour=2, minute=0))
         def weekly_scrape():
-            """Weekly scraping job for actions and amendments"""
+            """Weekly scraping job for actions, amendments, and stock assessments"""
             with app.app_context():
                 try:
                     logger.info("Starting weekly scrape job")
@@ -101,6 +101,23 @@ def init_scheduler(app):
                             )
                             db.session.add(meeting)
                             items_new += 1
+
+                    # Scrape stock assessments from SEDAR and StockSMART
+                    try:
+                        from src.scrapers.sedar_scraper import SEDARScraper
+                        from src.scrapers.stocksmart_scraper import StockSMARTScraper
+
+                        logger.info("Scraping SEDAR assessments...")
+                        sedar_scraper = SEDARScraper()
+                        sedar_results = sedar_scraper.scrape_assessments()
+
+                        logger.info("Scraping StockSMART status...")
+                        stocksmart_scraper = StockSMARTScraper()
+                        stocksmart_results = stocksmart_scraper.get_stock_status()
+
+                        logger.info(f"Stock assessments scraped: SEDAR={len(sedar_results.get('assessments', []))}, StockSMART={len(stocksmart_results.get('stocks', []))}")
+                    except Exception as assess_error:
+                        logger.error(f"Error scraping stock assessments: {assess_error}")
 
                     db.session.commit()
 
