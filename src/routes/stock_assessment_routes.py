@@ -6,6 +6,8 @@ Handles API endpoints for stock assessment data from SEDAR and StockSMART
 from flask import Blueprint, jsonify, request
 import logging
 from datetime import datetime
+from sqlalchemy import text, func
+from src.config.extensions import db
 
 logger = logging.getLogger(__name__)
 
@@ -260,58 +262,53 @@ def get_assessment(assessment_id):
 def get_assessment_stats():
     """Get summary statistics for stock assessments"""
     try:
-        from src.database import get_db_connection
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-
         # Total assessments
-        cur.execute("SELECT COUNT(*) FROM stock_assessments")
-        total = cur.fetchone()[0]
+        total_result = db.session.execute(text("SELECT COUNT(*) FROM stock_assessments"))
+        total = total_result.scalar()
 
         # Overfished stocks
-        cur.execute("SELECT COUNT(*) FROM stock_assessments WHERE overfished = TRUE")
-        overfished = cur.fetchone()[0]
+        overfished_result = db.session.execute(text("SELECT COUNT(*) FROM stock_assessments WHERE overfished = TRUE"))
+        overfished = overfished_result.scalar()
 
         # Overfishing occurring
-        cur.execute("SELECT COUNT(*) FROM stock_assessments WHERE overfishing_occurring = TRUE")
-        overfishing = cur.fetchone()[0]
+        overfishing_result = db.session.execute(text("SELECT COUNT(*) FROM stock_assessments WHERE overfishing_occurring = TRUE"))
+        overfishing = overfishing_result.scalar()
 
         # Healthy stocks (not overfished and no overfishing)
-        cur.execute("""
+        healthy_result = db.session.execute(text("""
             SELECT COUNT(*) FROM stock_assessments
             WHERE overfished = FALSE AND overfishing_occurring = FALSE
-        """)
-        healthy = cur.fetchone()[0]
+        """))
+        healthy = healthy_result.scalar()
 
         # In progress assessments
-        cur.execute("""
+        in_progress_result = db.session.execute(text("""
             SELECT COUNT(*) FROM stock_assessments
             WHERE status IN ('In Progress', 'Planning')
-        """)
-        in_progress = cur.fetchone()[0]
+        """))
+        in_progress = in_progress_result.scalar()
 
         # By FMP
-        cur.execute("""
+        fmp_result = db.session.execute(text("""
             SELECT unnest(fmps_affected) as fmp, COUNT(*)
             FROM stock_assessments
             WHERE fmps_affected IS NOT NULL
             GROUP BY fmp
             ORDER BY COUNT(*) DESC
-        """)
+        """))
         fmp_counts = {}
-        for row in cur.fetchall():
+        for row in fmp_result.fetchall():
             fmp_counts[row[0]] = row[1]
 
         # Recent assessments (last 5 years)
-        cur.execute("""
+        recent_result = db.session.execute(text("""
             SELECT species, sedar_number, completion_date, stock_status
             FROM stock_assessments
             WHERE completion_date >= (CURRENT_DATE - INTERVAL '5 years')
             ORDER BY completion_date DESC
             LIMIT 10
-        """)
-        recent_rows = cur.fetchall()
+        """))
+        recent_rows = recent_result.fetchall()
         recent_assessments = []
         for row in recent_rows:
             recent_assessments.append({
@@ -321,17 +318,14 @@ def get_assessment_stats():
                 'stock_status': row[3]
             })
 
-        cur.close()
-        conn.close()
-
         return jsonify({
             'success': True,
             'stats': {
-                'total': total,
-                'overfished': overfished,
-                'overfishing': overfishing,
-                'healthy': healthy,
-                'in_progress': in_progress,
+                'total': total or 0,
+                'overfished': overfished or 0,
+                'overfishing': overfishing or 0,
+                'healthy': healthy or 0,
+                'in_progress': in_progress or 0,
                 'by_fmp': fmp_counts,
                 'recent_assessments': recent_assessments
             }
@@ -339,6 +333,8 @@ def get_assessment_stats():
 
     except Exception as e:
         logger.error(f"Error fetching assessment stats: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
