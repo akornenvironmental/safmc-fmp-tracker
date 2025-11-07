@@ -46,13 +46,11 @@ def get_assessments():
         # Build query with filters
         query = """
             SELECT
-                id, sedar_number, species, scientific_name, stock_name,
+                id, sedar_number, species_common_name, species_scientific_name, stock_region,
                 assessment_type, status, start_date, completion_date,
-                stock_status, overfishing_occurring, overfished,
-                biomass_current, biomass_msy,
-                fishing_mortality_current, fishing_mortality_msy,
+                stock_status,
                 overfishing_limit, acceptable_biological_catch, annual_catch_limit,
-                keywords, fmps_affected, source_url, document_url,
+                optimum_yield, units, fmp, sedar_url, assessment_report_url,
                 created_at, updated_at
             FROM stock_assessments
             WHERE 1=1
@@ -60,7 +58,7 @@ def get_assessments():
         params = []
 
         if species:
-            query += " AND species ILIKE %s"
+            query += " AND species_common_name ILIKE %s"
             params.append(f"%{species}%")
 
         if status:
@@ -68,15 +66,15 @@ def get_assessments():
             params.append(status)
 
         if overfished is not None:
-            query += " AND overfished = %s"
-            params.append(overfished.lower() == 'true')
+            query += " AND stock_status ILIKE %s"
+            params.append('%overfished%' if overfished.lower() == 'true' else '%not overfished%')
 
         if overfishing is not None:
-            query += " AND overfishing_occurring = %s"
-            params.append(overfishing.lower() == 'true')
+            query += " AND stock_status ILIKE %s"
+            params.append('%overfishing%' if overfishing.lower() == 'true' else '%not overfishing%')
 
         if fmp:
-            query += " AND %s = ANY(fmps_affected)"
+            query += " AND fmp = %s"
             params.append(fmp)
 
         query += " ORDER BY updated_at DESC LIMIT %s OFFSET %s"
@@ -90,7 +88,7 @@ def get_assessments():
         count_params = []
 
         if species:
-            count_query += " AND species ILIKE %s"
+            count_query += " AND species_common_name ILIKE %s"
             count_params.append(f"%{species}%")
 
         if status:
@@ -98,15 +96,15 @@ def get_assessments():
             count_params.append(status)
 
         if overfished is not None:
-            count_query += " AND overfished = %s"
-            count_params.append(overfished.lower() == 'true')
+            count_query += " AND stock_status ILIKE %s"
+            count_params.append('%overfished%' if overfished.lower() == 'true' else '%not overfished%')
 
         if overfishing is not None:
-            count_query += " AND overfishing_occurring = %s"
-            count_params.append(overfishing.lower() == 'true')
+            count_query += " AND stock_status ILIKE %s"
+            count_params.append('%overfishing%' if overfishing.lower() == 'true' else '%not overfishing%')
 
         if fmp:
-            count_query += " AND %s = ANY(fmps_affected)"
+            count_query += " AND fmp = %s"
             count_params.append(fmp)
 
         cur.execute(count_query, count_params)
