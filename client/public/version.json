@@ -1,13 +1,14 @@
 {
   "commit": "NEXT",
-  "description": "Fix ALL table spacing across all pages",
-  "timestamp": "2025-11-07T21:00:00Z",
-  "build": "complete-table-fix",
+  "description": "FORCE REBUILD: Fix table spacing with new asset hashes",
+  "timestamp": "2025-11-07T22:00:00Z",
+  "build": "force-rebuild-table-fix",
   "changes": [
+    "Added build timestamp to main.jsx to force new asset hashes",
     "Fixed Actions page table padding (px-4 py-3 sm:px-6)",
     "Fixed Meetings page table padding",
     "Fixed ActionsEnhanced page table padding",
     "Fixed CommentsEnhanced page table padding",
-    "All tables now match Interview System spacing"
+    "This build WILL have new JS/CSS bundles with different hashes"
   ]
 }
