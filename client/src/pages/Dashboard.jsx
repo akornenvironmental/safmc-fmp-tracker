@@ -136,22 +136,22 @@ const Dashboard = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">
                   Action
                 </th>
-                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">
                   Type
                 </th>
-                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">
                   FMP
                 </th>
-                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">
                   Stage
                 </th>
-                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">
                   Progress
                 </th>
-                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">
                   Updated
                 </th>
               </tr>
@@ -159,20 +159,20 @@ const Dashboard = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="px-3 py-8 text-center text-sm text-gray-500">
+                  <td colSpan="6" className="px-4 py-8 sm:px-6 text-center text-sm text-gray-500">
                     Loading actions...
                   </td>
                 </tr>
               ) : recentActions.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-3 py-8 text-center text-sm text-gray-500">
+                  <td colSpan="6" className="px-4 py-8 sm:px-6 text-center text-sm text-gray-500">
                     No actions found. Click "Update Data" to scrape SAFMC website.
                   </td>
                 </tr>
               ) : (
                 recentActions.map((action, index) => (
                   <tr key={action.id || index} className="hover:bg-gray-50">
-                    <td className="px-3 py-2">
+                    <td className="px-4 py-3 sm:px-6">
                       {action.source_url ? (
                         <a
                           href={action.source_url}
@@ -191,18 +191,18 @@ const Dashboard = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                       <span className="text-xs text-gray-600">{action.type || 'Amendment'}</span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                       <span className="text-xs text-gray-900">{action.fmp || 'N/A'}</span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                       <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                         {action.progress_stage || 'Unknown'}
                       </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         <div className="w-16 bg-gray-200 rounded-full h-1.5">
                           <div
@@ -213,7 +213,7 @@ const Dashboard = () => {
                         <span className="text-xs text-gray-600">{action.progress || 0}%</span>
                       </div>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                    <td className="px-4 py-3 sm:px-6 whitespace-nowrap text-xs text-gray-500">
                       {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                     </td>
                   </tr>

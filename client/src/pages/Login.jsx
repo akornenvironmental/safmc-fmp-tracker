@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import safmcLogo from '../assets/safmc-logo.jpg';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +31,7 @@ const Login = () => {
           <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8 border border-gray-200 dark:border-gray-700">
             <div className="text-center">
               <svg
-                className="mx-auto h-16 w-16 text-brand-green"
+                className="mx-auto h-16 w-16 text-green-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -48,7 +47,7 @@ const Login = () => {
                 Check your email!
               </h2>
               <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                We've sent a login link to <strong className="text-brand-blue dark:text-blue-400">{email}</strong>
+                We've sent a login link to <strong className="text-blue-600 dark:text-blue-400">{email}</strong>
               </p>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Click the link in the email to log in. The link will expire in 15 minutes.
@@ -58,7 +57,7 @@ const Login = () => {
                   setSubmitted(false);
                   setEmail('');
                 }}
-                className="mt-6 text-sm text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-blue-300 underline"
+                className="mt-6 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
               >
                 Send to a different email
               </button>
@@ -72,8 +71,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <img src={safmcLogo} alt="SAFMC Logo" className="mx-auto h-24 w-auto rounded mb-4" />
+        <div>
           <h2 className="mt-6 text-center text-4xl font-heading font-bold text-gray-900 dark:text-gray-100">
             SAFMC FMP Tracker
           </h2>
@@ -105,7 +103,7 @@ const Login = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-brand-blue focus:border-brand-blue focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="your.email@example.com"
               />
             </div>
@@ -114,7 +112,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-blue hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? (
                   <span className="flex items-center">
@@ -145,7 +143,7 @@ const Login = () => {
                 )}
               </button>
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center">
-                By logging in, you agree to use this system responsibly for tracking FMP data.
+                By logging in, you agree to use this system responsibly for tracking FMP actions, stock assessments, and public comments.
               </p>
             </div>
           </form>
@@ -166,7 +164,7 @@ const Login = () => {
               Don't have access? Contact{' '}
               <a
                 href="mailto:aaron.kornbluth@gmail.com"
-                className="text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-blue-300"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
               >
                 aaron.kornbluth@gmail.com
               </a>
@@ -181,7 +179,7 @@ const Login = () => {
               href="https://akornenvironmental.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-blue-300"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
             >
               akorn environmental
             </a>
