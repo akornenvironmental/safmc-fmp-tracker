@@ -20,14 +20,20 @@ class CommentsScraper:
     # Known comment sources (Google Sheets pubhtml URLs)
     COMMENT_SOURCES = [
         {
+            'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=246666200&single=true',
+            'name': 'Public Comments - Comprehensive',
+            'action_id': 'comments-main',
+            'phase': 'Public Comment'
+        },
+        {
             'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=440075844&single=true',
-            'name': 'Public Comments - Sheet 1',
+            'name': 'Public Comments - Additional 1',
             'action_id': 'comments-1',
             'phase': 'Public Comment'
         },
         {
             'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=2112604420&single=true',
-            'name': 'Public Comments - Sheet 2',
+            'name': 'Public Comments - Additional 2',
             'action_id': 'comments-2',
             'phase': 'Public Comment'
         }
@@ -82,62 +88,47 @@ class CommentsScraper:
         return results
 
     def scrape_comment_sheet(self, source: Dict) -> List[Dict]:
-        """Scrape a single comment sheet from Google Sheets pubhtml"""
+        """Scrape a single comment sheet from Google Sheets by converting to CSV format"""
         try:
-            response = self.session.get(source['url'], timeout=self.timeout)
+            # Convert /pubhtml URL to /pub?output=csv for direct CSV access
+            csv_url = source['url'].replace('/pubhtml?', '/pub?').replace('/pubhtml', '/pub?')
+            if 'output=csv' not in csv_url:
+                csv_url = csv_url.replace('&single=true', '&single=true&output=csv')
+                if '&single=true&output=csv' not in csv_url:
+                    csv_url += '&output=csv'
+
+            logger.info(f"  Fetching CSV from: {csv_url}")
+
+            response = self.session.get(csv_url, timeout=self.timeout)
             response.raise_for_status()
 
-            # Parse HTML
-            soup = BeautifulSoup(response.content, 'lxml')
+            # Parse CSV data
+            csv_content = response.content.decode('utf-8')
+            csv_reader = csv.DictReader(StringIO(csv_content))
 
-            # Find the table in the HTML
-            table = soup.find('table')
-            if not table:
-                logger.warning(f"No table found in {source['url']}")
-                return []
-
-            # Get headers from first row
-            headers = []
-            header_row = table.find('tr')
-            if header_row:
-                headers = [th.get_text(strip=True) for th in header_row.find_all(['th', 'td'])]
-
+            # Get headers from CSV
+            headers = csv_reader.fieldnames
             if not headers:
-                logger.warning(f"No headers found in {source['url']}")
+                logger.warning(f"No headers found in CSV from {csv_url}")
                 return []
 
-            # Get data rows
+            logger.info(f"  Found headers: {headers}")
+
+            # Read all rows
             comments = []
-            rows = table.find_all('tr')[1:]  # Skip header row
-
-            for row in rows:
-                cells = row.find_all('td')
-                if len(cells) == 0:
-                    continue
-
-                # Create dict from headers and cells
-                row_data = {}
-                for i, cell in enumerate(cells):
-                    if i < len(headers):
-                        row_data[headers[i]] = cell.get_text(strip=True)
-
+            for row in csv_reader:
                 # Skip empty rows
-                if not any(row_data.values()):
+                if not any(row.values()):
                     continue
 
-                # Parse comment from row
-                comment = self._parse_comment_row(row_data)
-                if comment and comment.get('comment_text'):
-                    comments.append(comment)
+                comments.append(row)
 
-            logger.info(f"  Parsed {len(comments)} comments from table with {len(headers)} columns")
             return comments
 
-        except requests.RequestException as e:
-            logger.error(f"Error fetching {source['url']}: {e}")
-            return []
         except Exception as e:
-            logger.error(f"Error parsing {source['url']}: {e}")
+            logger.error(f"Error scraping comment sheet: {e}")
+            import traceback
+            traceback.print_exc()
             return []
 
     def _parse_comment_row(self, row: Dict) -> Optional[Dict]:
