@@ -6,7 +6,7 @@ Scrapes public comment data from various sources including Google Sheets
 import re
 import csv
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import requests
 from io import StringIO
@@ -60,12 +60,12 @@ class CommentsScraper:
         for source in self.COMMENT_SOURCES:
             try:
                 logger.info(f"Scraping: {source['name']}")
-                comments = self.scrape_comment_sheet(source)
+                metadata, comments = self.scrape_comment_sheet(source)
 
-                # Enhance each comment
+                # Enhance each comment with metadata
                 enhanced_comments = []
                 for i, comment in enumerate(comments, 1):
-                    enhanced = self._enhance_comment(comment, source, i)
+                    enhanced = self._enhance_comment(comment, source, i, metadata)
                     enhanced_comments.append(enhanced)
 
                 results['comments'].extend(enhanced_comments)
@@ -87,8 +87,14 @@ class CommentsScraper:
 
         return results
 
-    def scrape_comment_sheet(self, source: Dict) -> List[Dict]:
-        """Scrape a single comment sheet from Google Sheets by converting to CSV format"""
+    def scrape_comment_sheet(self, source: Dict) -> Tuple[Dict, List[Dict]]:
+        """
+        Scrape a single comment sheet from Google Sheets
+
+        Returns:
+            Tuple of (metadata_dict, comments_list)
+            metadata_dict contains: {'title': str, 'description': str}
+        """
         try:
             # Convert /pubhtml URL to /pub?output=csv for direct CSV access
             csv_url = source['url'].replace('/pubhtml?', '/pub?').replace('/pubhtml', '/pub?')
@@ -107,10 +113,29 @@ class CommentsScraper:
             lines = csv_content.strip().split('\n')
 
             # Google Sheets exports include metadata rows before headers
-            # Skip first 5 rows (metadata), row 6 has the actual headers
+            # Row 1: ID/metadata
+            # Row 2: "Public Reporting"
+            # Row 3: "Amendment"
+            # Row 4: Amendment title
+            # Row 5: Amendment description
+            # Row 6: Headers
             if len(lines) < 7:
                 logger.warning(f"CSV has fewer than 7 rows, may not have data: {csv_url}")
-                return []
+                return ({}, [])
+
+            # Extract metadata from rows 4 and 5
+            metadata = {}
+            if len(lines) >= 4:
+                # Row 4: Amendment title (first column only)
+                title_row = lines[3].split(',')[0].strip('"')
+                metadata['title'] = title_row if title_row else None
+
+            if len(lines) >= 5:
+                # Row 5: Amendment description (first column only)
+                desc_row = lines[4].split(',')[0].strip('"')
+                metadata['description'] = desc_row if desc_row else None
+
+            logger.info(f"  Amendment: {metadata.get('title', 'Unknown')}")
 
             # Reconstruct CSV starting from the headers (row 6, index 5)
             csv_data_from_headers = '\n'.join(lines[5:])
@@ -120,7 +145,7 @@ class CommentsScraper:
             headers = csv_reader.fieldnames
             if not headers:
                 logger.warning(f"No headers found in CSV from {csv_url}")
-                return []
+                return (metadata, [])
 
             logger.info(f"  Found headers: {headers}")
 
@@ -136,13 +161,13 @@ class CommentsScraper:
                 if parsed_comment:
                     comments.append(parsed_comment)
 
-            return comments
+            return (metadata, comments)
 
         except Exception as e:
             logger.error(f"Error scraping comment sheet: {e}")
             import traceback
             traceback.print_exc()
-            return []
+            return ({}, [])
 
     def _parse_comment_row(self, row: Dict) -> Optional[Dict]:
         """Parse a single comment row from CSV"""

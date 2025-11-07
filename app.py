@@ -207,11 +207,48 @@ def run_comment_migration():
         logger.error(f"Error running comment migration: {e}")
         db.session.rollback()
 
+def init_contacts_and_orgs():
+    """Create contacts and organizations tables on startup if they don't exist"""
+    try:
+        with app.app_context():
+            # Check if organizations table exists
+            result = db.session.execute(text("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'organizations'
+                );
+            """))
+            orgs_exist = result.scalar()
+
+            # Check if contacts table exists
+            result = db.session.execute(text("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'contacts'
+                );
+            """))
+            contacts_exist = result.scalar()
+
+            if not orgs_exist or not contacts_exist:
+                logger.info("Creating contacts and organizations tables...")
+
+                # Run the migration script
+                from migrations.create_contacts_and_orgs import upgrade
+                upgrade()
+
+                logger.info("✓ Contacts and organizations tables created")
+            else:
+                logger.info("Contacts and organizations tables already exist")
+    except Exception as e:
+        logger.error(f"Error creating contacts/orgs tables: {e}")
+        db.session.rollback()
+
 # Initialize tables on startup
 with app.app_context():
     init_stock_assessment_tables()
     init_fisherypulse_columns()
     run_comment_migration()
+    init_contacts_and_orgs()
 
 # Health check endpoint (before blueprints)
 @app.route('/health')
