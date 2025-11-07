@@ -57,6 +57,8 @@ class Comment(db.Model):
             'email': self.email,
             'city': self.city,
             'state': self.state,
+            'contactId': self.contact_id,
+            'organizationId': self.organization_id,
             'actionId': self.action_id,
             'commentDate': self.comment_date.isoformat() if self.comment_date else None,
             'commentType': self.comment_type,
