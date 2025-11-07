@@ -374,6 +374,178 @@ def init_ai_query_log():
         logger.error(f"Error creating AI query log table: {e}")
         db.session.rollback()
 
+def init_fmp_document_tables():
+    """Create FMP document tables for document management system"""
+    try:
+        with app.app_context():
+            # Check if tables already exist
+            result = db.session.execute(text("""
+                SELECT table_name FROM information_schema.tables
+                WHERE table_name IN ('fmp_documents', 'document_chunks', 'document_scrape_queue');
+            """))
+            existing_tables = {row[0] for row in result.fetchall()}
+
+            if len(existing_tables) == 3:
+                logger.info("FMP document tables already exist")
+                return
+
+            logger.info("Creating FMP document tables...")
+
+            # Create fmp_documents table
+            if 'fmp_documents' not in existing_tables:
+                db.session.execute(text("""
+                    CREATE TABLE fmp_documents (
+                        id SERIAL PRIMARY KEY,
+                        document_id VARCHAR(64) UNIQUE NOT NULL,
+
+                        -- Basic metadata
+                        title TEXT NOT NULL,
+                        document_type VARCHAR(100),
+                        fmp VARCHAR(100),
+                        amendment_number VARCHAR(50),
+
+                        -- Dates
+                        document_date DATE,
+                        publication_date DATE,
+                        effective_date DATE,
+
+                        -- Status and source
+                        status VARCHAR(50),
+                        source_url TEXT,
+                        download_url TEXT,
+
+                        -- Content
+                        description TEXT,
+                        full_text TEXT,
+                        summary TEXT,
+
+                        -- Categorization
+                        keywords TEXT[],
+                        species TEXT[],
+                        topics TEXT[],
+
+                        -- File info
+                        file_size_bytes INTEGER,
+                        page_count INTEGER,
+
+                        -- Processing status
+                        processed BOOLEAN DEFAULT FALSE,
+                        indexed BOOLEAN DEFAULT FALSE,
+
+                        -- Search
+                        search_vector TSVECTOR,
+
+                        -- Metadata
+                        metadata JSONB,
+
+                        -- Timestamps
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        last_scraped TIMESTAMP
+                    );
+                """))
+
+                db.session.execute(text("""
+                    CREATE INDEX idx_fmp_docs_type ON fmp_documents(document_type);
+                    CREATE INDEX idx_fmp_docs_fmp ON fmp_documents(fmp);
+                    CREATE INDEX idx_fmp_docs_status ON fmp_documents(status);
+                    CREATE INDEX idx_fmp_docs_date ON fmp_documents(document_date DESC);
+                    CREATE INDEX idx_fmp_docs_search ON fmp_documents USING GIN(search_vector);
+                    CREATE INDEX idx_fmp_docs_keywords ON fmp_documents USING GIN(keywords);
+                """))
+
+                db.session.execute(text("""
+                    CREATE OR REPLACE FUNCTION fmp_docs_search_vector_update() RETURNS TRIGGER AS $$
+                    BEGIN
+                        NEW.search_vector :=
+                            setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
+                            setweight(to_tsvector('english', COALESCE(NEW.description, '')), 'B') ||
+                            setweight(to_tsvector('english', COALESCE(NEW.summary, '')), 'C') ||
+                            setweight(to_tsvector('english', COALESCE(NEW.full_text, '')), 'D');
+                        RETURN NEW;
+                    END;
+                    $$ LANGUAGE plpgsql;
+
+                    CREATE TRIGGER fmp_docs_search_vector_trigger
+                    BEFORE INSERT OR UPDATE OF title, description, summary, full_text
+                    ON fmp_documents
+                    FOR EACH ROW
+                    EXECUTE FUNCTION fmp_docs_search_vector_update();
+                """))
+
+                logger.info("✓ fmp_documents table created")
+
+            # Create document_chunks table
+            if 'document_chunks' not in existing_tables:
+                db.session.execute(text("""
+                    CREATE TABLE document_chunks (
+                        id SERIAL PRIMARY KEY,
+                        document_id VARCHAR(64) REFERENCES fmp_documents(document_id) ON DELETE CASCADE,
+
+                        chunk_index INTEGER NOT NULL,
+                        chunk_text TEXT NOT NULL,
+                        chunk_type VARCHAR(50),
+
+                        section_title TEXT,
+                        page_number INTEGER,
+
+                        embedding_vector REAL[],
+
+                        metadata JSONB,
+
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                        UNIQUE(document_id, chunk_index)
+                    );
+                """))
+
+                db.session.execute(text("""
+                    CREATE INDEX idx_doc_chunks_doc_id ON document_chunks(document_id);
+                    CREATE INDEX idx_doc_chunks_type ON document_chunks(chunk_type);
+                """))
+
+                logger.info("✓ document_chunks table created")
+
+            # Create document_scrape_queue table
+            if 'document_scrape_queue' not in existing_tables:
+                db.session.execute(text("""
+                    CREATE TABLE document_scrape_queue (
+                        id SERIAL PRIMARY KEY,
+                        url TEXT UNIQUE NOT NULL,
+                        document_type VARCHAR(100),
+                        fmp VARCHAR(100),
+
+                        priority INTEGER DEFAULT 5,
+                        status VARCHAR(50) DEFAULT 'pending',
+
+                        attempts INTEGER DEFAULT 0,
+                        max_attempts INTEGER DEFAULT 3,
+
+                        metadata JSONB,
+                        error_message TEXT,
+
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        processed_at TIMESTAMP
+                    );
+                """))
+
+                db.session.execute(text("""
+                    CREATE INDEX idx_scrape_queue_status ON document_scrape_queue(status);
+                    CREATE INDEX idx_scrape_queue_priority ON document_scrape_queue(priority, created_at);
+                """))
+
+                logger.info("✓ document_scrape_queue table created")
+
+            db.session.commit()
+            logger.info("✓ FMP document tables created successfully")
+
+    except Exception as e:
+        logger.error(f"Error creating FMP document tables: {e}")
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+
 # Initialize tables on startup
 with app.app_context():
     init_stock_assessment_tables()
@@ -382,6 +554,7 @@ with app.app_context():
     run_comment_migration()
     init_contacts_and_orgs()
     init_ai_query_log()
+    init_fmp_document_tables()
 
 # Health check endpoint (before blueprints)
 @app.route('/health')
