@@ -129,7 +129,7 @@ export default function ReusableHeader({
                   const isActiveLink = isActive(link.to);
                   const linkClasses = `${
                     isActiveLink
-                      ? 'border-brand-blue text-brand-blue'
+                      ? 'border-brand-green text-brand-blue'
                       : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-brand-blue'
                   } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0`;
 
