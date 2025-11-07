@@ -230,7 +230,8 @@ const StockAssessments = () => {
             Stock assessments sync weekly from SEDAR and StockSMART
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        {/* Sync button disabled - use background jobs to avoid memory issues */}
+        {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
             onClick={syncAssessments}
             disabled={syncing}
@@ -239,7 +240,7 @@ const StockAssessments = () => {
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync Data'}
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Cards */}
