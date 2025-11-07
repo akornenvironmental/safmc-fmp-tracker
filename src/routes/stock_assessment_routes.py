@@ -170,13 +170,11 @@ def get_assessment(assessment_id):
         # Get assessment details
         cur.execute("""
             SELECT
-                id, sedar_number, species, scientific_name, stock_name,
+                id, sedar_number, species_common_name, species_scientific_name, stock_region,
                 assessment_type, status, start_date, completion_date,
-                stock_status, overfishing_occurring, overfished,
-                biomass_current, biomass_msy,
-                fishing_mortality_current, fishing_mortality_msy,
+                stock_status,
                 overfishing_limit, acceptable_biological_catch, annual_catch_limit,
-                keywords, fmps_affected, source_url, document_url,
+                optimum_yield, units, fmp, sedar_url, assessment_report_url,
                 created_at, updated_at
             FROM stock_assessments
             WHERE id = %s
@@ -190,31 +188,24 @@ def get_assessment(assessment_id):
         assessment = {
             'id': row[0],
             'sedar_number': row[1],
-            'species': row[2],
-            'scientific_name': row[3],
-            'stock_name': row[4],
+            'species': row[2],  # species_common_name
+            'scientific_name': row[3],  # species_scientific_name
+            'stock_region': row[4],
             'assessment_type': row[5],
             'status': row[6],
             'start_date': row[7].isoformat() if row[7] else None,
             'completion_date': row[8].isoformat() if row[8] else None,
             'stock_status': row[9],
-            'overfishing_occurring': row[10],
-            'overfished': row[11],
-            'biomass_current': float(row[12]) if row[12] else None,
-            'biomass_msy': float(row[13]) if row[13] else None,
-            'b_bmsy': float(row[12] / row[13]) if row[12] and row[13] and row[13] != 0 else None,
-            'fishing_mortality_current': float(row[14]) if row[14] else None,
-            'fishing_mortality_msy': float(row[15]) if row[15] else None,
-            'f_fmsy': float(row[14] / row[15]) if row[14] and row[15] and row[15] != 0 else None,
-            'overfishing_limit': float(row[16]) if row[16] else None,
-            'acceptable_biological_catch': float(row[17]) if row[17] else None,
-            'annual_catch_limit': float(row[18]) if row[18] else None,
-            'keywords': row[19],
-            'fmps_affected': row[20],
-            'source_url': row[21],
-            'document_url': row[22],
-            'created_at': row[23].isoformat() if row[23] else None,
-            'updated_at': row[24].isoformat() if row[24] else None
+            'overfishing_limit': float(row[10]) if row[10] else None,
+            'acceptable_biological_catch': float(row[11]) if row[11] else None,
+            'annual_catch_limit': float(row[12]) if row[12] else None,
+            'optimum_yield': float(row[13]) if row[13] else None,
+            'units': row[14],
+            'fmp': row[15],
+            'sedar_url': row[16],
+            'assessment_report_url': row[17],
+            'created_at': row[18].isoformat() if row[18] else None,
+            'updated_at': row[19].isoformat() if row[19] else None
         }
 
         # Get comments for this assessment
