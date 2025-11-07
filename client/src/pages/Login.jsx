@@ -7,7 +7,6 @@ const Login = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [devLink, setDevLink] = useState('');
   const { requestLogin } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -19,9 +18,6 @@ const Login = () => {
 
     if (result.success) {
       setSubmitted(true);
-      if (result.dev_link) {
-        setDevLink(result.dev_link);
-      }
     } else {
       setError(result.error || 'Failed to send login link. Please try again.');
     }
@@ -57,22 +53,10 @@ const Login = () => {
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Click the link in the email to log in. The link will expire in 15 minutes.
               </p>
-              {devLink && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                  <p className="text-xs text-yellow-800 font-bold mb-2">DEV MODE - Email not configured</p>
-                  <a
-                    href={devLink}
-                    className="text-xs text-blue-600 hover:text-blue-800 underline break-all"
-                  >
-                    {devLink}
-                  </a>
-                </div>
-              )}
               <button
                 onClick={() => {
                   setSubmitted(false);
                   setEmail('');
-                  setDevLink('');
                 }}
                 className="mt-6 text-sm text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-blue-300 underline"
               >
