@@ -180,10 +180,38 @@ def init_fisherypulse_columns():
         logger.error(f"Error adding FisheryPulse columns: {e}")
         db.session.rollback()
 
+def run_comment_migration():
+    """Run migration to make action_id nullable in comments table"""
+    try:
+        with app.app_context():
+            # Check if action_id is already nullable
+            result = db.session.execute(text("""
+                SELECT is_nullable
+                FROM information_schema.columns
+                WHERE table_name = 'comments'
+                AND column_name = 'action_id';
+            """))
+            row = result.fetchone()
+
+            if row and row[0] == 'NO':
+                logger.info("Making action_id nullable in comments table...")
+                db.session.execute(text("""
+                    ALTER TABLE comments
+                    ALTER COLUMN action_id DROP NOT NULL;
+                """))
+                db.session.commit()
+                logger.info("✓ action_id is now nullable")
+            else:
+                logger.info("action_id already nullable, skipping migration")
+    except Exception as e:
+        logger.error(f"Error running comment migration: {e}")
+        db.session.rollback()
+
 # Initialize tables on startup
 with app.app_context():
     init_stock_assessment_tables()
     init_fisherypulse_columns()
+    run_comment_migration()
 
 # Health check endpoint (before blueprints)
 @app.route('/health')

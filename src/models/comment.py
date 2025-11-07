@@ -21,7 +21,7 @@ class Comment(db.Model):
     state = db.Column(db.String(50))
 
     # Comment details
-    action_id = db.Column(db.String(100), db.ForeignKey('actions.action_id'))
+    action_id = db.Column(db.String(100), db.ForeignKey('actions.action_id'), nullable=True)
     comment_date = db.Column(db.DateTime)
     comment_type = db.Column(db.String(100))  # Written, Oral, Email, Portal, etc.
     commenter_type = db.Column(db.String(100))  # For-Hire, Commercial, NGO, Government, etc.

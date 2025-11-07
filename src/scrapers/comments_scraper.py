@@ -22,19 +22,19 @@ class CommentsScraper:
         {
             'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=246666200&single=true',
             'name': 'Public Comments - Comprehensive',
-            'action_id': 'comments-main',
+            'source_id': 'comments-main',  # For ID generation only, not for action_id FK
             'phase': 'Public Comment'
         },
         {
             'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=440075844&single=true',
             'name': 'Public Comments - Additional 1',
-            'action_id': 'comments-1',
+            'source_id': 'comments-1',  # For ID generation only, not for action_id FK
             'phase': 'Public Comment'
         },
         {
             'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=2112604420&single=true',
             'name': 'Public Comments - Additional 2',
-            'action_id': 'comments-2',
+            'source_id': 'comments-2',  # For ID generation only, not for action_id FK
             'phase': 'Public Comment'
         }
     ]
@@ -104,7 +104,17 @@ class CommentsScraper:
 
             # Parse CSV data
             csv_content = response.content.decode('utf-8')
-            csv_reader = csv.DictReader(StringIO(csv_content))
+            lines = csv_content.strip().split('\n')
+
+            # Google Sheets exports include metadata rows before headers
+            # Skip first 5 rows (metadata), row 6 has the actual headers
+            if len(lines) < 7:
+                logger.warning(f"CSV has fewer than 7 rows, may not have data: {csv_url}")
+                return []
+
+            # Reconstruct CSV starting from the headers (row 6, index 5)
+            csv_data_from_headers = '\n'.join(lines[5:])
+            csv_reader = csv.DictReader(StringIO(csv_data_from_headers))
 
             # Get headers from CSV
             headers = csv_reader.fieldnames
@@ -114,14 +124,17 @@ class CommentsScraper:
 
             logger.info(f"  Found headers: {headers}")
 
-            # Read all rows
+            # Read all rows and parse them
             comments = []
             for row in csv_reader:
                 # Skip empty rows
                 if not any(row.values()):
                     continue
 
-                comments.append(row)
+                # Parse the row to normalize field names
+                parsed_comment = self._parse_comment_row(row)
+                if parsed_comment:
+                    comments.append(parsed_comment)
 
             return comments
 
@@ -141,20 +154,61 @@ class CommentsScraper:
                         return value or ''
             return ''
 
+        # Get raw fields
+        submitted_by = get_field(['name', 'commenter', 'submitted by'])
+        location_raw = get_field(['location', 'city/state', 'city', 'address'])
+
+        # Parse "Submitted By" field which may contain multi-line format:
+        # First Name: X\nLast Name: Y\nEmail: Z
+        name = ''
+        email = get_field(['email', 'e-mail', 'contact'])
+
+        if submitted_by and '\n' in submitted_by:
+            # Parse multi-line format
+            lines = submitted_by.split('\n')
+            first_name = ''
+            last_name = ''
+            for line in lines:
+                if 'first name:' in line.lower():
+                    first_name = line.split(':', 1)[1].strip()
+                elif 'last name:' in line.lower():
+                    last_name = line.split(':', 1)[1].strip()
+                elif 'email:' in line.lower() and not email:
+                    email = line.split(':', 1)[1].strip()
+            name = f"{first_name} {last_name}".strip()
+        else:
+            name = submitted_by
+
+        # Parse "Location" field which may contain multi-line format:
+        # City: X\nState: Y
+        location = location_raw
+        if location_raw and '\n' in location_raw:
+            # Parse multi-line format
+            lines = location_raw.split('\n')
+            city_part = ''
+            state_part = ''
+            for line in lines:
+                if 'city:' in line.lower():
+                    city_part = line.split(':', 1)[1].strip()
+                elif 'state:' in line.lower():
+                    state_part = line.split(':', 1)[1].strip()
+            if city_part and state_part:
+                location = f"{city_part}, {state_part}"
+
         return {
             'date': get_field(['date', 'submit date', 'timestamp']),
-            'name': get_field(['name', 'commenter', 'submitted by']),
+            'name': name,
             'organization': get_field(['organization', 'org', 'affiliation']),
-            'location': get_field(['location', 'city/state', 'city', 'address']),
-            'email': get_field(['email', 'e-mail', 'contact']),
+            'location': location,
+            'email': email,
             'comment_text': get_field(['comment', 'comments', 'text', 'submission'])
         }
 
     def _enhance_comment(self, comment: Dict, source: Dict, sequence: int) -> Dict:
         """Enhance comment with analysis and categorization"""
-        # Generate unique ID
+        # Generate unique ID using source_id (not action_id)
         year = datetime.now().year
-        comment_id = f"PC-{year}-{source['action_id'].upper()}-{sequence:04d}"
+        comment_id = f"PC-{year}-{source['source_id'].upper()}-{sequence:04d}"
 
         # Parse location
         city, state = self._parse_location(comment.get('location', ''))
@@ -170,7 +224,7 @@ class CommentsScraper:
         return {
             'comment_id': comment_id,
             'submit_date': comment.get('date', ''),
-            'amendment_id': source['action_id'],
+            'amendment_id': None,  # General comments not tied to specific actions
             'amendment_phase': source['phase'],
             'name': comment.get('name', ''),
             'organization': comment.get('organization', ''),
