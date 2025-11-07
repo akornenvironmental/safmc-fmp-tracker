@@ -576,7 +576,7 @@ const ActionsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-3 py-2" style={{ width: col.width }}>
+                    <td key={col.key} className="px-4 py-3 sm:px-6" style={{ width: col.width }}>
                       {col.key === 'title' ? (
                         <>
                           {action.source_url ? (

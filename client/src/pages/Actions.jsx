@@ -137,19 +137,19 @@ const Actions = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 FMP
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Progress Stage
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Progress
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Last Updated
               </th>
             </tr>
@@ -170,7 +170,7 @@ const Actions = () => {
             ) : (
               filteredActions.map((action, index) => (
                 <tr key={action.id || index} className="hover:bg-gray-50">
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-3 sm:px-6">
                     {action.source_url ? (
                       <a
                         href={action.source_url}
@@ -187,15 +187,15 @@ const Actions = () => {
                       <div className="text-xs text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
                     )}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <div className="text-xs text-gray-900">{action.fmp || 'N/A'}</div>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
                       {action.progress_stage || 'Unknown'}
                     </span>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-1">
                       <div className="w-16 bg-gray-200 rounded-full h-1.5">
                         <div
@@ -206,7 +206,7 @@ const Actions = () => {
                       <span className="text-xs text-gray-700">{action.progress || 0}%</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap text-xs text-gray-500">
                     {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

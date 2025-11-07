@@ -85,19 +85,19 @@ const Meetings = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Title
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Council
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Location
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Type
               </th>
             </tr>
@@ -118,7 +118,7 @@ const Meetings = () => {
             ) : (
               meetings.map((meeting, index) => (
                 <tr key={meeting.id || index} className="hover:bg-gray-50">
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-3 sm:px-6">
                     {meeting.source_url ? (
                       <a
                         href={meeting.source_url}
@@ -135,13 +135,13 @@ const Meetings = () => {
                       <div className="text-xs text-gray-500 mt-0.5">{meeting.description.substring(0, 100)}...</div>
                     )}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <div className="text-xs font-semibold text-brand-blue">{meeting.council || 'SAFMC'}</div>
                     {meeting.organization_type && (
                       <div className="text-xs text-gray-500">{meeting.organization_type}</div>
                     )}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <div>
@@ -156,13 +156,13 @@ const Meetings = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-3 sm:px-6">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       <div className="text-xs text-gray-900">{meeting.location || 'TBD'}</div>
                     </div>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getTypeColor(meeting.type)}`}>
                       {meeting.type || 'Meeting'}
                     </span>
