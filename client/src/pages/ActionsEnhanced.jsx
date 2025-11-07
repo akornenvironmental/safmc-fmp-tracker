@@ -293,68 +293,115 @@ const ActionsEnhanced = () => {
           <p className="mt-2 text-sm text-gray-700">
             Showing {filteredAndSortedActions.length} of {actions.length} actions
           </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Actions and amendments are automatically synced weekly
+          </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
-          <button
-            onClick={handleReset}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
-            title="Reset filters, sorting, and selection"
-          >
-            <RotateCcw size={14} />
-            Reset
-          </button>
-          <button
-            onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
-          >
-            <Settings size={14} />
-            Columns
-          </button>
-          <div className="relative">
+        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-col gap-2 items-end">
+          <div className="flex flex-wrap gap-2">
             <button
-              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
-              onClick={(e) => {
-                const menu = e.currentTarget.nextElementSibling;
-                menu.classList.toggle('hidden');
-              }}
+              onClick={handleReset}
+              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
+              title="Reset filters, sorting, and selection"
             >
-              <Download size={14} />
-              Export
+              <RotateCcw size={14} />
+              Reset
             </button>
-            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-              <div className="py-1">
-                <div className="px-4 py-2 text-xs text-gray-500 border-b">
-                  {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
+            <button
+              onClick={() => setShowColumnSelector(!showColumnSelector)}
+              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
+            >
+              <Settings size={14} />
+              Columns
+            </button>
+            <div className="relative">
+              <button
+                className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
+                onClick={(e) => {
+                  const menu = e.currentTarget.nextElementSibling;
+                  menu.classList.toggle('hidden');
+                }}
+              >
+                <Download size={14} />
+                Export
+              </button>
+              <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                <div className="py-1">
+                  <div className="px-4 py-2 text-xs text-gray-500 border-b">
+                    {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
+                  </div>
+                  <button
+                    onClick={exportToCSV}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    CSV Format (.csv)
+                  </button>
+                  <button
+                    onClick={exportToTSV}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    TSV Format (.tsv)
+                  </button>
+                  <button
+                    onClick={exportToExcel}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    Excel Format (.xls)
+                  </button>
                 </div>
-                <button
-                  onClick={exportToCSV}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                >
-                  CSV Format (.csv)
-                </button>
-                <button
-                  onClick={exportToTSV}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                >
-                  TSV Format (.tsv)
-                </button>
-                <button
-                  onClick={exportToExcel}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                >
-                  Excel Format (.xls)
-                </button>
               </div>
             </div>
+            <button
+              onClick={syncActions}
+              disabled={syncing}
+              className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Syncing...' : 'Sync Actions'}
+            </button>
           </div>
-          <button
-            onClick={syncActions}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Actions'}
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setFilterStage('all')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
+                filterStage === 'all'
+                  ? 'bg-brand-blue text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              All ({actions.length})
+            </button>
+            <button
+              onClick={() => setFilterStage('scoping')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
+                filterStage === 'scoping'
+                  ? 'bg-brand-blue text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Scoping ({actions.filter(a => a.progress_stage?.toLowerCase().includes('scoping')).length})
+            </button>
+            <button
+              onClick={() => setFilterStage('hearing')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
+                filterStage === 'hearing'
+                  ? 'bg-brand-blue text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Public Hearing ({actions.filter(a => a.progress_stage?.toLowerCase().includes('hearing')).length})
+            </button>
+            <button
+              onClick={() => setFilterStage('approval')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
+                filterStage === 'approval'
+                  ? 'bg-brand-blue text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Approval ({actions.filter(a => a.progress_stage?.toLowerCase().includes('approval')).length})
+            </button>
+          </div>
         </div>
       </div>
 
@@ -380,52 +427,6 @@ const ActionsEnhanced = () => {
           </div>
         </div>
       )}
-
-      {/* Filter Buttons */}
-      <div className="mt-6">
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setFilterStage('all')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStage === 'all'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            All ({actions.length})
-          </button>
-          <button
-            onClick={() => setFilterStage('scoping')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStage === 'scoping'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Scoping ({actions.filter(a => a.progress_stage?.toLowerCase().includes('scoping')).length})
-          </button>
-          <button
-            onClick={() => setFilterStage('hearing')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStage === 'hearing'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Public Hearing ({actions.filter(a => a.progress_stage?.toLowerCase().includes('hearing')).length})
-          </button>
-          <button
-            onClick={() => setFilterStage('approval')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStage === 'approval'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Approval ({actions.filter(a => a.progress_stage?.toLowerCase().includes('approval')).length})
-          </button>
-        </div>
-      </div>
 
       {/* Search and page size */}
       <div className="mt-6 flex flex-col sm:flex-row gap-4">

@@ -19,13 +19,13 @@ def init_scheduler(app):
     # Only run scheduler if enabled
     if os.getenv('ENABLE_SCHEDULER', 'true').lower() == 'true':
 
-        # Schedule daily scraping at 2 AM
-        @scheduler.scheduled_job(CronTrigger(hour=2, minute=0))
-        def daily_scrape():
-            """Daily scraping job"""
+        # Schedule weekly scraping at 2 AM on Sundays
+        @scheduler.scheduled_job(CronTrigger(day_of_week='sun', hour=2, minute=0))
+        def weekly_scrape():
+            """Weekly scraping job for actions and amendments"""
             with app.app_context():
                 try:
-                    logger.info("Starting daily scrape job")
+                    logger.info("Starting weekly scrape job")
 
                     from src.scrapers.amendments_scraper import AmendmentsScraper
                     from src.scrapers.meetings_scraper import MeetingsScraper
@@ -107,8 +107,8 @@ def init_scheduler(app):
                     # Log the operation
                     duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
                     log = ScrapeLog(
-                        source='scheduled_daily',
-                        action_type='daily_scrape',
+                        source='scheduled_weekly',
+                        action_type='weekly_scrape',
                         status='success',
                         items_found=amendments_results['total_found'] + meetings_results['total_found'],
                         items_new=items_new,
@@ -119,10 +119,10 @@ def init_scheduler(app):
                     db.session.add(log)
                     db.session.commit()
 
-                    logger.info(f"Daily scrape completed: {items_new} new, {items_updated} updated")
+                    logger.info(f"Weekly scrape completed: {items_new} new, {items_updated} updated")
 
                 except Exception as e:
-                    logger.error(f"Error in daily scrape job: {e}")
+                    logger.error(f"Error in weekly scrape job: {e}")
                     db.session.rollback()
 
         scheduler.start()
