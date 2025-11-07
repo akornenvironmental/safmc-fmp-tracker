@@ -22,7 +22,7 @@ const Layout = () => {
     { to: '/actions', label: 'Actions' },
     { to: '/meetings', label: 'Meetings' },
     { to: '/comments', label: 'Comments' },
-    { to: '/assessments', label: 'Stock Assessments' }
+    { to: '/assessments', label: 'Stocks' }
   ];
 
   const customDescription = (
