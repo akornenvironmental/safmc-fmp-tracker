@@ -24,6 +24,7 @@ from src.scrapers.amendments_scraper import AmendmentsScraper
 from src.scrapers.meetings_scraper import MeetingsScraper
 from src.scrapers.multi_council_scraper import MultiCouncilScraper
 from src.scrapers.comments_scraper import CommentsScraper
+from src.scrapers.briefing_books_scraper import BriefingBooksScraper
 from src.services.ai_service import AIService
 
 bp = Blueprint('api', __name__)
@@ -1016,4 +1017,323 @@ def get_scrape_logs():
 
     except Exception as e:
         logger.error(f"Error getting scrape logs: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ==================== DOCUMENT ENDPOINTS ====================
+
+@bp.route('/documents')
+def get_documents():
+    """Search and browse FMP documents"""
+    try:
+        # Get query parameters
+        search_query = request.args.get('q', '')
+        document_type = request.args.get('type')
+        fmp = request.args.get('fmp')
+        limit = request.args.get('limit', 50, type=int)
+        offset = request.args.get('offset', 0, type=int)
+
+        # Build query
+        query = """
+            SELECT id, document_id, title, document_type, fmp,
+                   amendment_number, document_date, publication_date,
+                   status, source_url, download_url, summary,
+                   keywords, species, topics, page_count, created_at
+            FROM fmp_documents
+            WHERE 1=1
+        """
+        params = {}
+
+        # Add search filter
+        if search_query:
+            query += " AND search_vector @@ plainto_tsquery('english', :search_query)"
+            params['search_query'] = search_query
+
+        # Add type filter
+        if document_type:
+            query += " AND document_type = :document_type"
+            params['document_type'] = document_type
+
+        # Add FMP filter
+        if fmp:
+            query += " AND fmp = :fmp"
+            params['fmp'] = fmp
+
+        # Add ordering and pagination
+        query += " ORDER BY document_date DESC NULLS LAST, created_at DESC"
+        query += " LIMIT :limit OFFSET :offset"
+        params['limit'] = limit
+        params['offset'] = offset
+
+        result = db.session.execute(text(query), params)
+        documents = []
+
+        for row in result:
+            documents.append({
+                'id': row[0],
+                'document_id': row[1],
+                'title': row[2],
+                'document_type': row[3],
+                'fmp': row[4],
+                'amendment_number': row[5],
+                'document_date': row[6].isoformat() if row[6] else None,
+                'publication_date': row[7].isoformat() if row[7] else None,
+                'status': row[8],
+                'source_url': row[9],
+                'download_url': row[10],
+                'summary': row[11],
+                'keywords': row[12],
+                'species': row[13],
+                'topics': row[14],
+                'page_count': row[15],
+                'created_at': row[16].isoformat() if row[16] else None
+            })
+
+        # Get total count
+        count_query = "SELECT COUNT(*) FROM fmp_documents WHERE 1=1"
+        count_params = {}
+        if search_query:
+            count_query += " AND search_vector @@ plainto_tsquery('english', :search_query)"
+            count_params['search_query'] = search_query
+        if document_type:
+            count_query += " AND document_type = :document_type"
+            count_params['document_type'] = document_type
+        if fmp:
+            count_query += " AND fmp = :fmp"
+            count_params['fmp'] = fmp
+
+        count_result = db.session.execute(text(count_query), count_params)
+        total = count_result.scalar()
+
+        return jsonify({
+            'documents': documents,
+            'total': total,
+            'limit': limit,
+            'offset': offset
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting documents: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/documents/<document_id>')
+def get_document(document_id):
+    """Get single document with full details"""
+    try:
+        query = """
+            SELECT id, document_id, title, document_type, fmp,
+                   amendment_number, document_date, publication_date, effective_date,
+                   status, source_url, download_url, description, summary,
+                   keywords, species, topics, file_size_bytes, page_count,
+                   processed, indexed, metadata, created_at, updated_at
+            FROM fmp_documents
+            WHERE document_id = :document_id
+        """
+
+        result = db.session.execute(text(query), {'document_id': document_id})
+        row = result.fetchone()
+
+        if not row:
+            return jsonify({'error': 'Document not found'}), 404
+
+        document = {
+            'id': row[0],
+            'document_id': row[1],
+            'title': row[2],
+            'document_type': row[3],
+            'fmp': row[4],
+            'amendment_number': row[5],
+            'document_date': row[6].isoformat() if row[6] else None,
+            'publication_date': row[7].isoformat() if row[7] else None,
+            'effective_date': row[8].isoformat() if row[8] else None,
+            'status': row[9],
+            'source_url': row[10],
+            'download_url': row[11],
+            'description': row[12],
+            'summary': row[13],
+            'keywords': row[14],
+            'species': row[15],
+            'topics': row[16],
+            'file_size_bytes': row[17],
+            'page_count': row[18],
+            'processed': row[19],
+            'indexed': row[20],
+            'metadata': row[21],
+            'created_at': row[22].isoformat() if row[22] else None,
+            'updated_at': row[23].isoformat() if row[23] else None
+        }
+
+        # Get document chunks for this document
+        chunks_query = """
+            SELECT chunk_index, chunk_text, chunk_type, section_title, page_number
+            FROM document_chunks
+            WHERE document_id = :document_id
+            ORDER BY chunk_index
+        """
+        chunks_result = db.session.execute(text(chunks_query), {'document_id': document_id})
+
+        document['chunks'] = []
+        for chunk_row in chunks_result:
+            document['chunks'].append({
+                'chunk_index': chunk_row[0],
+                'chunk_text': chunk_row[1],
+                'chunk_type': chunk_row[2],
+                'section_title': chunk_row[3],
+                'page_number': chunk_row[4]
+            })
+
+        return jsonify(document)
+
+    except Exception as e:
+        logger.error(f"Error getting document {document_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/documents/stats')
+def get_document_stats():
+    """Get document statistics"""
+    try:
+        stats_query = """
+            SELECT
+                COUNT(*) as total_documents,
+                COUNT(DISTINCT fmp) as total_fmps,
+                COUNT(DISTINCT document_type) as total_types,
+                SUM(CASE WHEN processed = true THEN 1 ELSE 0 END) as processed_count,
+                SUM(CASE WHEN indexed = true THEN 1 ELSE 0 END) as indexed_count,
+                SUM(page_count) as total_pages,
+                SUM(file_size_bytes) as total_bytes
+            FROM fmp_documents
+        """
+
+        result = db.session.execute(text(stats_query))
+        row = result.fetchone()
+
+        # Get documents by type
+        type_query = """
+            SELECT document_type, COUNT(*) as count
+            FROM fmp_documents
+            WHERE document_type IS NOT NULL
+            GROUP BY document_type
+            ORDER BY count DESC
+        """
+        type_result = db.session.execute(text(type_query))
+        by_type = {row[0]: row[1] for row in type_result}
+
+        # Get documents by FMP
+        fmp_query = """
+            SELECT fmp, COUNT(*) as count
+            FROM fmp_documents
+            WHERE fmp IS NOT NULL
+            GROUP BY fmp
+            ORDER BY count DESC
+        """
+        fmp_result = db.session.execute(text(fmp_query))
+        by_fmp = {row[0]: row[1] for row in fmp_result}
+
+        return jsonify({
+            'total_documents': row[0],
+            'total_fmps': row[1],
+            'total_types': row[2],
+            'processed_count': row[3],
+            'indexed_count': row[4],
+            'total_pages': row[5],
+            'total_bytes': row[6],
+            'by_type': by_type,
+            'by_fmp': by_fmp
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting document stats: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/scrape/documents/briefing-books', methods=['POST'])
+def scrape_briefing_books():
+    """Manually trigger briefing books scraping"""
+    try:
+        start_time = datetime.utcnow()
+
+        # Get optional parameters
+        data = request.get_json() or {}
+        limit = data.get('limit', 10)  # Default to first 10 briefing books
+
+        scraper = BriefingBooksScraper()
+        results = scraper.scrape_briefing_books(limit=limit)
+
+        # Log the scrape
+        duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+        log = ScrapeLog(
+            source='fmp_documents',
+            action_type='scrape_briefing_books',
+            status='success' if results.get('documents_queued', 0) > 0 else 'warning',
+            items_found=results.get('documents_queued', 0),
+            items_new=results.get('documents_queued', 0),
+            items_updated=0,
+            error_message=results.get('errors') if results.get('errors') else None,
+            duration_ms=duration_ms,
+            completed_at=datetime.utcnow()
+        )
+        db.session.add(log)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'booksFound': results.get('books_found', 0),
+            'documentsQueued': results.get('documents_queued', 0),
+            'duration': duration_ms,
+            'errors': results.get('errors', [])
+        })
+
+    except Exception as e:
+        logger.error(f"Error in scrape_briefing_books: {e}")
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/scrape/queue/status')
+def get_scrape_queue_status():
+    """Get status of document scrape queue"""
+    try:
+        status_query = """
+            SELECT
+                status,
+                COUNT(*) as count,
+                SUM(CASE WHEN status = 'failed' THEN attempts ELSE 0 END) as total_attempts
+            FROM document_scrape_queue
+            GROUP BY status
+        """
+
+        result = db.session.execute(text(status_query))
+        status_counts = {}
+        for row in result:
+            status_counts[row[0]] = {
+                'count': row[1],
+                'total_attempts': row[2]
+            }
+
+        # Get recent queue items
+        recent_query = """
+            SELECT url, document_type, fmp, status, attempts, priority, created_at, updated_at
+            FROM document_scrape_queue
+            ORDER BY updated_at DESC
+            LIMIT 20
+        """
+        recent_result = db.session.execute(text(recent_query))
+
+        recent_items = []
+        for row in recent_result:
+            recent_items.append({
+                'url': row[0],
+                'document_type': row[1],
+                'fmp': row[2],
+                'status': row[3],
+                'attempts': row[4],
+                'priority': row[5],
+                'created_at': row[6].isoformat() if row[6] else None,
+                'updated_at': row[7].isoformat() if row[7] else None
+            })
+
+        return jsonify({
+            'status_counts': status_counts,
+            'recent_items': recent_items
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting scrape queue status: {e}")
         return jsonify({'error': str(e)}), 500
