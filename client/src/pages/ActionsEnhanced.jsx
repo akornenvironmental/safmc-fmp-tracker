@@ -32,7 +32,7 @@ const ActionsEnhanced = () => {
     { key: 'fmp', label: 'FMP', core: true, width: '150px' },
     { key: 'progress_stage', label: 'Stage', core: true, width: '180px' },
     { key: 'progress', label: 'Progress', core: true, width: '120px' },
-    { key: 'last_updated', label: 'Updated', core: true, width: '140px' },
+    { key: 'last_updated', label: 'Last Action', core: true, width: '140px' },
     { key: 'description', label: 'Description', core: false, width: '300px' },
     { key: 'type', label: 'Type', core: false, width: '120px' },
   ]);
@@ -514,7 +514,7 @@ const ActionsEnhanced = () => {
           </caption>
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-2 py-1.5 text-left">
+              <th scope="col" className="w-12 px-3 py-3 sm:px-4 text-left">
                 <input
                   type="checkbox"
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
@@ -566,7 +566,7 @@ const ActionsEnhanced = () => {
             ) : (
               paginatedActions.map((action, index) => (
                 <tr key={action.id || index} className="hover:bg-gray-50">
-                  <td className="px-2 py-0.5">
+                  <td className="w-12 px-3 py-3 sm:px-4">
                     <input
                       type="checkbox"
                       checked={selectedActions.has(action.id)}

@@ -1,15 +1,13 @@
 {
   "commit": "NEXT",
-  "description": "FORCE REBUILD v3: Table spacing fix with executable code change",
-  "timestamp": "2025-11-07T22:15:00Z",
-  "build": "force-rebuild-v3-executable",
+  "description": "Fix checkbox column width and rename to Last Action",
+  "timestamp": "2025-11-07T22:30:00Z",
+  "build": "checkbox-lastaction-fix",
   "changes": [
-    "Added BUILD_VERSION constant and console.log to App.jsx (actual code change)",
-    "This executable code WILL change the compiled bundle hash",
-    "Fixed Actions page table padding (px-4 py-3 sm:px-6)",
-    "Fixed Meetings page table padding",
-    "Fixed ActionsEnhanced page table padding",
-    "Fixed CommentsEnhanced page table padding",
-    "Previous attempts failed because comments don't affect Vite hashes"
+    "Fixed checkbox column width: narrow from wide to w-12",
+    "Renamed 'Updated' column to 'Last Action' for clarity",
+    "Checkbox header: w-12 px-3 py-3 sm:px-4",
+    "Checkbox cells: w-12 px-3 py-3 sm:px-4",
+    "Updated BUILD_VERSION to force new asset hash"
   ]
 }
