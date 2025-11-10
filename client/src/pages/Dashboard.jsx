@@ -76,6 +76,11 @@ const Dashboard = () => {
 
   return (
     <div>
+      {/* DEBUG BANNER - IMPOSSIBLE TO MISS */}
+      <div className="bg-red-600 text-white text-center py-4 mb-6 text-2xl font-bold border-4 border-yellow-400">
+        🔴 DEBUG MODE v2 ACTIVE - YOU'RE SEEING THE NEW BUILD! 🔴
+      </div>
+
       {/* Header with Update Button */}
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div className="sm:flex-auto">

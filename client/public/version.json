@@ -1,12 +1,12 @@
 {
   "commit": "NEXT",
-  "description": "Added visible version badge for debugging browser cache issues",
-  "timestamp": "2025-11-10T02:00:00Z",
-  "build": "v2-visible-version-debug",
+  "description": "HUGE RED DEBUG BANNER - impossible to miss!",
+  "timestamp": "2025-11-10T03:00:00Z",
+  "build": "v3-giant-red-banner-debug",
   "changes": [
-    "Added green 'Build: v2-debug' badge to Dashboard header (highly visible)",
-    "Updated BUILD_VERSION constant to force new JavaScript bundle generation",
-    "This will help diagnose browser cache issues",
-    "All previous table padding fixes remain: px-6 py-3 headers, px-6 py-4 body cells"
+    "🔴 ADDED MASSIVE RED BANNER AT TOP OF DASHBOARD - IMPOSSIBLE TO MISS!",
+    "Banner says: DEBUG MODE v2 ACTIVE - YOU'RE SEEING THE NEW BUILD!",
+    "Also has green version badge next to Dashboard title",
+    "All table padding fixes present: px-6 py-3 headers, px-6 py-4 body cells"
   ]
 }
