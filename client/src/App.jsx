@@ -15,7 +15,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-10-v4-header-light-mode-fix';
+const BUILD_VERSION = '2025-11-10-v5-header-direct-css-fix';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

@@ -78,6 +78,15 @@ html.text-size-large {
   color: #f0f0f0;
 }
 
+/* Header Light Mode Fix - Force white background in light mode */
+header[role="banner"] nav {
+  background-color: #ffffff !important;
+}
+
+.dark header[role="banner"] nav {
+  background-color: #1f2937 !important; /* gray-800 */
+}
+
 .dark .bg-white:not(header *):not(nav) {
   background-color: #1e1e1e !important;
 }

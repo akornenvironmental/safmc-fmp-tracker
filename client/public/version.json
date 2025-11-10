@@ -1,12 +1,13 @@
 {
   "commit": "NEXT",
-  "description": "Fixed header light mode color",
-  "timestamp": "2025-11-10T03:30:00Z",
-  "build": "v4-header-light-mode-fix",
+  "description": "Fixed header light mode with direct CSS",
+  "timestamp": "2025-11-10T04:00:00Z",
+  "build": "v5-header-direct-css-fix",
   "changes": [
-    "✅ Fixed header showing white in light mode (was dark blue)",
-    "Updated CSS to exclude header nav from dark mode overrides",
-    "Removed debug banner - clean UI restored",
+    "✅ Fixed header with direct CSS rule: header[role='banner'] nav forced to white",
+    "Added !important rules to override any conflicting styles",
+    "Light mode: white background (#ffffff)",
+    "Dark mode: gray-800 background (#1f2937)",
     "All table padding fixes remain: px-6 py-3 headers, px-6 py-4 body cells"
   ]
 }
