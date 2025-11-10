@@ -1,13 +1,12 @@
 {
   "commit": "NEXT",
-  "description": "Complete table padding standardization and footer cleanup",
-  "timestamp": "2025-11-10T01:00:00Z",
-  "build": "dashboard-footer-cleanup",
+  "description": "Added visible version badge for debugging browser cache issues",
+  "timestamp": "2025-11-10T02:00:00Z",
+  "build": "v2-visible-version-debug",
   "changes": [
-    "Updated Dashboard table: px-6 py-3 headers, px-6 py-4 body cells",
-    "Simplified footer text (removed verbose descriptions)",
-    "ALL tables now match Interview System padding pattern consistently",
-    "Previous: CommentsEnhanced, MeetingsEnhanced, ActionsEnhanced tables updated",
-    "Previous: Changed 'Organization' to 'Affiliation' in Public Comments"
+    "Added green 'Build: v2-debug' badge to Dashboard header (highly visible)",
+    "Updated BUILD_VERSION constant to force new JavaScript bundle generation",
+    "This will help diagnose browser cache issues",
+    "All previous table padding fixes remain: px-6 py-3 headers, px-6 py-4 body cells"
   ]
 }

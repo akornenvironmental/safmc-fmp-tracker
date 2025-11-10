@@ -79,7 +79,12 @@ const Dashboard = () => {
       {/* Header with Update Button */}
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-3xl font-bold text-gray-900">Dashboard</h1>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
+              Build: v2-debug
+            </span>
+          </div>
           <p className="mt-2 text-sm text-gray-700">
             Overview of FMP actions, meetings, and public comments
           </p>
