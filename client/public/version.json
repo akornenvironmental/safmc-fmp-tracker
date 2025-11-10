@@ -1,13 +1,14 @@
 {
   "commit": "NEXT",
-  "description": "Fix checkbox column width and rename to Last Action",
-  "timestamp": "2025-11-07T22:30:00Z",
-  "build": "checkbox-lastaction-fix",
+  "description": "Match all tables to Interview System styling and rename Organization to Affiliation",
+  "timestamp": "2025-11-10T00:00:00Z",
+  "build": "affiliation-table-padding-fix",
   "changes": [
-    "Fixed checkbox column width: narrow from wide to w-12",
-    "Renamed 'Updated' column to 'Last Action' for clarity",
-    "Checkbox header: w-12 px-3 py-3 sm:px-4",
-    "Checkbox cells: w-12 px-3 py-3 sm:px-4",
+    "Changed 'Organization' to 'Affiliation' in Public Comments page",
+    "Updated CommentsEnhanced table: px-6 py-3 headers, px-6 py-4 body cells",
+    "Updated MeetingsEnhanced table: px-6 py-3 headers, px-6 py-4 body cells",
+    "Updated ActionsEnhanced table: px-6 py-3 headers, px-6 py-4 body cells",
+    "All tables now match Interview System consistent padding pattern",
     "Updated BUILD_VERSION to force new asset hash"
   ]
 }

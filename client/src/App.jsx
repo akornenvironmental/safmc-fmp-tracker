@@ -15,7 +15,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-07-checkbox-lastaction-fix';
+const BUILD_VERSION = '2025-11-10-affiliation-table-padding-fix';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

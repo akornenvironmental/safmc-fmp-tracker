@@ -35,7 +35,7 @@ const CommentsEnhanced = () => {
     { key: 'name', label: 'Name', core: true },
     { key: 'actionFmp', label: 'FMP', core: false },
     { key: 'actionTitle', label: 'Action/Amendment', core: false },
-    { key: 'organization', label: 'Organization', core: false },
+    { key: 'organization', label: 'Affiliation', core: false },
     { key: 'state', label: 'State', core: false },
     { key: 'position', label: 'Position', core: false },
     { key: 'commentDate', label: 'Date', core: true },
@@ -344,7 +344,7 @@ const CommentsEnhanced = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-2 py-1.5 text-left">
+              <th scope="col" className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
                   checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
@@ -357,7 +357,7 @@ const CommentsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -388,7 +388,7 @@ const CommentsEnhanced = () => {
             ) : (
               paginatedComments.map((comment, index) => (
                 <tr key={comment.id || index} className="hover:bg-gray-50">
-                  <td className="px-2 py-0.5">
+                  <td className="px-6 py-4">
                     <input
                       type="checkbox"
                       checked={selectedComments.has(comment.id)}
@@ -398,7 +398,7 @@ const CommentsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-4 py-3 sm:px-6">
+                    <td key={col.key} className="px-6 py-4">
                       {col.key === 'name' ? (
                         comment.contactId ? (
                           <button

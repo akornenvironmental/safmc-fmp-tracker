@@ -852,7 +852,7 @@ const MeetingsEnhanced = () => {
           </caption>
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-2 py-1.5 text-left">
+              <th scope="col" className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
                   checked={selectedMeetings.size === paginatedMeetings.length && paginatedMeetings.length > 0}
@@ -865,7 +865,7 @@ const MeetingsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -896,7 +896,7 @@ const MeetingsEnhanced = () => {
             ) : (
               paginatedMeetings.map((meeting, index) => (
                 <tr key={meeting.id || index} className="hover:bg-gray-50">
-                  <td className="px-2 py-0.5">
+                  <td className="px-6 py-4">
                     <input
                       type="checkbox"
                       checked={selectedMeetings.has(meeting.id)}
@@ -906,7 +906,7 @@ const MeetingsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-3 py-2">
+                    <td key={col.key} className="px-6 py-4">
                       {col.key === 'title' ? (
                         meeting.source_url ? (
                           <a
