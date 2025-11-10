@@ -15,7 +15,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-10-v3-giant-red-banner-debug';
+const BUILD_VERSION = '2025-11-10-v4-header-light-mode-fix';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

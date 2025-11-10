@@ -1,12 +1,12 @@
 {
   "commit": "NEXT",
-  "description": "HUGE RED DEBUG BANNER - impossible to miss!",
-  "timestamp": "2025-11-10T03:00:00Z",
-  "build": "v3-giant-red-banner-debug",
+  "description": "Fixed header light mode color",
+  "timestamp": "2025-11-10T03:30:00Z",
+  "build": "v4-header-light-mode-fix",
   "changes": [
-    "🔴 ADDED MASSIVE RED BANNER AT TOP OF DASHBOARD - IMPOSSIBLE TO MISS!",
-    "Banner says: DEBUG MODE v2 ACTIVE - YOU'RE SEEING THE NEW BUILD!",
-    "Also has green version badge next to Dashboard title",
-    "All table padding fixes present: px-6 py-3 headers, px-6 py-4 body cells"
+    "✅ Fixed header showing white in light mode (was dark blue)",
+    "Updated CSS to exclude header nav from dark mode overrides",
+    "Removed debug banner - clean UI restored",
+    "All table padding fixes remain: px-6 py-3 headers, px-6 py-4 body cells"
   ]
 }

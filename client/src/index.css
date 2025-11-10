@@ -78,7 +78,7 @@ html.text-size-large {
   color: #f0f0f0;
 }
 
-.dark .bg-white {
+.dark .bg-white:not(header *):not(nav) {
   background-color: #1e1e1e !important;
 }
 
@@ -135,7 +135,7 @@ html.text-size-large {
   color: #9e9e9e;
 }
 
-.dark nav {
+.dark nav:not(header nav) {
   background-color: #1e1e1e !important;
   border-bottom: 1px solid #4a4a4a;
 }
