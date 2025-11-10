@@ -1,14 +1,13 @@
 {
   "commit": "NEXT",
-  "description": "Match all tables to Interview System styling and rename Organization to Affiliation",
-  "timestamp": "2025-11-10T00:00:00Z",
-  "build": "affiliation-table-padding-fix",
+  "description": "Complete table padding standardization and footer cleanup",
+  "timestamp": "2025-11-10T01:00:00Z",
+  "build": "dashboard-footer-cleanup",
   "changes": [
-    "Changed 'Organization' to 'Affiliation' in Public Comments page",
-    "Updated CommentsEnhanced table: px-6 py-3 headers, px-6 py-4 body cells",
-    "Updated MeetingsEnhanced table: px-6 py-3 headers, px-6 py-4 body cells",
-    "Updated ActionsEnhanced table: px-6 py-3 headers, px-6 py-4 body cells",
-    "All tables now match Interview System consistent padding pattern",
-    "Updated BUILD_VERSION to force new asset hash"
+    "Updated Dashboard table: px-6 py-3 headers, px-6 py-4 body cells",
+    "Simplified footer text (removed verbose descriptions)",
+    "ALL tables now match Interview System padding pattern consistently",
+    "Previous: CommentsEnhanced, MeetingsEnhanced, ActionsEnhanced tables updated",
+    "Previous: Changed 'Organization' to 'Affiliation' in Public Comments"
   ]
 }

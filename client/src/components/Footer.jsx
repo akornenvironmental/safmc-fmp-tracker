@@ -29,11 +29,8 @@ const Footer = () => {
 
           {/* Data Source Notice */}
           <div className="pb-2 border-b border-blue-300/30">
-            <p className="text-base text-blue-100 leading-relaxed">
-              <strong className="text-white">Fishery Management Plan Tracking System.</strong> This system tracks amendments, meetings, and public comments for South Atlantic FMPs. All data is sourced from publicly available information on SAFMC.net.
-            </p>
-            <p className="text-xs text-blue-200 mt-2">
-              This system uses AI-powered analysis to assist with tracking and summarization. All information should be verified against official SAFMC sources.
+            <p className="text-sm text-blue-100">
+              Tracking system for South Atlantic FMP amendments, meetings, and public comments. Data sourced from <a href="https://safmc.net" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">SAFMC.net</a>.
             </p>
           </div>
 
