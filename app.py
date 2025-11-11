@@ -56,7 +56,14 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 from src.config.extensions import db, migrate
 db.init_app(app)
 migrate.init_app(app, db)
-CORS(app)
+
+# CORS configuration - allows frontend to communicate with backend API
+# Supports both monolithic deployment (same origin) and separated deployment (different domains)
+CORS(app, origins=[
+    "http://localhost:5173",  # Local development (Vite dev server)
+    "https://safmc-fmp-tracker.onrender.com",  # Current monolithic deployment
+    "https://safmc-fmp-tracker-frontend.onrender.com",  # New separated frontend Static Site
+])
 
 # Import models after db initialization
 from src.models.action import Action
@@ -624,11 +631,12 @@ def debug_static():
     })
 
 # Import and register API routes
-from src.routes import api_routes, auth_routes
+from src.routes import api_routes, auth_routes, admin_routes
 from src.routes.stock_assessment_routes import stock_assessment_bp
 app.register_blueprint(api_routes.bp, url_prefix='/api')
 app.register_blueprint(auth_routes.bp)
 app.register_blueprint(stock_assessment_bp)
+app.register_blueprint(admin_routes.bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
