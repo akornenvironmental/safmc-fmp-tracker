@@ -631,10 +631,10 @@ def debug_static():
     })
 
 # Import and register API routes
-from routes.api_routes import bp as api_bp
-from routes.auth_routes import bp as auth_bp
-from routes.admin_routes import bp as admin_bp
-from routes.stock_assessment_routes import stock_assessment_bp
+from src.routes.api_routes import bp as api_bp
+from src.routes.auth_routes import bp as auth_bp
+from src.routes.admin_routes import bp as admin_bp
+from src.routes.stock_assessment_routes import stock_assessment_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
