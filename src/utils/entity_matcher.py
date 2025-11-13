@@ -282,9 +282,8 @@ def find_or_create_action(
         title=amendment_title,
         description=description,
         status=phase or 'Public Comment',
-        action_type='Amendment',
-        start_date=datetime.utcnow(),
-        data_source=data_source
+        type='Amendment',
+        start_date=datetime.utcnow()
     )
 
     db.session.add(action)
