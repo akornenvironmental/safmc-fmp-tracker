@@ -325,7 +325,7 @@ class CommentsScraper:
         return {
             'comment_id': comment_id,
             'submit_date': comment.get('date', ''),
-            'amendment_id': action_id_str,  # Linked to Action
+            'action_id': action_id_str,  # Linked to Action
             'amendment_phase': source['phase'],
             'name': full_name,
             'organization': org_name,

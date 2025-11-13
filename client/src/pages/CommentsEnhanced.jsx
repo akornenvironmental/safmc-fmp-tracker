@@ -25,9 +25,9 @@ const CommentsEnhanced = () => {
     actionTitle: true,
     organization: true,
     state: true,
-    position: true,
+    position: false,
     commentDate: true,
-    comment_text: false,
+    comment_text: true,
   });
 
   // Define all available columns
@@ -344,7 +344,7 @@ const CommentsEnhanced = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left">
+              <th scope="col" className="px-2 py-1.5 text-left">
                 <input
                   type="checkbox"
                   checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
@@ -357,7 +357,7 @@ const CommentsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -375,20 +375,20 @@ const CommentsEnhanced = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
                   Loading comments...
                 </td>
               </tr>
             ) : paginatedComments.length === 0 ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
                   No comments found
                 </td>
               </tr>
             ) : (
               paginatedComments.map((comment, index) => (
                 <tr key={comment.id || index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedComments.has(comment.id)}
@@ -398,7 +398,7 @@ const CommentsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-6 py-4">
+                    <td key={col.key} className="px-2 py-0.5">
                       {col.key === 'name' ? (
                         comment.contactId ? (
                           <button

@@ -230,8 +230,7 @@ const StockAssessments = () => {
             Stock assessments sync weekly from SEDAR and StockSMART
           </p>
         </div>
-        {/* Sync button disabled - use background jobs to avoid memory issues */}
-        {/* <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
             onClick={syncAssessments}
             disabled={syncing}
@@ -240,7 +239,7 @@ const StockAssessments = () => {
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync Data'}
           </button>
-        </div> */}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -398,7 +397,7 @@ const StockAssessments = () => {
             <tr>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('species')}
               >
                 <div className="flex items-center gap-1">
@@ -408,7 +407,7 @@ const StockAssessments = () => {
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('sedar')}
               >
                 <div className="flex items-center gap-1">
@@ -418,7 +417,7 @@ const StockAssessments = () => {
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('status')}
               >
                 <div className="flex items-center gap-1">
@@ -428,7 +427,7 @@ const StockAssessments = () => {
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('b_bmsy')}
               >
                 <div className="flex items-center gap-1">
@@ -438,7 +437,7 @@ const StockAssessments = () => {
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('f_fmsy')}
               >
                 <div className="flex items-center gap-1">
@@ -446,12 +445,12 @@ const StockAssessments = () => {
                   <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 FMP
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('updated')}
               >
                 <div className="flex items-center gap-1">
@@ -464,20 +463,20 @@ const StockAssessments = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan="7" className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan="7" className="px-6 py-12 text-center text-sm text-gray-500">
                   Loading assessments...
                 </td>
               </tr>
             ) : sortedAssessments.length === 0 ? (
               <tr>
-                <td colSpan="7" className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan="7" className="px-6 py-12 text-center text-sm text-gray-500">
                   No assessments found. Try adjusting your search and filters.
                 </td>
               </tr>
             ) : (
               sortedAssessments.map((assessment, index) => (
                 <tr key={assessment.id || index} className="hover:bg-gray-50">
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-0.5">
                     {assessment.source_url ? (
                       <a
                         href={assessment.source_url}
@@ -494,16 +493,16 @@ const StockAssessments = () => {
                       <div className="text-xs text-gray-500 italic">{assessment.scientific_name}</div>
                     )}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-2 py-0.5 whitespace-nowrap">
                     <div className="text-xs text-gray-900">{assessment.sedar_number || 'N/A'}</div>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-2 py-0.5 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(assessment)}`}>
                       {getStatusIcon(assessment)}
                       {getStatusLabel(assessment)}
                     </span>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-2 py-0.5 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {assessment.b_bmsy ? (
                         <span className={assessment.b_bmsy >= 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
@@ -514,7 +513,7 @@ const StockAssessments = () => {
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-2 py-0.5 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {assessment.f_fmsy ? (
                         <span className={assessment.f_fmsy <= 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
@@ -525,7 +524,7 @@ const StockAssessments = () => {
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-0.5">
                     {assessment.fmps_affected && assessment.fmps_affected.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {assessment.fmps_affected.map((fmp, idx) => (
@@ -538,7 +537,7 @@ const StockAssessments = () => {
                       <span className="text-xs text-gray-400">N/A</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                  <td className="px-2 py-0.5 whitespace-nowrap text-xs text-gray-500">
                     {assessment.updated_at ? new Date(assessment.updated_at).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

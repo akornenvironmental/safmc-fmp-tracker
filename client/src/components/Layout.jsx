@@ -10,19 +10,23 @@ const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme, textSize, setTextSize, isDark } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, isSuperAdmin, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
+  // Build navigation links based on user role
   const navLinks = [
     { to: '/', label: 'Dashboard' },
     { to: '/actions', label: 'Actions' },
     { to: '/meetings', label: 'Meetings' },
     { to: '/comments', label: 'Comments' },
-    { to: '/assessments', label: 'Stocks' }
+    { to: '/assessments', label: 'Stocks' },
+    // Admin links - conditionally shown based on role
+    ...(isAdmin() ? [{ to: '/admin/logs', label: 'Activity Logs' }] : []),
+    ...(isSuperAdmin() ? [{ to: '/admin/users', label: 'Users' }] : [])
   ];
 
   const customDescription = (
@@ -67,6 +71,7 @@ const Layout = () => {
         setTextSize={setTextSize}
         userName={user?.name || user?.email}
         userEmail={user?.email}
+        userRole={user?.role}
         onLogoutClick={handleLogout}
         headerClassName="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50"
         containerClassName="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"

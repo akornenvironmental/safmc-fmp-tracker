@@ -39,6 +39,7 @@ export default function ReusableHeader({
   setTextSize,
   userName,
   userEmail,
+  userRole,
   userAvatarUrl,
   onSettingsClick,
   onLogoutClick,
@@ -172,6 +173,7 @@ export default function ReusableHeader({
                 setTextSize={setTextSize}
                 userName={userName}
                 userEmail={userEmail}
+                userRole={userRole}
                 userAvatarUrl={userAvatarUrl}
                 onSettingsClick={onSettingsClick}
                 onLogoutClick={onLogoutClick}

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from src.config.extensions import db
 from src.models.user import User
+from src.middleware.auth_middleware import log_activity
 import logging
 import smtplib
 from email.mime.text import MIMEText
@@ -150,10 +151,25 @@ def verify_login():
         user = User.query.filter_by(email=email, login_token=token).first()
 
         if not user:
+            # Log failed login attempt - invalid token or email
+            log_activity(
+                activity_type='user.login_failed',
+                description=f'Failed login attempt for {email} - invalid link',
+                category='auth'
+            )
             return jsonify({'error': 'Invalid login link'}), 401
 
         # Check if token is expired
         if user.token_expiry < datetime.utcnow():
+            # Log failed login attempt - expired token
+            log_activity(
+                activity_type='user.login_failed',
+                description=f'Failed login attempt for {user.email} - link expired',
+                category='auth',
+                resource_type='user',
+                resource_id=user.id,
+                resource_name=user.email
+            )
             return jsonify({'error': 'Login link has expired. Please request a new one.'}), 401
 
         # Update last login and clear token
@@ -177,6 +193,16 @@ def verify_login():
 
         logger.info(f"User {user.email} logged in successfully")
 
+        # Log successful login activity
+        log_activity(
+            activity_type='user.login',
+            description=f'User logged in successfully',
+            category='auth',
+            resource_type='user',
+            resource_id=user.id,
+            resource_name=user.email
+        )
+
         return jsonify({
             'success': True,
             'token': jwt_token,
@@ -197,6 +223,13 @@ def verify_login():
 @bp.route('/logout', methods=['POST'])
 def logout():
     """Logout endpoint (client-side token removal)"""
+    # Log logout activity
+    log_activity(
+        activity_type='user.logout',
+        description='User logged out',
+        category='auth'
+    )
+
     return jsonify({'success': True, 'message': 'Logged out successfully'})
 
 

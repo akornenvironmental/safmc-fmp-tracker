@@ -130,12 +130,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const isSuperAdmin = () => {
+    return user?.role === 'super_admin';
+  };
+
   const isAdmin = () => {
-    return user?.role === 'admin';
+    return user?.role === 'super_admin' || user?.role === 'admin';
   };
 
   const isEditor = () => {
-    return user?.role === 'admin' || user?.role === 'editor';
+    return user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'editor';
   };
 
   const value = {
@@ -146,6 +150,7 @@ export const AuthProvider = ({ children }) => {
     verifyLogin,
     logout,
     checkAuth,
+    isSuperAdmin,
     isAdmin,
     isEditor,
   };

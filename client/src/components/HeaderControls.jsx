@@ -18,6 +18,7 @@ export default function HeaderControls({
   setTextSize,
   userName = 'User',
   userEmail,
+  userRole,
   userAvatarUrl,
   onSettingsClick,
   onLogoutClick,
@@ -103,8 +104,27 @@ export default function HeaderControls({
                   {userName}
                 </div>
                 {userEmail && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     {userEmail}
+                  </div>
+                )}
+                {userRole && (
+                  <div className="mt-2">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        userRole === 'super_admin'
+                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                          : userRole === 'admin'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {userRole === 'super_admin'
+                        ? 'Super Admin'
+                        : userRole === 'admin'
+                        ? 'Admin'
+                        : 'Editor'}
+                    </span>
                   </div>
                 )}
               </div>

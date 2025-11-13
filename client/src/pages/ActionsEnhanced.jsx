@@ -514,7 +514,7 @@ const ActionsEnhanced = () => {
           </caption>
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left">
+              <th scope="col" className="px-2 py-1.5 text-left">
                 <input
                   type="checkbox"
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
@@ -533,7 +533,7 @@ const ActionsEnhanced = () => {
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   style={{ width: col.width }}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${
+                  className={`px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${
                     !col.locked ? 'cursor-grab hover:bg-gray-200' : 'cursor-pointer hover:bg-gray-100'
                   } ${draggedColumn === index ? 'opacity-50 bg-gray-200' : ''}`}
                   onClick={() => handleSort(col.key)}
@@ -553,20 +553,20 @@ const ActionsEnhanced = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
                   Loading actions...
                 </td>
               </tr>
             ) : paginatedActions.length === 0 ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
                   No actions found
                 </td>
               </tr>
             ) : (
               paginatedActions.map((action, index) => (
                 <tr key={action.id || index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedActions.has(action.id)}
@@ -576,7 +576,7 @@ const ActionsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-6 py-4" style={{ width: col.width }}>
+                    <td key={col.key} className="px-2 py-0.5" style={{ width: col.width }}>
                       {col.key === 'title' ? (
                         <>
                           {action.source_url ? (
