@@ -9,7 +9,7 @@ class User(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     name = db.Column(db.String(255), nullable=True)
-    role = db.Column(db.Enum('admin', 'editor', name='user_roles'), nullable=False, default='editor')
+    role = db.Column(db.Enum('admin', 'editor', 'super_admin', name='user_roles'), nullable=False, default='editor')
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
     login_token = db.Column(db.String(255), nullable=True)
