@@ -953,14 +953,14 @@ def scrape_comments():
                 comment.key_topics = comment_data.get('key_topics')
                 comment.contact_id = comment_data.get('contact_id')
                 comment.organization_id = comment_data.get('organization_id')
-                comment.action_id = comment_data.get('amendment_id')
+                comment.action_id = comment_data.get('action_id')
                 comment.updated_at = datetime.utcnow()
                 items_updated += 1
             else:
                 # Create new
                 comment = Comment(
                     comment_id=comment_data['comment_id'],
-                    action_id=comment_data.get('amendment_id'),
+                    action_id=comment_data.get('action_id'),
                     contact_id=comment_data.get('contact_id'),
                     organization_id=comment_data.get('organization_id'),
                     name=comment_data.get('name'),
