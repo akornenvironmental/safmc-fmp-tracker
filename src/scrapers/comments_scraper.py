@@ -263,6 +263,11 @@ class CommentsScraper:
         # Find or create Action from amendment metadata
         action = None
         action_id_str = None
+
+        # DEBUG: Log metadata title
+        metadata_title = metadata.get('title')
+        logger.info(f"[DEBUG] Processing comment - metadata title: '{metadata_title}'")
+
         if metadata.get('title'):
             try:
                 action = find_or_create_action(
@@ -271,11 +276,19 @@ class CommentsScraper:
                     phase=source['phase'],
                     data_source=source['name']
                 )
+                logger.info(f"[DEBUG] find_or_create_action returned: {action}")
+
                 if action:
                     db.session.flush()  # Get the ID without committing
                     action_id_str = action.action_id
+                    logger.info(f"[DEBUG] action_id_str set to: '{action_id_str}'")
+                else:
+                    logger.warning(f"[DEBUG] find_or_create_action returned None for title '{metadata_title}'")
             except Exception as e:
                 logger.error(f"Error creating action: {e}")
+                logger.error(f"[DEBUG] Exception details: {type(e).__name__}: {str(e)}")
+        else:
+            logger.warning(f"[DEBUG] No title in metadata, skipping action creation")
 
         # Find or create Contact
         contact = None
@@ -322,7 +335,7 @@ class CommentsScraper:
             except Exception as e:
                 logger.error(f"Error creating organization: {e}")
 
-        return {
+        comment_data = {
             'comment_id': comment_id,
             'submit_date': comment.get('date', ''),
             'action_id': action_id_str,  # Linked to Action
@@ -342,6 +355,11 @@ class CommentsScraper:
             'contact_id': contact_id_int,
             'organization_id': organization_id_int
         }
+
+        # DEBUG: Log the action_id being returned
+        logger.info(f"[DEBUG] Returning comment data with action_id: '{comment_data.get('action_id')}' for comment_id: '{comment_id}'")
+
+        return comment_data
 
     def _parse_location(self, location: str) -> tuple:
         """Parse city and state from location string"""
