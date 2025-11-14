@@ -938,10 +938,16 @@ def scrape_comments():
         items_updated = 0
 
         for comment_data in results['comments']:
+            # DEBUG: Log incoming comment data
+            logger.info(f"[ENDPOINT DEBUG] Received comment_data for {comment_data['comment_id']}")
+            logger.info(f"[ENDPOINT DEBUG] action_id in comment_data: '{comment_data.get('action_id')}'")
+            logger.info(f"[ENDPOINT DEBUG] contact_id: {comment_data.get('contact_id')}, org_id: {comment_data.get('organization_id')}")
+
             comment = Comment.query.filter_by(comment_id=comment_data['comment_id']).first()
 
             if comment:
                 # Update existing
+                logger.info(f"[ENDPOINT DEBUG] Updating existing comment {comment.comment_id}")
                 comment.name = comment_data.get('name')
                 comment.organization = comment_data.get('organization')
                 comment.city = comment_data.get('city')
@@ -954,13 +960,18 @@ def scrape_comments():
                 comment.contact_id = comment_data.get('contact_id')
                 comment.organization_id = comment_data.get('organization_id')
                 comment.action_id = comment_data.get('action_id')
+                logger.info(f"[ENDPOINT DEBUG] Set comment.action_id to: '{comment.action_id}'")
                 comment.updated_at = datetime.utcnow()
                 items_updated += 1
             else:
                 # Create new
+                action_id_value = comment_data.get('action_id')
+                logger.info(f"[ENDPOINT DEBUG] Creating new comment {comment_data['comment_id']}")
+                logger.info(f"[ENDPOINT DEBUG] action_id value to be saved: '{action_id_value}'")
+
                 comment = Comment(
                     comment_id=comment_data['comment_id'],
-                    action_id=comment_data.get('action_id'),
+                    action_id=action_id_value,
                     contact_id=comment_data.get('contact_id'),
                     organization_id=comment_data.get('organization_id'),
                     name=comment_data.get('name'),
@@ -977,10 +988,24 @@ def scrape_comments():
                     data_source=comment_data.get('data_source'),
                     comment_date=datetime.utcnow()
                 )
+                logger.info(f"[ENDPOINT DEBUG] Created Comment object with action_id: '{comment.action_id}'")
                 db.session.add(comment)
                 items_new += 1
 
+        logger.info(f"[ENDPOINT DEBUG] About to commit {items_new} new + {items_updated} updated comments to database")
         db.session.commit()
+        logger.info("[ENDPOINT DEBUG] Database commit successful")
+
+        # DEBUG: Verify what's in the database after commit
+        logger.info("[ENDPOINT DEBUG] Verifying database state after commit...")
+        sample_comments = Comment.query.limit(5).all()
+        for c in sample_comments:
+            logger.info(f"[ENDPOINT DEBUG] DB verification - comment_id: {c.comment_id}, action_id: '{c.action_id}', contact_id: {c.contact_id}")
+
+        # Count how many have action_id populated
+        total_comments = Comment.query.count()
+        comments_with_action = Comment.query.filter(Comment.action_id != None).count()
+        logger.info(f"[ENDPOINT DEBUG] Total comments: {total_comments}, with action_id: {comments_with_action}")
 
         # Log the scrape
         duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
