@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AIAssistant from './components/AIAssistant';
 import Dashboard from './pages/Dashboard';
 import ActionsEnhanced from './pages/ActionsEnhanced';
+import ActionsNew from './pages/ActionsNew';
 import MeetingsEnhanced from './pages/MeetingsEnhanced';
 import CommentsEnhanced from './pages/CommentsEnhanced';
 import StockAssessments from './pages/StockAssessments';
@@ -46,6 +47,7 @@ function App() {
             >
               <Route index element={<Dashboard />} />
               <Route path="actions" element={<ActionsEnhanced />} />
+              <Route path="actions-new" element={<ActionsNew />} />
               <Route path="meetings" element={<MeetingsEnhanced />} />
               <Route path="comments" element={<CommentsEnhanced />} />
               <Route path="assessments" element={<StockAssessments />} />
