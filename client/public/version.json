@@ -1,13 +1,12 @@
 {
-  "commit": "NEXT",
-  "description": "Fixed header light mode with direct CSS",
-  "timestamp": "2025-11-10T04:00:00Z",
-  "build": "v5-header-direct-css-fix",
+  "commit": "b1a2973",
+  "description": "Fixed ActionsEnhanced table padding to match Interview System",
+  "timestamp": "2025-11-17T10:15:00Z",
+  "build": "actions-enhanced-padding-fix-final",
   "changes": [
-    "✅ Fixed header with direct CSS rule: header[role='banner'] nav forced to white",
-    "Added !important rules to override any conflicting styles",
-    "Light mode: white background (#ffffff)",
-    "Dark mode: gray-800 background (#1f2937)",
-    "All table padding fixes remain: px-6 py-3 headers, px-6 py-4 body cells"
+    "✅ ActionsEnhanced: Increased padding to px-6 py-3 (headers) and px-6 py-4 (body)",
+    "Matches Interview System pattern exactly",
+    "All tables now have consistent, comfortable spacing",
+    "Users will need to HARD REFRESH (Cmd+Shift+R) to see changes"
   ]
 }
