@@ -1,14 +1,14 @@
 {
-  "commit": "actions-new-page-created",
-  "description": "Created brand new Actions page with Interview System UI/UX",
-  "timestamp": "2025-11-17T12:00:00Z",
-  "build": "actions-new-temp-route",
+  "commit": "checkbox-column-width-fix",
+  "description": "Fixed checkbox column width in ActionsNew to match Contacts",
+  "timestamp": "2025-11-17T12:15:00Z",
+  "build": "actions-new-checkbox-fix",
   "changes": [
-    "✅ Created ActionsNew.jsx - brand new page with correct UI/UX from start",
-    "Uses Interview System Contacts page padding pattern: px-2 py-1.5 (headers), px-2 py-0.5 (body)",
-    "Preserves all functionality from ActionsEnhanced (filtering, sorting, pagination, export, etc.)",
-    "Accessible at temporary URL: /actions-new for testing",
-    "Old /actions route still works - new page will replace it after verification",
-    "Users will need to HARD REFRESH (Cmd+Shift+R) to see new route"
+    "✅ Fixed checkbox column width - constrained to w-10 (40px)",
+    "Problem: Checkbox column was expanding because data columns had explicit widths but checkbox didn't",
+    "Solution: Added w-10 class to both checkbox th (header) and td (body)",
+    "Now matches Interview System Contacts page table layout EXACTLY",
+    "Accessible at: /actions-new for testing",
+    "Users must HARD REFRESH (Cmd+Shift+R) to see the fix!"
   ]
 }
