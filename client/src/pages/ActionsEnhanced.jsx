@@ -1,9 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X } from 'lucide-react';
 
 const ActionsEnhanced = () => {
-  const [filterStage, setFilterStage] = useState('all');
+  const [filterStage, setFilterStage] = useState([]);
+  const [filterFMP, setFilterFMP] = useState([]);
+  const [filterType, setFilterType] = useState([]);
   const [actions, setActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -14,6 +16,13 @@ const ActionsEnhanced = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedActions, setSelectedActions] = useState(new Set());
+  const [showStageDropdown, setShowStageDropdown] = useState(false);
+  const [showFMPDropdown, setShowFMPDropdown] = useState(false);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+
+  const stageDropdownRef = useRef(null);
+  const fmpDropdownRef = useRef(null);
+  const typeDropdownRef = useRef(null);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -41,6 +50,24 @@ const ActionsEnhanced = () => {
 
   useEffect(() => {
     fetchActions();
+  }, []);
+
+  // Click outside handler for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (stageDropdownRef.current && !stageDropdownRef.current.contains(event.target)) {
+        setShowStageDropdown(false);
+      }
+      if (fmpDropdownRef.current && !fmpDropdownRef.current.contains(event.target)) {
+        setShowFMPDropdown(false);
+      }
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
+        setShowTypeDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchActions = async () => {
@@ -88,7 +115,46 @@ const ActionsEnhanced = () => {
     setCurrentPage(1);
     setSelectedActions(new Set());
     setShowColumnSelector(false);
-    setFilterStage('all');
+    setFilterStage([]);
+    setFilterFMP([]);
+    setFilterType([]);
+    setShowStageDropdown(false);
+    setShowFMPDropdown(false);
+    setShowTypeDropdown(false);
+  };
+
+  // Toggle filter functions for multi-select
+  const toggleStageFilter = (stage) => {
+    setFilterStage(prev => {
+      if (prev.includes(stage)) {
+        return prev.filter(s => s !== stage);
+      } else {
+        return [...prev, stage];
+      }
+    });
+    setCurrentPage(1);
+  };
+
+  const toggleFMPFilter = (fmp) => {
+    setFilterFMP(prev => {
+      if (prev.includes(fmp)) {
+        return prev.filter(f => f !== fmp);
+      } else {
+        return [...prev, fmp];
+      }
+    });
+    setCurrentPage(1);
+  };
+
+  const toggleTypeFilter = (type) => {
+    setFilterType(prev => {
+      if (prev.includes(type)) {
+        return prev.filter(t => t !== type);
+      } else {
+        return [...prev, type];
+      }
+    });
+    setCurrentPage(1);
   };
 
   // Handle sorting
@@ -101,23 +167,53 @@ const ActionsEnhanced = () => {
     }
   };
 
+  // Get unique values for filters
+  const uniqueFMPs = useMemo(() => {
+    const fmps = new Set(actions.map(a => a.fmp).filter(Boolean));
+    return Array.from(fmps).sort();
+  }, [actions]);
+
+  const uniqueTypes = useMemo(() => {
+    const types = new Set(actions.map(a => a.type).filter(Boolean));
+    return Array.from(types).sort();
+  }, [actions]);
+
+  const uniqueStages = useMemo(() => {
+    const stages = new Set(actions.map(a => a.progress_stage).filter(Boolean));
+    return Array.from(stages).sort();
+  }, [actions]);
+
   // Filter and sort actions
   const filteredAndSortedActions = useMemo(() => {
-    // First apply stage filter
-    const stageFiltered = actions.filter(action => {
-      if (filterStage === 'all') return true;
-      return action.progress_stage && action.progress_stage.toLowerCase().includes(filterStage.toLowerCase());
-    });
+    // Apply all filters
+    const filtered = actions.filter(action => {
+      // FMP filter
+      if (filterFMP.length > 0 && !filterFMP.includes(action.fmp)) {
+        return false;
+      }
 
-    // Then apply search filter
-    const filtered = stageFiltered.filter(action => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        action.title?.toLowerCase().includes(searchLower) ||
-        action.fmp?.toLowerCase().includes(searchLower) ||
-        action.progress_stage?.toLowerCase().includes(searchLower) ||
-        action.description?.toLowerCase().includes(searchLower)
-      );
+      // Type filter
+      if (filterType.length > 0 && !filterType.includes(action.type)) {
+        return false;
+      }
+
+      // Stage filter
+      if (filterStage.length > 0 && !filterStage.includes(action.progress_stage)) {
+        return false;
+      }
+
+      // Search filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          action.title?.toLowerCase().includes(searchLower) ||
+          action.fmp?.toLowerCase().includes(searchLower) ||
+          action.progress_stage?.toLowerCase().includes(searchLower) ||
+          action.description?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      return true;
     });
 
     // Then sort
@@ -141,7 +237,7 @@ const ActionsEnhanced = () => {
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [actions, searchTerm, sortField, sortDirection, filterStage]);
+  }, [actions, searchTerm, sortField, sortDirection, filterStage, filterFMP, filterType]);
 
   // Pagination
   const paginatedActions = useMemo(() => {
@@ -409,47 +505,127 @@ const ActionsEnhanced = () => {
               {syncing ? 'Syncing...' : 'Sync Actions'}
             </button>
           </div>
+          {/* Multi-select filter dropdowns */}
           <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => setFilterStage('all')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'all'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              All ({actions.length})
-            </button>
-            <button
-              onClick={() => setFilterStage('scoping')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'scoping'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Scoping ({actions.filter(a => a.progress_stage?.toLowerCase().includes('scoping')).length})
-            </button>
-            <button
-              onClick={() => setFilterStage('hearing')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'hearing'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Public Hearing ({actions.filter(a => a.progress_stage?.toLowerCase().includes('hearing')).length})
-            </button>
-            <button
-              onClick={() => setFilterStage('approval')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'approval'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Approval ({actions.filter(a => a.progress_stage?.toLowerCase().includes('approval')).length})
-            </button>
+            {/* Progress Stage Filter */}
+            <div className="relative" ref={stageDropdownRef}>
+              <button
+                onClick={() => setShowStageDropdown(!showStageDropdown)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+              >
+                Progress Stage
+                {filterStage.length > 0 && (
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                    {filterStage.length}
+                  </span>
+                )}
+              </button>
+              {showStageDropdown && (
+                <div className="absolute z-10 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                  <div className="p-2 max-h-60 overflow-y-auto">
+                    {uniqueStages.map(stage => (
+                      <label key={stage} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filterStage.includes(stage)}
+                          onChange={() => toggleStageFilter(stage)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-gray-700">{stage}</span>
+                        <span className="ml-auto text-xs text-gray-500">
+                          ({actions.filter(a => a.progress_stage === stage).length})
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* FMP Filter */}
+            <div className="relative" ref={fmpDropdownRef}>
+              <button
+                onClick={() => setShowFMPDropdown(!showFMPDropdown)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+              >
+                FMP
+                {filterFMP.length > 0 && (
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                    {filterFMP.length}
+                  </span>
+                )}
+              </button>
+              {showFMPDropdown && (
+                <div className="absolute z-10 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                  <div className="p-2 max-h-60 overflow-y-auto">
+                    {uniqueFMPs.map(fmp => (
+                      <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filterFMP.includes(fmp)}
+                          onChange={() => toggleFMPFilter(fmp)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-gray-700">{fmp}</span>
+                        <span className="ml-auto text-xs text-gray-500">
+                          ({actions.filter(a => a.fmp === fmp).length})
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Type Filter */}
+            <div className="relative" ref={typeDropdownRef}>
+              <button
+                onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+              >
+                Type
+                {filterType.length > 0 && (
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                    {filterType.length}
+                  </span>
+                )}
+              </button>
+              {showTypeDropdown && (
+                <div className="absolute z-10 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                  <div className="p-2 max-h-60 overflow-y-auto">
+                    {uniqueTypes.map(type => (
+                      <label key={type} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filterType.includes(type)}
+                          onChange={() => toggleTypeFilter(type)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-gray-700">{type}</span>
+                        <span className="ml-auto text-xs text-gray-500">
+                          ({actions.filter(a => a.type === type).length})
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Clear Filters Button */}
+            {(filterStage.length > 0 || filterFMP.length > 0 || filterType.length > 0) && (
+              <button
+                onClick={() => {
+                  setFilterStage([]);
+                  setFilterFMP([]);
+                  setFilterType([]);
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         </div>
       </div>
