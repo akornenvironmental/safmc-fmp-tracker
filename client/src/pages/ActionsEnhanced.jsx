@@ -26,15 +26,15 @@ const ActionsEnhanced = () => {
     type: false,
   });
 
-  // Define all available columns with widths
+  // Define all available columns with min-widths (using Tailwind classes, not inline styles)
   const [columnOrder, setColumnOrder] = useState([
-    { key: 'title', label: 'Title', core: true, locked: true, width: '300px' },
-    { key: 'fmp', label: 'FMP', core: true, width: '150px' },
-    { key: 'progress_stage', label: 'Stage', core: true, width: '180px' },
-    { key: 'progress', label: 'Progress', core: true, width: '120px' },
-    { key: 'last_updated', label: 'Last Action', core: true, width: '140px' },
-    { key: 'description', label: 'Description', core: false, width: '300px' },
-    { key: 'type', label: 'Type', core: false, width: '120px' },
+    { key: 'title', label: 'Title', core: true, locked: true, minWidth: 'min-w-[300px]' },
+    { key: 'fmp', label: 'FMP', core: true, minWidth: 'min-w-[150px]' },
+    { key: 'progress_stage', label: 'Stage', core: true, minWidth: 'min-w-[180px]' },
+    { key: 'progress', label: 'Progress', core: true, minWidth: 'min-w-[120px]' },
+    { key: 'last_updated', label: 'Last Action', core: true, minWidth: 'min-w-[140px]' },
+    { key: 'description', label: 'Description', core: false, minWidth: 'min-w-[300px]' },
+    { key: 'type', label: 'Type', core: false, minWidth: 'min-w-[120px]' },
   ]);
 
   const [draggedColumn, setDraggedColumn] = useState(null);
@@ -403,7 +403,7 @@ const ActionsEnhanced = () => {
             <button
               onClick={syncActions}
               disabled={syncing}
-              className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Syncing...' : 'Sync Actions'}
@@ -487,7 +487,7 @@ const ActionsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="flex-1 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
           aria-label="Search actions by title, FMP, progress stage, or description"
         />
         <select
@@ -496,7 +496,7 @@ const ActionsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
           aria-label="Number of actions to display per page"
         >
           <option value={20}>Show 20</option>
@@ -532,8 +532,7 @@ const ActionsEnhanced = () => {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  style={{ width: col.width }}
-                  className={`px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${
+                  className={`px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${col.minWidth || ''} ${
                     !col.locked ? 'cursor-grab hover:bg-gray-200' : 'cursor-pointer hover:bg-gray-100'
                   } ${draggedColumn === index ? 'opacity-50 bg-gray-200' : ''}`}
                   onClick={() => handleSort(col.key)}
@@ -565,7 +564,7 @@ const ActionsEnhanced = () => {
               </tr>
             ) : (
               paginatedActions.map((action, index) => (
-                <tr key={action.id || index} className="hover:bg-gray-50 transition-colors duration-150">
+                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
@@ -576,7 +575,7 @@ const ActionsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-2 py-0.5" style={{ width: col.width }}>
+                    <td key={col.key} className={`px-2 py-0.5 ${col.minWidth || ''}`}>
                       {col.key === 'title' ? (
                         <>
                           {action.source_url ? (

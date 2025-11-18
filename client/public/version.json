@@ -1,16 +1,20 @@
 {
-  "commit": "table-standardization-contacts-pattern",
-  "description": "Standardized all table styling to match Contacts pattern from Interview System",
-  "timestamp": "2025-11-18T12:00:00Z",
-  "build": "table-standardization-complete",
+  "commit": "actions-enhanced-contacts-pattern-v1",
+  "description": "Fixed ActionsEnhanced table with complete Contacts pattern (1 of 8 tables)",
+  "timestamp": "2025-11-18T14:30:00Z",
+  "build": "partial-table-rebuild-actions-enhanced",
   "changes": [
-    "✅ Applied Contacts pattern to ALL 8 tables in FMP tracker",
-    "Typography: All table text uses text-xs (12px) for consistency",
-    "Header padding: px-2 py-1.5 across all tables",
-    "Body cell padding: px-2 py-0.5 across all tables",
-    "Row hover: Added transition-colors duration-150 to all table rows",
-    "Checkbox columns: NO width constraints (only padding)",
-    "Files updated: ActionsEnhanced, ActionsNew, MeetingsEnhanced, CommentsEnhanced, Dashboard, StockAssessments, UserManagement, ActivityLogs",
+    "✅ FIXED: ActionsEnhanced.jsx - Complete rebuild with Contacts pattern",
+    "Fixed gigantic checkbox column: Replaced inline width styles with min-w-[XXX] classes",
+    "Added alternating row colors: bg-white and bg-gray-100",
+    "Added white backgrounds to search input and page size select",
+    "Standardized button text to text-xs",
+    "Typography: All table text uses text-xs (12px)",
+    "Header padding: px-2 py-1.5, Body cell padding: px-2 py-0.5",
+    "Row transitions: transition-colors duration-150 for smooth hover",
+    "",
+    "⏳ PENDING: 7 more tables need fixes (ActionsNew, CommentsEnhanced, MeetingsEnhanced, Dashboard, StockAssessments, UserManagement, ActivityLogs)",
+    "",
     "Users must HARD REFRESH (Cmd+Shift+R) to see changes!"
   ]
 }
