@@ -298,7 +298,7 @@ const StockAssessments = () => {
                 placeholder="Search species, scientific name, or SEDAR #..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+                className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
               />
             </div>
           </div>
@@ -309,7 +309,7 @@ const StockAssessments = () => {
             <select
               value={fmpFilter}
               onChange={(e) => setFmpFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             >
               <option value="all">All FMPs</option>
               {uniqueFmps.map(fmp => (
@@ -324,7 +324,7 @@ const StockAssessments = () => {
             <select
               value={managementFilter}
               onChange={(e) => setManagementFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             >
               <option value="all">All</option>
               <option value="safmc">SAFMC-only</option>
@@ -475,7 +475,7 @@ const StockAssessments = () => {
               </tr>
             ) : (
               sortedAssessments.map((assessment, index) => (
-                <tr key={assessment.id || index} className="hover:bg-gray-50 transition-colors duration-150">
+                <tr key={assessment.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
                   <td className="px-2 py-0.5">
                     {assessment.source_url ? (
                       <a
