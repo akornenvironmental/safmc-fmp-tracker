@@ -475,19 +475,19 @@ const StockAssessments = () => {
               </tr>
             ) : (
               sortedAssessments.map((assessment, index) => (
-                <tr key={assessment.id || index} className="hover:bg-gray-50">
+                <tr key={assessment.id || index} className="hover:bg-gray-50 transition-colors duration-150">
                   <td className="px-2 py-0.5">
                     {assessment.source_url ? (
                       <a
                         href={assessment.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
+                        className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
                       >
                         {assessment.species}
                       </a>
                     ) : (
-                      <div className="text-sm font-medium text-gray-900">{assessment.species}</div>
+                      <div className="text-xs font-medium text-gray-900">{assessment.species}</div>
                     )}
                     {assessment.scientific_name && (
                       <div className="text-xs text-gray-500 italic">{assessment.scientific_name}</div>
@@ -503,7 +503,7 @@ const StockAssessments = () => {
                     </span>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                    <div className="text-xs text-gray-900">
                       {assessment.b_bmsy ? (
                         <span className={assessment.b_bmsy >= 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                           {assessment.b_bmsy.toFixed(2)}
@@ -514,7 +514,7 @@ const StockAssessments = () => {
                     </div>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                    <div className="text-xs text-gray-900">
                       {assessment.f_fmsy ? (
                         <span className={assessment.f_fmsy <= 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                           {assessment.f_fmsy.toFixed(2)}

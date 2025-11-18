@@ -171,19 +171,19 @@ const Dashboard = () => {
                 </tr>
               ) : (
                 recentActions.map((action, index) => (
-                  <tr key={action.id || index} className="hover:bg-gray-50">
+                  <tr key={action.id || index} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="px-2 py-0.5">
                       {action.source_url ? (
                         <a
                           href={action.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
+                          className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
                         >
                           {action.title}
                         </a>
                       ) : (
-                        <div className="text-sm font-medium text-gray-900">{action.title}</div>
+                        <div className="text-xs font-medium text-gray-900">{action.title}</div>
                       )}
                       {action.description && (
                         <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">

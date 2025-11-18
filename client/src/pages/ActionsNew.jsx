@@ -508,7 +508,7 @@ const ActionsNew = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="w-10 px-2 py-1.5 text-left">
+              <th scope="col" className="px-2 py-1.5 text-left">
                 <input
                   type="checkbox"
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
@@ -560,7 +560,7 @@ const ActionsNew = () => {
             ) : (
               paginatedActions.map((action, index) => (
                 <tr key={action.id || index} className="hover:bg-gray-50">
-                  <td className="w-10 px-2 py-0.5">
+                  <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedActions.has(action.id)}

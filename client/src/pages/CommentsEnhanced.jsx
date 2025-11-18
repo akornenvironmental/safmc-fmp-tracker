@@ -387,7 +387,7 @@ const CommentsEnhanced = () => {
               </tr>
             ) : (
               paginatedComments.map((comment, index) => (
-                <tr key={comment.id || index} className="hover:bg-gray-50">
+                <tr key={comment.id || index} className="hover:bg-gray-50 transition-colors duration-150">
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
@@ -403,32 +403,32 @@ const CommentsEnhanced = () => {
                         comment.contactId ? (
                           <button
                             onClick={() => fetchContactProfile(comment.contactId)}
-                            className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
+                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
                           >
                             {comment.name || 'Anonymous'}
                           </button>
                         ) : (
-                          <div className="text-sm font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
+                          <div className="text-xs font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
                         )
                       ) : col.key === 'actionFmp' ? (
-                        <div className="text-sm text-gray-700 font-medium">{comment.actionFmp || '—'}</div>
+                        <div className="text-xs text-gray-700 font-medium">{comment.actionFmp || '—'}</div>
                       ) : col.key === 'actionTitle' ? (
-                        <div className="text-sm text-gray-700 max-w-xs truncate" title={comment.actionTitle || 'No action specified'}>
+                        <div className="text-xs text-gray-700 max-w-xs truncate" title={comment.actionTitle || 'No action specified'}>
                           {comment.actionTitle || '—'}
                         </div>
                       ) : col.key === 'organization' ? (
                         comment.organizationId ? (
                           <button
                             onClick={() => fetchOrganizationProfile(comment.organizationId)}
-                            className="text-sm text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
+                            className="text-xs text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
                           >
                             {comment.organization || '—'}
                           </button>
                         ) : (
-                          <div className="text-sm text-gray-700">{comment.organization || '—'}</div>
+                          <div className="text-xs text-gray-700">{comment.organization || '—'}</div>
                         )
                       ) : col.key === 'state' ? (
-                        <div className="text-sm text-gray-700">{comment.state || '—'}</div>
+                        <div className="text-xs text-gray-700">{comment.state || '—'}</div>
                       ) : col.key === 'position' ? (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           comment.position?.toLowerCase().includes('support') ? 'bg-green-100 text-green-800' :
@@ -438,9 +438,9 @@ const CommentsEnhanced = () => {
                           {comment.position || 'Neutral'}
                         </span>
                       ) : col.key === 'commentDate' ? (
-                        <div className="text-sm text-gray-500">{formatDate(comment.commentDate)}</div>
+                        <div className="text-xs text-gray-500">{formatDate(comment.commentDate)}</div>
                       ) : col.key === 'comment_text' ? (
-                        <div className="text-sm text-gray-600 max-w-md truncate">{comment.comment_text || '—'}</div>
+                        <div className="text-xs text-gray-600 max-w-md truncate">{comment.comment_text || '—'}</div>
                       ) : null}
                     </td>
                   ))}

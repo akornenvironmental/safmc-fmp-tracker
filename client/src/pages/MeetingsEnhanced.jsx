@@ -895,7 +895,7 @@ const MeetingsEnhanced = () => {
               </tr>
             ) : (
               paginatedMeetings.map((meeting, index) => (
-                <tr key={meeting.id || index} className="hover:bg-gray-50">
+                <tr key={meeting.id || index} className="hover:bg-gray-50 transition-colors duration-150">
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
@@ -913,12 +913,12 @@ const MeetingsEnhanced = () => {
                             href={meeting.source_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
+                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
                           >
                             {meeting.title}
                           </a>
                         ) : (
-                          <div className="text-sm font-medium text-gray-900">{meeting.title}</div>
+                          <div className="text-xs font-medium text-gray-900">{meeting.title}</div>
                         )
                       ) : col.key === 'council' ? (
                         <div>
