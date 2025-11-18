@@ -273,6 +273,9 @@ const UserManagement = () => {
               <p className="mt-2 text-sm text-gray-700">
                 Manage user accounts and permissions
               </p>
+              <p className="mt-1 text-xs text-gray-500">
+                User accounts are managed manually by super admins.
+              </p>
             </div>
           </div>
         </div>
@@ -309,7 +312,7 @@ const UserManagement = () => {
               placeholder="Search by email or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             />
           </div>
 
@@ -318,7 +321,7 @@ const UserManagement = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             >
               <option value="all">All Roles</option>
               <option value="super_admin">Super Admin</option>
@@ -365,8 +368,8 @@ const UserManagement = () => {
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-150">
+              filteredUsers.map((user, index) => (
+                <tr key={user.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
                   <td className="px-2 py-0.5 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
