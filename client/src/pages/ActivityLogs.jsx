@@ -228,6 +228,9 @@ const ActivityLogs = () => {
               <p className="mt-2 text-sm text-gray-700">
                 Monitor user activity across the system
               </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Activity is logged in real-time. Showing {logs.length} of {totalLogs.toLocaleString()} logs.
+              </p>
             </div>
           </div>
         </div>
@@ -300,7 +303,7 @@ const ActivityLogs = () => {
               placeholder="Search logs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             />
           </div>
 
@@ -309,7 +312,7 @@ const ActivityLogs = () => {
             <select
               value={activityFilter}
               onChange={(e) => setActivityFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             >
               <option value="all">All Activities</option>
               <option value="login">Login</option>
@@ -330,7 +333,7 @@ const ActivityLogs = () => {
               placeholder="Filter by user..."
               value={userFilter}
               onChange={(e) => setUserFilter(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             />
           </div>
 
@@ -341,7 +344,7 @@ const ActivityLogs = () => {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             />
           </div>
 
@@ -352,7 +355,7 @@ const ActivityLogs = () => {
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
             />
           </div>
         </div>
@@ -399,8 +402,8 @@ const ActivityLogs = () => {
                   </td>
                 </tr>
               ) : (
-                logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 transition-colors duration-150">
+                logs.map((log, index) => (
+                  <tr key={log.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
                     <td className="px-2 py-0.5 whitespace-nowrap text-xs text-gray-900">
                       {new Date(log.timestamp).toLocaleString()}
                     </td>
