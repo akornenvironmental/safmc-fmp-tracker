@@ -1,14 +1,16 @@
 {
-  "commit": "checkbox-column-width-fix",
-  "description": "Fixed checkbox column width in ActionsNew to match Contacts",
-  "timestamp": "2025-11-17T12:15:00Z",
-  "build": "actions-new-checkbox-fix",
+  "commit": "table-standardization-contacts-pattern",
+  "description": "Standardized all table styling to match Contacts pattern from Interview System",
+  "timestamp": "2025-11-18T12:00:00Z",
+  "build": "table-standardization-complete",
   "changes": [
-    "✅ Fixed checkbox column width - constrained to w-10 (40px)",
-    "Problem: Checkbox column was expanding because data columns had explicit widths but checkbox didn't",
-    "Solution: Added w-10 class to both checkbox th (header) and td (body)",
-    "Now matches Interview System Contacts page table layout EXACTLY",
-    "Accessible at: /actions-new for testing",
-    "Users must HARD REFRESH (Cmd+Shift+R) to see the fix!"
+    "✅ Applied Contacts pattern to ALL 8 tables in FMP tracker",
+    "Typography: All table text uses text-xs (12px) for consistency",
+    "Header padding: px-2 py-1.5 across all tables",
+    "Body cell padding: px-2 py-0.5 across all tables",
+    "Row hover: Added transition-colors duration-150 to all table rows",
+    "Checkbox columns: NO width constraints (only padding)",
+    "Files updated: ActionsEnhanced, ActionsNew, MeetingsEnhanced, CommentsEnhanced, Dashboard, StockAssessments, UserManagement, ActivityLogs",
+    "Users must HARD REFRESH (Cmd+Shift+R) to see changes!"
   ]
 }
