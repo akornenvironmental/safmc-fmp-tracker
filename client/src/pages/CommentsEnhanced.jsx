@@ -255,6 +255,9 @@ const CommentsEnhanced = () => {
           <p className="mt-2 text-sm text-gray-700">
             Showing {filteredAndSortedComments.length} of {comments.length} comments
           </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Comments are automatically synced weekly from SAFMC public hearings and comment periods.
+          </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
           <button
@@ -320,7 +323,7 @@ const CommentsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
           aria-label="Search comments by name, organization, position, or comment text"
         />
         <select
@@ -329,7 +332,7 @@ const CommentsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
           aria-label="Number of comments to display per page"
         >
           <option value={20}>Show 20</option>
@@ -387,7 +390,7 @@ const CommentsEnhanced = () => {
               </tr>
             ) : (
               paginatedComments.map((comment, index) => (
-                <tr key={comment.id || index} className="hover:bg-gray-50 transition-colors duration-150">
+                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
