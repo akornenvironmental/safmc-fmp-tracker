@@ -83,6 +83,9 @@ const Dashboard = () => {
           <p className="mt-2 text-sm text-gray-700">
             Overview of FMP actions, meetings, and public comments
           </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Data is automatically synced weekly. Showing {recentActions.length} recent actions.
+          </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
@@ -171,7 +174,7 @@ const Dashboard = () => {
                 </tr>
               ) : (
                 recentActions.map((action, index) => (
-                  <tr key={action.id || index} className="hover:bg-gray-50 transition-colors duration-150">
+                  <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
                     <td className="px-2 py-0.5">
                       {action.source_url ? (
                         <a
