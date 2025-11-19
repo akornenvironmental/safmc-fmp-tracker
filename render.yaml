@@ -31,4 +31,5 @@ databases:
   - name: safmc-fmp-tracker-db
     databaseName: safmc_fmp_tracker
     region: oregon
-    plan: starter
+    plan: free
+    ipAllowList: []
