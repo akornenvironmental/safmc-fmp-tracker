@@ -23,7 +23,6 @@ services:
   - type: web
     name: safmc-fmp-tracker-frontend
     env: static
-    region: global
     buildCommand: "cd client && npm install && npm run build"
     staticPublishPath: ./client/dist
 
