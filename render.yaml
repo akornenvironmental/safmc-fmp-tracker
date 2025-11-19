@@ -1,7 +1,7 @@
 services:
-  # Web Service
+  # Backend API Service
   - type: web
-    name: safmc-fmp-tracker
+    name: safmc-fmp-tracker-backend
     env: python
     region: oregon
     plan: starter
@@ -18,3 +18,18 @@ services:
         fromDatabase:
           name: safmc-fmp-tracker-db
           property: connectionString
+
+  # Frontend Static Site
+  - type: web
+    name: safmc-fmp-tracker-frontend
+    env: static
+    region: global
+    buildCommand: "cd client && npm install && npm run build"
+    staticPublishPath: ./client/dist
+
+  # PostgreSQL Database
+databases:
+  - name: safmc-fmp-tracker-db
+    databaseName: safmc_fmp_tracker
+    region: oregon
+    plan: starter
