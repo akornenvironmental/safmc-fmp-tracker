@@ -23,7 +23,7 @@ services:
   - type: web
     name: safmc-fmp-tracker-frontend
     env: static
-    buildCommand: "cd client && npm install && npm run build"
+    buildCommand: "npm install --prefix client && npm run build --prefix client"
     staticPublishPath: ./client/dist
 
 # Note: Database 'safmc-fmp-tracker-db' already exists and will be connected manually
