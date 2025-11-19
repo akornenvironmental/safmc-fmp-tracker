@@ -26,10 +26,11 @@ services:
     buildCommand: "cd client && npm install && npm run build"
     staticPublishPath: ./client/dist
 
-  # PostgreSQL Database
-databases:
-  - name: safmc-fmp-tracker-db
-    databaseName: safmc_fmp_tracker
-    region: oregon
-    plan: free
-    ipAllowList: []
+# Note: Database 'safmc-fmp-tracker-db' already exists and will be connected manually
+# Uncomment below to create a new database via blueprint:
+# databases:
+#   - name: safmc-fmp-tracker-db
+#     databaseName: safmc_fmp_tracker
+#     region: oregon
+#     plan: free
+#     ipAllowList: []
