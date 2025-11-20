@@ -73,6 +73,15 @@ from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 from src.models.user import User
 
+# Import workplan models
+from src.models.workplan import (
+    WorkplanVersion,
+    WorkplanItem,
+    WorkplanMilestone,
+    MilestoneType,
+    WorkplanUploadLog
+)
+
 # Initialize stock assessment tables if they don't exist
 def init_stock_assessment_tables():
     """Create stock assessment tables on startup if they don't exist"""
