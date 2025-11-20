@@ -644,11 +644,13 @@ from src.routes.api_routes import bp as api_bp
 from src.routes.auth_routes import bp as auth_bp
 from src.routes.admin_routes import bp as admin_bp
 from src.routes.stock_assessment_routes import stock_assessment_bp
+from src.routes.workplan_routes import bp as workplan_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
 app.register_blueprint(stock_assessment_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(workplan_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
