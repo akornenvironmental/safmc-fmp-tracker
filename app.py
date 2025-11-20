@@ -82,6 +82,17 @@ from src.models.workplan import (
     WorkplanUploadLog
 )
 
+# Import SAFE/SEDAR models
+from src.models.safe_sedar import (
+    SAFEReport,
+    SAFEReportStock,
+    SAFEReportSection,
+    SEDARAssessment,
+    AssessmentActionLink,
+    SAFESEDARScrapeLog,
+    StockStatusDefinition
+)
+
 # Initialize stock assessment tables if they don't exist
 def init_stock_assessment_tables():
     """Create stock assessment tables on startup if they don't exist"""
@@ -645,12 +656,16 @@ from src.routes.auth_routes import bp as auth_bp
 from src.routes.admin_routes import bp as admin_bp
 from src.routes.stock_assessment_routes import stock_assessment_bp
 from src.routes.workplan_routes import bp as workplan_bp
+from src.routes.sedar_routes import bp as sedar_bp
+from src.routes.safe_report_routes import bp as safe_reports_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
 app.register_blueprint(stock_assessment_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(workplan_bp)
+app.register_blueprint(sedar_bp)
+app.register_blueprint(safe_reports_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
