@@ -12,6 +12,7 @@ import ActionsNew from './pages/ActionsNew';
 import MeetingsEnhanced from './pages/MeetingsEnhanced';
 import CommentsEnhanced from './pages/CommentsEnhanced';
 import StockAssessments from './pages/StockAssessments';
+import Workplan from './pages/Workplan';
 import UserManagement from './pages/UserManagement';
 import ActivityLogs from './pages/ActivityLogs';
 import Login from './pages/Login';
@@ -51,6 +52,7 @@ function App() {
               <Route path="meetings" element={<MeetingsEnhanced />} />
               <Route path="comments" element={<CommentsEnhanced />} />
               <Route path="assessments" element={<StockAssessments />} />
+              <Route path="workplan" element={<Workplan />} />
               <Route path="admin/users" element={<UserManagement />} />
               <Route path="admin/logs" element={<ActivityLogs />} />
             </Route>

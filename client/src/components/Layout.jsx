@@ -24,6 +24,7 @@ const Layout = () => {
     { to: '/meetings', label: 'Meetings' },
     { to: '/comments', label: 'Comments' },
     { to: '/assessments', label: 'Stocks' },
+    { to: '/workplan', label: 'Workplan' },
     // Admin links - conditionally shown based on role
     ...(isAdmin() ? [{ to: '/admin/logs', label: 'Activity Logs' }] : []),
     ...(isSuperAdmin() ? [{ to: '/admin/users', label: 'Users' }] : [])
