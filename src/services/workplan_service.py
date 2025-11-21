@@ -204,18 +204,24 @@ class WorkplanService:
         Try to match an amendment to an existing action
 
         Matching strategies:
-        1. Exact amendment_id match
+        1. Exact amendment_id match (normalized)
         2. Fuzzy title match
-        3. Create new action if no match
+        3. Create new action if no match (or return existing if already created)
         """
         from rapidfuzz import fuzz
 
         amendment_id = amend_data['amendment_id']
         topic = amend_data['topic']
 
-        # Try exact ID match first
+        # Normalize the amendment_id for matching
+        normalized_id = amendment_id.lower().replace(' ', '-').strip()
+
+        # Try exact ID match first (check both original and normalized forms)
         action = Action.query.filter(
-            db.func.lower(Action.action_id) == amendment_id.lower()
+            db.or_(
+                db.func.lower(Action.action_id) == amendment_id.lower(),
+                db.func.lower(Action.action_id) == normalized_id
+            )
         ).first()
 
         if action:
@@ -242,14 +248,17 @@ class WorkplanService:
             logger.debug(f"Fuzzy match: {amendment_id} -> {best_match.action_id} (score: {best_score})")
             return best_match.action_id
 
-        # No match found - create new action
+        # No match found - check if action with normalized ID already exists before creating
+        existing = Action.query.filter_by(action_id=normalized_id).first()
+        if existing:
+            logger.debug(f"Found existing action: {normalized_id}")
+            return existing.action_id
+
+        # Create new action
         logger.info(f"No match found for {amendment_id}, creating new action")
 
-        # Generate action_id from amendment_id
-        action_id = amendment_id.lower().replace(' ', '-').strip()
-
         new_action = Action(
-            action_id=action_id,
+            action_id=normalized_id,
             title=topic,
             type='Amendment',
             status=amend_data['status'],
