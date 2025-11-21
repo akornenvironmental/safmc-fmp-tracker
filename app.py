@@ -82,16 +82,17 @@ from src.models.workplan import (
     WorkplanUploadLog
 )
 
-# Import SAFE/SEDAR models - Testing if models import is the issue
-from src.models.safe_sedar import (
-    SAFEReport,
-    SAFEReportStock,
-    SAFEReportSection,
-    SEDARAssessment,
-    AssessmentActionLink,
-    SAFESEDARScrapeLog,
-    StockStatusDefinition
-)
+# Import SAFE/SEDAR models - DISABLED until we can access build logs
+# Will re-enable once we identify the specific import issue
+# from src.models.safe_sedar import (
+#     SAFEReport,
+#     SAFEReportStock,
+#     SAFEReportSection,
+#     SEDARAssessment,
+#     AssessmentActionLink,
+#     SAFESEDARScrapeLog,
+#     StockStatusDefinition
+# )
 
 # Initialize stock assessment tables if they don't exist
 def init_stock_assessment_tables():
