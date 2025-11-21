@@ -6,10 +6,11 @@ import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AIAssistant from './components/AIAssistant';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/DashboardEnhanced';
 import ActionsEnhanced from './pages/ActionsEnhanced';
 import ActionsNew from './pages/ActionsNew';
 import MeetingsEnhanced from './pages/MeetingsEnhanced';
+import MeetingCalendar from './pages/MeetingCalendar';
 import CommentsEnhanced from './pages/CommentsEnhanced';
 import StockAssessments from './pages/StockAssessments';
 import Workplan from './pages/Workplan';
@@ -22,7 +23,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-21-v2-comparison-tool';
+const BUILD_VERSION = '2025-11-21-v3-dashboard-calendar';
 
 function App() {
   // Log build version on mount (forces this code into bundle)
@@ -53,6 +54,7 @@ function App() {
               <Route path="actions" element={<ActionsEnhanced />} />
               <Route path="actions-new" element={<ActionsNew />} />
               <Route path="meetings" element={<MeetingsEnhanced />} />
+              <Route path="calendar" element={<MeetingCalendar />} />
               <Route path="comments" element={<CommentsEnhanced />} />
               <Route path="assessments" element={<StockAssessments />} />
               <Route path="workplan" element={<Workplan />} />

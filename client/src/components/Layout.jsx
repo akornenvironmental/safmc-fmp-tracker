@@ -22,6 +22,7 @@ const Layout = () => {
     { to: '/', label: 'Dashboard' },
     { to: '/actions', label: 'Actions' },
     { to: '/meetings', label: 'Meetings' },
+    { to: '/calendar', label: 'Calendar' },
     { to: '/comments', label: 'Comments' },
     { to: '/species', label: 'Species' },
     { to: '/compare', label: 'Compare' },
