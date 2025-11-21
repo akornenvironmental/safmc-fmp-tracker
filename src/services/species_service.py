@@ -223,7 +223,7 @@ class SpeciesService:
                 'start_date': action.start_date.isoformat() if action.start_date else None,
                 'target_date': action.target_date.isoformat() if action.target_date else None,
                 'completion_date': action.completion_date.isoformat() if action.completion_date else None,
-                'progress': action.progress,
+                'progress': action.progress_percentage,
                 'source_url': action.source_url
             })
 
