@@ -6,8 +6,14 @@ Orchestrates SEDAR assessment scraping, AI analysis, and database import
 import logging
 from typing import Dict, List, Optional
 from datetime import datetime
-import anthropic
 import os
+
+try:
+    import anthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
+    logging.warning("anthropic package not available - AI features will be disabled")
 
 from src.config.extensions import db
 from src.models.safe_sedar import SEDARAssessment, AssessmentActionLink, SAFESEDARScrapeLog
@@ -24,12 +30,15 @@ class SEDARImportService:
         self.scraper = SEDARScraperEnhanced()
         self.claude_client = None
 
-        # Initialize Claude if API key available
-        api_key = os.getenv('ANTHROPIC_API_KEY')
-        if api_key:
-            self.claude_client = anthropic.Anthropic(api_key=api_key)
+        # Initialize Claude if API key available and anthropic installed
+        if ANTHROPIC_AVAILABLE:
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+            if api_key:
+                self.claude_client = anthropic.Anthropic(api_key=api_key)
+            else:
+                logger.warning("ANTHROPIC_API_KEY not set - AI extraction will be skipped")
         else:
-            logger.warning("ANTHROPIC_API_KEY not set - AI extraction will be skipped")
+            logger.warning("anthropic package not installed - AI extraction will be skipped")
 
     def import_all_assessments(self, safmc_only: bool = False) -> Dict:
         """
