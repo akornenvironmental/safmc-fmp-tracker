@@ -15,13 +15,14 @@ import StockAssessments from './pages/StockAssessments';
 import Workplan from './pages/Workplan';
 import Species from './pages/Species';
 import SpeciesProfile from './pages/SpeciesProfile';
+import Compare from './pages/Compare';
 import UserManagement from './pages/UserManagement';
 import ActivityLogs from './pages/ActivityLogs';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-21-v1-species-profiles';
+const BUILD_VERSION = '2025-11-21-v2-comparison-tool';
 
 function App() {
   // Log build version on mount (forces this code into bundle)
@@ -57,6 +58,7 @@ function App() {
               <Route path="workplan" element={<Workplan />} />
               <Route path="species" element={<Species />} />
               <Route path="species/:speciesName" element={<SpeciesProfile />} />
+              <Route path="compare" element={<Compare />} />
               <Route path="admin/users" element={<UserManagement />} />
               <Route path="admin/logs" element={<ActivityLogs />} />
             </Route>

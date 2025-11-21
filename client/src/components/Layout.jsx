@@ -24,6 +24,7 @@ const Layout = () => {
     { to: '/meetings', label: 'Meetings' },
     { to: '/comments', label: 'Comments' },
     { to: '/species', label: 'Species' },
+    { to: '/compare', label: 'Compare' },
     { to: '/assessments', label: 'Stocks' },
     { to: '/workplan', label: 'Workplan' },
     // Admin links - conditionally shown based on role

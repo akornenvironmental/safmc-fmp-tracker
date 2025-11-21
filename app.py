@@ -659,6 +659,7 @@ from src.routes.workplan_routes import bp as workplan_bp
 from src.routes.species_routes import bp as species_bp
 from src.routes.sedar_routes import bp as sedar_bp
 from src.routes.safe_report_routes import bp as safe_reports_bp
+from src.routes.comparison_routes import bp as comparison_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
@@ -668,6 +669,7 @@ app.register_blueprint(workplan_bp)
 app.register_blueprint(species_bp)
 app.register_blueprint(sedar_bp)
 app.register_blueprint(safe_reports_bp)
+app.register_blueprint(comparison_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
