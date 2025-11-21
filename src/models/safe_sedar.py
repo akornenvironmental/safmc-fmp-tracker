@@ -3,8 +3,8 @@ SQLAlchemy Models for SAFE Reports and SEDAR Assessments System
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, Date, Boolean, DECIMAL, TIMESTAMP, ForeignKey, ARRAY
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, Integer, String, Text, Date, Boolean, DECIMAL, TIMESTAMP, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.orm import relationship
 from src.config.extensions import db
 
