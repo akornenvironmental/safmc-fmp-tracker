@@ -5,7 +5,7 @@ Handles importing workplan data into the database with versioning
 
 import logging
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from src.config.extensions import db
 from src.models.workplan import (
     WorkplanVersion,
