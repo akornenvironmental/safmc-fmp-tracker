@@ -82,17 +82,16 @@ from src.models.workplan import (
     WorkplanUploadLog
 )
 
-# Import SAFE/SEDAR models - DISABLED until we can access build logs
-# Will re-enable once we identify the specific import issue
-# from src.models.safe_sedar import (
-#     SAFEReport,
-#     SAFEReportStock,
-#     SAFEReportSection,
-#     SEDARAssessment,
-#     AssessmentActionLink,
-#     SAFESEDARScrapeLog,
-#     StockStatusDefinition
-# )
+# Import SAFE/SEDAR models
+from src.models.safe_sedar import (
+    SAFEReport,
+    SAFEReportStock,
+    SAFEReportSection,
+    SEDARAssessment,
+    AssessmentActionLink,
+    SAFESEDARScrapeLog,
+    StockStatusDefinition
+)
 
 # Initialize stock assessment tables if they don't exist
 def init_stock_assessment_tables():
@@ -658,9 +657,8 @@ from src.routes.admin_routes import bp as admin_bp
 from src.routes.stock_assessment_routes import stock_assessment_bp
 from src.routes.workplan_routes import bp as workplan_bp
 from src.routes.species_routes import bp as species_bp
-# TEMPORARILY DISABLED FOR DEBUGGING
-# from src.routes.sedar_routes import bp as sedar_bp
-# from src.routes.safe_report_routes import bp as safe_reports_bp
+from src.routes.sedar_routes import bp as sedar_bp
+from src.routes.safe_report_routes import bp as safe_reports_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
@@ -668,9 +666,8 @@ app.register_blueprint(stock_assessment_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(workplan_bp)
 app.register_blueprint(species_bp)
-# TEMPORARILY DISABLED FOR DEBUGGING
-# app.register_blueprint(sedar_bp)
-# app.register_blueprint(safe_reports_bp)
+app.register_blueprint(sedar_bp)
+app.register_blueprint(safe_reports_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
