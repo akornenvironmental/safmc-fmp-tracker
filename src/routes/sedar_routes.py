@@ -8,7 +8,6 @@ from sqlalchemy import or_, desc
 
 from src.config.extensions import db
 from src.models.safe_sedar import SEDARAssessment, AssessmentActionLink, SAFESEDARScrapeLog
-from src.services.sedar_import_service import SEDARImportService
 
 logger = logging.getLogger(__name__)
 
@@ -291,6 +290,9 @@ def trigger_sedar_scrape():
         run_linking = data.get('run_linking', True)
 
         logger.info(f"Starting SEDAR scrape (SAFMC only: {safmc_only})...")
+
+        # Lazy import to avoid loading heavy dependencies at module level
+        from src.services.sedar_import_service import SEDARImportService
 
         # Run import
         service = SEDARImportService()

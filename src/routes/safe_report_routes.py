@@ -8,7 +8,6 @@ from sqlalchemy import desc, or_
 
 from src.config.extensions import db
 from src.models.safe_sedar import SAFEReport, SAFEReportStock, SAFEReportSection, SAFESEDARScrapeLog
-from src.services.safe_import_service import SAFEImportService
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +198,9 @@ def trigger_safe_scrape():
         fmp = data.get('fmp')
 
         logger.info(f"Starting SAFE reports scrape (FMP: {fmp or 'all'})...")
+
+        # Lazy import to avoid loading heavy dependencies at module level
+        from src.services.safe_import_service import SAFEImportService
 
         service = SAFEImportService()
 
