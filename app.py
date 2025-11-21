@@ -657,6 +657,7 @@ from src.routes.auth_routes import bp as auth_bp
 from src.routes.admin_routes import bp as admin_bp
 from src.routes.stock_assessment_routes import stock_assessment_bp
 from src.routes.workplan_routes import bp as workplan_bp
+from src.routes.species_routes import bp as species_bp
 # TEMPORARILY DISABLED FOR DEBUGGING
 # from src.routes.sedar_routes import bp as sedar_bp
 # from src.routes.safe_report_routes import bp as safe_reports_bp
@@ -666,6 +667,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(stock_assessment_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(workplan_bp)
+app.register_blueprint(species_bp)
 # TEMPORARILY DISABLED FOR DEBUGGING
 # app.register_blueprint(sedar_bp)
 # app.register_blueprint(safe_reports_bp)
