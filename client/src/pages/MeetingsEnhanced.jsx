@@ -953,6 +953,7 @@ const MeetingsEnhanced = () => {
 
       {/* Table View */}
       {viewMode === 'table' && (
+        <>
       <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <caption className="sr-only">
@@ -1103,6 +1104,7 @@ const MeetingsEnhanced = () => {
           </div>
         </div>
       )}
+        </>
       )}
 
       {/* Calendar View */}
