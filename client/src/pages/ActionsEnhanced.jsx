@@ -420,25 +420,25 @@ const ActionsEnhanced = () => {
   };
 
   const getStageColor = (stage) => {
-    if (!stage) return 'bg-gray-100 text-gray-800';
+    if (!stage) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
 
     const stageLower = stage.toLowerCase();
-    if (stageLower.includes('scoping')) return 'bg-yellow-100 text-yellow-800';
-    if (stageLower.includes('hearing')) return 'bg-blue-100 text-blue-800';
-    if (stageLower.includes('approval')) return 'bg-green-100 text-green-800';
-    if (stageLower.includes('implementation')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
+    if (stageLower.includes('scoping')) return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
+    if (stageLower.includes('hearing')) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
+    if (stageLower.includes('approval')) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
+    if (stageLower.includes('implementation')) return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200';
+    return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
   };
 
   return (
     <div>
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Actions & Amendments</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Actions & Amendments</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Showing {filteredAndSortedActions.length} of {actions.length} actions
           </p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Actions and amendments are automatically synced weekly
           </p>
         </div>
@@ -470,26 +470,26 @@ const ActionsEnhanced = () => {
                 <Download size={14} />
                 Export
               </button>
-              <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+              <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
                 <div className="py-1">
-                  <div className="px-4 py-2 text-xs text-gray-500 border-b">
+                  <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
                     {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
                   </div>
                   <button
                     onClick={exportToCSV}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                   >
                     CSV Format (.csv)
                   </button>
                   <button
                     onClick={exportToTSV}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                   >
                     TSV Format (.tsv)
                   </button>
                   <button
                     onClick={exportToExcel}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                   >
                     Excel Format (.xls)
                   </button>
@@ -511,7 +511,7 @@ const ActionsEnhanced = () => {
             <div className="relative" ref={stageDropdownRef}>
               <button
                 onClick={() => setShowStageDropdown(!showStageDropdown)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Progress Stage
                 {filterStage.length > 0 && (
@@ -521,18 +521,18 @@ const ActionsEnhanced = () => {
                 )}
               </button>
               {showStageDropdown && (
-                <div className="absolute z-10 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
                   <div className="p-2 max-h-60 overflow-y-auto">
                     {uniqueStages.map(stage => (
-                      <label key={stage} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                      <label key={stage} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
                         <input
                           type="checkbox"
                           checked={filterStage.includes(stage)}
                           onChange={() => toggleStageFilter(stage)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-xs text-gray-700">{stage}</span>
-                        <span className="ml-auto text-xs text-gray-500">
+                        <span className="text-xs text-gray-700 dark:text-gray-300">{stage}</span>
+                        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
                           ({actions.filter(a => a.progress_stage === stage).length})
                         </span>
                       </label>
@@ -546,7 +546,7 @@ const ActionsEnhanced = () => {
             <div className="relative" ref={fmpDropdownRef}>
               <button
                 onClick={() => setShowFMPDropdown(!showFMPDropdown)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 FMP
                 {filterFMP.length > 0 && (
@@ -556,18 +556,18 @@ const ActionsEnhanced = () => {
                 )}
               </button>
               {showFMPDropdown && (
-                <div className="absolute z-10 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
                   <div className="p-2 max-h-60 overflow-y-auto">
                     {uniqueFMPs.map(fmp => (
-                      <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                      <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
                         <input
                           type="checkbox"
                           checked={filterFMP.includes(fmp)}
                           onChange={() => toggleFMPFilter(fmp)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-xs text-gray-700">{fmp}</span>
-                        <span className="ml-auto text-xs text-gray-500">
+                        <span className="text-xs text-gray-700 dark:text-gray-300">{fmp}</span>
+                        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
                           ({actions.filter(a => a.fmp === fmp).length})
                         </span>
                       </label>
@@ -581,7 +581,7 @@ const ActionsEnhanced = () => {
             <div className="relative" ref={typeDropdownRef}>
               <button
                 onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Type
                 {filterType.length > 0 && (
@@ -591,18 +591,18 @@ const ActionsEnhanced = () => {
                 )}
               </button>
               {showTypeDropdown && (
-                <div className="absolute z-10 mt-1 w-64 bg-white rounded-md shadow-lg border border-gray-200">
+                <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
                   <div className="p-2 max-h-60 overflow-y-auto">
                     {uniqueTypes.map(type => (
-                      <label key={type} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                      <label key={type} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
                         <input
                           type="checkbox"
                           checked={filterType.includes(type)}
                           onChange={() => toggleTypeFilter(type)}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-xs text-gray-700">{type}</span>
-                        <span className="ml-auto text-xs text-gray-500">
+                        <span className="text-xs text-gray-700 dark:text-gray-300">{type}</span>
+                        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
                           ({actions.filter(a => a.type === type).length})
                         </span>
                       </label>
@@ -621,7 +621,7 @@ const ActionsEnhanced = () => {
                   setFilterType([]);
                   setCurrentPage(1);
                 }}
-                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Clear Filters
               </button>
@@ -632,8 +632,8 @@ const ActionsEnhanced = () => {
 
       {/* Column selector */}
       {showColumnSelector && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Show/Hide Columns</h3>
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Show/Hide Columns</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {columnOrder.map(col => (
               <label key={col.key} className="flex items-center gap-2">
@@ -642,9 +642,9 @@ const ActionsEnhanced = () => {
                   checked={visibleColumns[col.key]}
                   onChange={() => toggleColumn(col.key)}
                   disabled={col.core}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                 />
-                <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
+                <span className={`text-sm ${col.core ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
                   {col.label} {col.core && '(required)'}
                 </span>
               </label>
@@ -663,7 +663,7 @@ const ActionsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="flex-1 bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search actions by title, FMP, progress stage, or description"
         />
         <select
@@ -672,7 +672,7 @@ const ActionsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border"
+          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border text-gray-900 dark:text-gray-100"
           aria-label="Number of actions to display per page"
         >
           <option value={20}>Show 20</option>
@@ -683,19 +683,19 @@ const ActionsEnhanced = () => {
       </div>
 
       {/* Actions Table */}
-      <div className="mt-6 bg-white shadow overflow-x-auto sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <caption className="sr-only">
             Actions tracker with {filteredAndSortedActions.length} actions. Table includes columns for selection, title, FMP, progress stage, progress percentage, and last updated date. Click column headers to sort.
           </caption>
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
                 <input
                   type="checkbox"
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
                   onChange={toggleSelectAll}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                   aria-label={`Select all ${paginatedActions.length} actions on this page`}
                 />
               </th>
@@ -708,15 +708,15 @@ const ActionsEnhanced = () => {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider select-none ${col.minWidth || ''} ${
-                    !col.locked ? 'cursor-grab hover:bg-gray-200' : 'cursor-pointer hover:bg-gray-100'
-                  } ${draggedColumn === index ? 'opacity-50 bg-gray-200' : ''}`}
+                  className={`px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none ${col.minWidth || ''} ${
+                    !col.locked ? 'cursor-grab hover:bg-gray-200 dark:hover:bg-gray-700' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${draggedColumn === index ? 'opacity-50 bg-gray-200 dark:bg-gray-700' : ''}`}
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
                     {col.label}
                     {sortField === col.key && (
-                      <span className="text-blue-600">
+                      <span className="text-blue-600 dark:text-blue-400">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -725,28 +725,28 @@ const ActionsEnhanced = () => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {loading ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   Loading actions...
                 </td>
               </tr>
             ) : paginatedActions.length === 0 ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   No actions found
                 </td>
               </tr>
             ) : (
               paginatedActions.map((action, index) => (
-                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
+                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedActions.has(action.id)}
                       onChange={() => toggleSelectAction(action)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                       aria-label={`Select action: ${action.title}`}
                     />
                   </td>
@@ -759,15 +759,15 @@ const ActionsEnhanced = () => {
                               href={action.source_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                              className="text-xs font-medium text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-green-400 hover:underline"
                             >
                               {action.title}
                             </a>
                           ) : (
-                            <div className="text-xs font-medium text-gray-900">{action.title}</div>
+                            <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{action.title}</div>
                           )}
                           {action.description && visibleColumns.description && (
-                            <div className="text-xs text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{action.description.substring(0, 100)}...</div>
                           )}
                         </>
                       ) : col.key === 'progress_stage' ? (
@@ -776,20 +776,20 @@ const ActionsEnhanced = () => {
                         </span>
                       ) : col.key === 'progress' ? (
                         <div className="flex items-center gap-1">
-                          <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                          <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
                             <div
                               className="bg-brand-blue h-1.5 rounded-full"
                               style={{ width: `${action.progress || 0}%` }}
                             ></div>
                           </div>
-                          <span className="text-xs text-gray-700">{action.progress || 0}%</span>
+                          <span className="text-xs text-gray-700 dark:text-gray-300">{action.progress || 0}%</span>
                         </div>
                       ) : col.key === 'last_updated' ? (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                         </div>
                       ) : (
-                        <div className="text-xs text-gray-900">{action[col.key] || 'N/A'}</div>
+                        <div className="text-xs text-gray-900 dark:text-gray-100">{action[col.key] || 'N/A'}</div>
                       )}
                     </td>
                   ))}
@@ -803,24 +803,24 @@ const ActionsEnhanced = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Showing {filteredAndSortedActions.length} of {actions.length} actions
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700">
+            <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>

@@ -148,15 +148,15 @@ const DashboardEnhanced = () => {
     }).slice(0, 8);
   }, [actions, meetings]);
 
-  // Get stage colors
+  // Get stage colors - with dark mode support
   const getStageColor = (stage) => {
-    if (!stage) return 'bg-gray-100 text-gray-700';
+    if (!stage) return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
     const s = stage.toLowerCase();
-    if (s.includes('scoping')) return 'bg-yellow-100 text-yellow-800';
-    if (s.includes('hearing')) return 'bg-blue-100 text-blue-800';
-    if (s.includes('approval')) return 'bg-green-100 text-green-800';
-    if (s.includes('implementation')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-700';
+    if (s.includes('scoping')) return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
+    if (s.includes('hearing')) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
+    if (s.includes('approval')) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
+    if (s.includes('implementation')) return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200';
+    return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
   };
 
   return (
@@ -164,8 +164,8 @@ const DashboardEnhanced = () => {
       {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             SAFMC FMP Tracker Overview
           </p>
         </div>
@@ -181,75 +181,75 @@ const DashboardEnhanced = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/actions" className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link to="/actions" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Actions</p>
-              <p className="text-3xl font-bold text-brand-blue">{loading ? '-' : stats.totalActions}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Actions</p>
+              <p className="text-3xl font-bold text-brand-blue dark:text-blue-400">{loading ? '-' : stats.totalActions}</p>
             </div>
-            <FileText className="w-10 h-10 text-blue-200" />
+            <FileText className="w-10 h-10 text-blue-200 dark:text-blue-800" />
           </div>
         </Link>
 
-        <Link to="/meetings" className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link to="/meetings" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Upcoming Meetings</p>
-              <p className="text-3xl font-bold text-green-600">{loading ? '-' : stats.upcomingMeetings}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming Meetings</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">{loading ? '-' : stats.upcomingMeetings}</p>
             </div>
-            <Calendar className="w-10 h-10 text-green-200" />
+            <Calendar className="w-10 h-10 text-green-200 dark:text-green-800" />
           </div>
         </Link>
 
-        <Link to="/comments" className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link to="/comments" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Recent Comments</p>
-              <p className="text-3xl font-bold text-purple-600">{loading ? '-' : stats.recentComments}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Recent Comments</p>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{loading ? '-' : stats.recentComments}</p>
             </div>
-            <MessageSquare className="w-10 h-10 text-purple-200" />
+            <MessageSquare className="w-10 h-10 text-purple-200 dark:text-purple-800" />
           </div>
         </Link>
 
-        <Link to="/species" className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+        <Link to="/species" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Species Tracked</p>
-              <p className="text-3xl font-bold text-cyan-600">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Species Tracked</p>
+              <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
             </div>
-            <Fish className="w-10 h-10 text-cyan-200" />
+            <Fish className="w-10 h-10 text-cyan-200 dark:text-cyan-800" />
           </div>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* FMP Progress */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-gray-400" />
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               Progress by FMP
             </h2>
-            <Link to="/actions" className="text-sm text-brand-blue hover:underline">
+            <Link to="/actions" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
               View all
             </Link>
           </div>
 
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
           ) : fmpStats.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No FMP data available</div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">No FMP data available</div>
           ) : (
             <div className="space-y-4">
               {fmpStats.slice(0, 6).map(fmp => (
                 <div key={fmp.fmp}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-900">{fmp.fmp}</span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {fmp.completed}/{fmp.total} completed
                     </span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                  <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
                     <div className="flex h-2.5 rounded-full overflow-hidden">
                       <div
                         className="bg-green-500"
@@ -260,12 +260,12 @@ const DashboardEnhanced = () => {
                         style={{ width: `${(fmp.inProgress / fmp.total) * 100}%` }}
                       ></div>
                       <div
-                        className="bg-gray-300"
+                        className="bg-gray-300 dark:bg-gray-600"
                         style={{ width: `${(fmp.pending / fmp.total) * 100}%` }}
                       ></div>
                     </div>
                   </div>
-                  <div className="flex gap-4 mt-1 text-xs text-gray-500">
+                  <div className="flex gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       {fmp.completed} done
@@ -275,7 +275,7 @@ const DashboardEnhanced = () => {
                       {fmp.inProgress} active
                     </span>
                     <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-gray-300 rounded-full"></span>
+                      <span className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full"></span>
                       {fmp.pending} pending
                     </span>
                   </div>
@@ -286,16 +286,16 @@ const DashboardEnhanced = () => {
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5 text-gray-400" />
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             Recent Activity
           </h2>
 
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
           ) : recentActivity.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No recent activity</div>
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">No recent activity</div>
           ) : (
             <div className="space-y-3">
               {recentActivity.map((item, idx) => {
@@ -304,27 +304,27 @@ const DashboardEnhanced = () => {
                   <Link
                     key={idx}
                     to={item.link}
-                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <div className={`p-2 rounded-lg ${
-                      item.type === 'action' ? 'bg-blue-100' : 'bg-green-100'
+                      item.type === 'action' ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-green-100 dark:bg-green-900/50'
                     }`}>
                       <Icon className={`w-4 h-4 ${
-                        item.type === 'action' ? 'text-blue-600' : 'text-green-600'
+                        item.type === 'action' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                         {item.title}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
                       {item.date && (
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                           {new Date(item.date).toLocaleDateString()}
                         </p>
                       )}
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   </Link>
                 );
               })}
@@ -337,58 +337,58 @@ const DashboardEnhanced = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link
           to="/species"
-          className="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
           <Fish className="w-8 h-8 text-cyan-500" />
           <div>
-            <p className="font-medium text-gray-900">Species Profiles</p>
-            <p className="text-xs text-gray-500">View species data</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">Species Profiles</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">View species data</p>
           </div>
         </Link>
 
         <Link
           to="/compare"
-          className="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
           <TrendingUp className="w-8 h-8 text-purple-500" />
           <div>
-            <p className="font-medium text-gray-900">Compare Actions</p>
-            <p className="text-xs text-gray-500">Side-by-side analysis</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">Compare Actions</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Side-by-side analysis</p>
           </div>
         </Link>
 
         <Link
           to="/workplan"
-          className="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
           <FileText className="w-8 h-8 text-orange-500" />
           <div>
-            <p className="font-medium text-gray-900">Workplan</p>
-            <p className="text-xs text-gray-500">Amendment schedule</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">Workplan</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Amendment schedule</p>
           </div>
         </Link>
 
         <Link
           to="/assessments"
-          className="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
           <AlertCircle className="w-8 h-8 text-red-500" />
           <div>
-            <p className="font-medium text-gray-900">Stock Status</p>
-            <p className="text-xs text-gray-500">SEDAR assessments</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">Stock Status</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">SEDAR assessments</p>
           </div>
         </Link>
       </div>
 
       {/* Top Species */}
       {speciesStats && speciesStats.topSpecies && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Fish className="w-5 h-5 text-gray-400" />
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Fish className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               Most Active Species
             </h2>
-            <Link to="/species" className="text-sm text-brand-blue hover:underline">
+            <Link to="/species" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
               View all
             </Link>
           </div>
@@ -398,10 +398,10 @@ const DashboardEnhanced = () => {
               <Link
                 key={idx}
                 to={`/species/${sp.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-center"
+                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-center"
               >
-                <p className="font-medium text-gray-900">{sp.name}</p>
-                <p className="text-sm text-gray-500">{sp.actionCount} actions</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{sp.name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{sp.actionCount} actions</p>
               </Link>
             ))}
           </div>

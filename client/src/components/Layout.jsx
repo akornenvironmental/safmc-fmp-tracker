@@ -53,7 +53,7 @@ const Layout = () => {
   const customFooterContent = null;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
       {/* Skip Navigation Links for 508 Compliance */}
       <a href="#main-content" className="skip-link">
         Skip to main content

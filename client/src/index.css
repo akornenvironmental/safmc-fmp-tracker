@@ -378,6 +378,243 @@ label input[type="radio"],
   background-color: #209d5c !important;
 }
 
+/* ============================================ */
+/* DARK MODE - STATUS BADGES & COLORED ELEMENTS */
+/* ============================================ */
+
+/* Yellow badges (Scoping stage) */
+.dark .bg-yellow-100 {
+  background-color: #78350f !important;
+}
+.dark .text-yellow-800 {
+  color: #fef3c7 !important;
+}
+.dark .border-yellow-200 {
+  border-color: #a16207 !important;
+}
+
+/* Green badges (Approval stage, success states) */
+.dark .bg-green-100 {
+  background-color: #14532d !important;
+}
+.dark .text-green-800 {
+  color: #dcfce7 !important;
+}
+.dark .text-green-600 {
+  color: #4ade80 !important;
+}
+.dark .text-green-200 {
+  color: #86efac !important;
+}
+.dark .border-green-200 {
+  border-color: #166534 !important;
+}
+
+/* Purple badges (Implementation stage) */
+.dark .bg-purple-100 {
+  background-color: #581c87 !important;
+}
+.dark .text-purple-800 {
+  color: #f3e8ff !important;
+}
+.dark .text-purple-600 {
+  color: #c084fc !important;
+}
+.dark .text-purple-200 {
+  color: #e9d5ff !important;
+}
+.dark .border-purple-200 {
+  border-color: #7e22ce !important;
+}
+
+/* Cyan badges (Species stats) */
+.dark .bg-cyan-100 {
+  background-color: #164e63 !important;
+}
+.dark .text-cyan-800 {
+  color: #cffafe !important;
+}
+.dark .text-cyan-600 {
+  color: #22d3ee !important;
+}
+.dark .text-cyan-200 {
+  color: #a5f3fc !important;
+}
+
+/* Orange badges (Workplan) */
+.dark .bg-orange-100 {
+  background-color: #7c2d12 !important;
+}
+.dark .text-orange-800 {
+  color: #ffedd5 !important;
+}
+.dark .text-orange-500 {
+  color: #fb923c !important;
+}
+
+/* Red badges (Alerts, errors) */
+.dark .bg-red-100 {
+  background-color: #7f1d1d !important;
+}
+.dark .text-red-800 {
+  color: #fee2e2 !important;
+}
+.dark .text-red-500 {
+  color: #f87171 !important;
+}
+.dark .border-red-200 {
+  border-color: #991b1b !important;
+}
+
+/* ============================================ */
+/* DARK MODE - ADDITIONAL GRAY SHADES */
+/* ============================================ */
+
+.dark .text-gray-400 {
+  color: #a3a3a3 !important;
+}
+
+.dark .text-gray-300 {
+  color: #d4d4d4 !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #3a3a3a !important;
+}
+
+.dark .bg-gray-300 {
+  background-color: #4a4a4a !important;
+}
+
+/* ============================================ */
+/* DARK MODE - TABLE SPECIFIC STYLES */
+/* ============================================ */
+
+.dark table {
+  background-color: #1e1e1e;
+}
+
+.dark thead {
+  background-color: #2a2a2a !important;
+}
+
+.dark .bg-gray-50,
+.dark thead.bg-gray-50 {
+  background-color: #2a2a2a !important;
+}
+
+.dark tbody tr:nth-child(even) {
+  background-color: #252525;
+}
+
+.dark tbody tr:nth-child(odd) {
+  background-color: #1e1e1e;
+}
+
+.dark tbody tr:hover {
+  background-color: #333333 !important;
+}
+
+.dark th {
+  color: #e5e5e5 !important;
+  border-color: #4a4a4a !important;
+}
+
+.dark td {
+  border-color: #3a3a3a !important;
+}
+
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #3a3a3a !important;
+}
+
+/* ============================================ */
+/* DARK MODE - DROPDOWN & MENU STYLES */
+/* ============================================ */
+
+.dark .dropdown-menu,
+.dark [class*="absolute"][class*="bg-white"][class*="shadow"],
+.dark [class*="absolute"][class*="bg-white"][class*="rounded"] {
+  background-color: #2a2a2a !important;
+  border-color: #4a4a4a !important;
+}
+
+.dark .dropdown-menu button:hover,
+.dark .dropdown-menu a:hover {
+  background-color: #3a3a3a !important;
+}
+
+/* ============================================ */
+/* DARK MODE - CARD & PANEL STYLES */
+/* ============================================ */
+
+.dark .shadow-sm,
+.dark .shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .ring-1 {
+  --tw-ring-color: rgba(74, 74, 74, 1) !important;
+}
+
+.dark .ring-black {
+  --tw-ring-color: rgba(74, 74, 74, 0.5) !important;
+}
+
+/* ============================================ */
+/* DARK MODE - PROGRESS BARS */
+/* ============================================ */
+
+.dark .bg-gray-200.rounded-full,
+.dark [class*="bg-gray-200"][class*="rounded-full"] {
+  background-color: #404040 !important;
+}
+
+/* ============================================ */
+/* DARK MODE - BUTTON VARIANTS */
+/* ============================================ */
+
+.dark button[class*="border-gray-300"],
+.dark [class*="border"][class*="border-gray-300"] {
+  border-color: #525252 !important;
+}
+
+.dark button[class*="bg-white"]:not([class*="text-white"]),
+.dark [class*="rounded-md"][class*="bg-white"]:not([class*="text-white"]) {
+  background-color: #2a2a2a !important;
+  color: #e5e5e5 !important;
+}
+
+.dark button:hover[class*="bg-gray-50"],
+.dark button:hover[class*="hover\\:bg-gray-50"] {
+  background-color: #3a3a3a !important;
+}
+
+.dark button:hover[class*="bg-gray-100"],
+.dark button:hover[class*="hover\\:bg-gray-100"] {
+  background-color: #3a3a3a !important;
+}
+
+/* Gradient buttons in dark mode */
+.dark [class*="bg-gradient-to-r"][class*="from-slate-50"] {
+  background: linear-gradient(to right, #334155, #374151) !important;
+  color: #e5e5e5 !important;
+}
+
+.dark [class*="bg-gradient-to-r"][class*="from-indigo-50"] {
+  background: linear-gradient(to right, #312e81, #4c1d95) !important;
+  color: #e5e5e5 !important;
+}
+
+.dark [class*="bg-gradient-to-r"][class*="from-teal-50"] {
+  background: linear-gradient(to right, #134e4a, #164e63) !important;
+  color: #e5e5e5 !important;
+}
+
 /* Dark mode focus adjustments */
 .dark *:focus-visible {
   outline-color: #41b883 !important; /* Lighter green for dark mode */
