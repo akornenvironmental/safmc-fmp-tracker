@@ -651,3 +651,78 @@ def send_test_notification():
     except Exception as e:
         logger.error(f"Error sending test notification: {e}")
         return jsonify({'error': 'Failed to send test notification'}), 500
+
+
+# ==================== DUPLICATE CONTACT MANAGEMENT ====================
+
+@bp.route('/contacts/duplicates', methods=['GET'])
+@require_admin
+def get_duplicate_contacts():
+    """Find potential duplicate contacts"""
+    try:
+        from src.services.duplicate_detection_service import find_potential_duplicates
+
+        min_score = request.args.get('min_score', 0.8, type=float)
+        duplicates = find_potential_duplicates(min_score=min_score)
+
+        return jsonify({
+            'success': True,
+            'duplicate_groups': duplicates,
+            'total_groups': len(duplicates)
+        })
+
+    except Exception as e:
+        logger.error(f"Error finding duplicate contacts: {e}")
+        return jsonify({'error': 'Failed to find duplicates'}), 500
+
+
+@bp.route('/contacts/duplicate-stats', methods=['GET'])
+@require_admin
+def get_duplicate_stats():
+    """Get statistics about potential duplicate contacts"""
+    try:
+        from src.services.duplicate_detection_service import get_duplicate_stats
+
+        stats = get_duplicate_stats()
+
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting duplicate stats: {e}")
+        return jsonify({'error': 'Failed to get duplicate stats'}), 500
+
+
+@bp.route('/contacts/merge', methods=['POST'])
+@require_super_admin
+def merge_duplicate_contacts():
+    """Merge duplicate contacts into a primary contact (super_admin only)"""
+    try:
+        from src.services.duplicate_detection_service import merge_contacts
+
+        data = request.get_json()
+        primary_id = data.get('primary_id')
+        duplicate_ids = data.get('duplicate_ids', [])
+
+        if not primary_id:
+            return jsonify({'error': 'primary_id is required'}), 400
+
+        if not duplicate_ids:
+            return jsonify({'error': 'duplicate_ids is required'}), 400
+
+        result = merge_contacts(primary_id, duplicate_ids)
+
+        if result['success']:
+            log_activity(
+                activity_type='admin.contacts_merged',
+                description=f'Merged {result["merged_count"]} contacts into primary contact',
+                category='admin'
+            )
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error merging contacts: {e}")
+        return jsonify({'error': 'Failed to merge contacts'}), 500
