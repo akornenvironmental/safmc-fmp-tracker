@@ -27,7 +27,7 @@ const CommentsEnhanced = () => {
     state: true,
     position: false,
     commentDate: true,
-    comment_text: true,
+    commentText: true,
   });
 
   // Define all available columns
@@ -39,7 +39,7 @@ const CommentsEnhanced = () => {
     { key: 'state', label: 'State', core: false },
     { key: 'position', label: 'Position', core: false },
     { key: 'commentDate', label: 'Date', core: true },
-    { key: 'comment_text', label: 'Comment', core: false },
+    { key: 'commentText', label: 'Comment', core: false },
   ];
 
   useEffect(() => {
@@ -112,7 +112,7 @@ const CommentsEnhanced = () => {
         comment.name?.toLowerCase().includes(searchLower) ||
         comment.organization?.toLowerCase().includes(searchLower) ||
         comment.position?.toLowerCase().includes(searchLower) ||
-        comment.comment_text?.toLowerCase().includes(searchLower) ||
+        comment.commentText?.toLowerCase().includes(searchLower) ||
         comment.actionFmp?.toLowerCase().includes(searchLower) ||
         comment.actionTitle?.toLowerCase().includes(searchLower)
       );
@@ -428,7 +428,7 @@ const CommentsEnhanced = () => {
                             {comment.organization || '—'}
                           </button>
                         ) : (
-                          <div className="text-xs text-gray-900 dark:text-gray-100">{comment.organization || '—'}</div>
+                          <div className="text-xs text-gray-900 dark:text-gray-100 max-w-[150px] truncate" title={comment.organization}>{comment.organization || '—'}</div>
                         )
                       ) : col.key === 'state' ? (
                         <div className="text-xs text-gray-900 dark:text-gray-100">{comment.state || '—'}</div>
@@ -442,8 +442,8 @@ const CommentsEnhanced = () => {
                         </span>
                       ) : col.key === 'commentDate' ? (
                         <div className="text-xs text-gray-700 dark:text-gray-300">{formatDate(comment.commentDate)}</div>
-                      ) : col.key === 'comment_text' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300 max-w-md truncate">{comment.comment_text || '—'}</div>
+                      ) : col.key === 'commentText' ? (
+                        <div className="text-xs text-gray-700 dark:text-gray-300 max-w-md truncate" title={comment.commentText}>{comment.commentText || '—'}</div>
                       ) : null}
                     </td>
                   ))}
