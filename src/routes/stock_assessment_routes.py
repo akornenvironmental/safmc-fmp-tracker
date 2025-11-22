@@ -535,9 +535,10 @@ def seed_assessments():
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Ensure table exists
+        # Drop and recreate table with correct schema
+        cur.execute("DROP TABLE IF EXISTS stock_assessments CASCADE")
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS stock_assessments (
+            CREATE TABLE stock_assessments (
                 id SERIAL PRIMARY KEY,
                 sedar_number VARCHAR(50),
                 species_common_name VARCHAR(255),
