@@ -95,6 +95,16 @@ def init_scheduler(app):
                     db.session.add(log)
                     db.session.commit()
 
+                    # Send email notifications for new comments
+                    if items_new > 0:
+                        try:
+                            from src.services.notification_service import notify_admins_of_new_comments
+                            # Get the new comments for notification
+                            new_comment_data = [c.to_dict() for c in Comment.query.order_by(Comment.created_at.desc()).limit(items_new).all()]
+                            notify_admins_of_new_comments(new_comment_data, db.session)
+                        except Exception as notify_error:
+                            logger.error(f"Error sending comment notifications: {notify_error}")
+
                     logger.info(f"Daily comments scrape completed: {items_new} new, {items_updated} updated from {len(results['by_source'])} sources")
 
                 except Exception as e:

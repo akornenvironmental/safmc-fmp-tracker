@@ -537,3 +537,117 @@ def export_activity_logs():
     except Exception as e:
         logger.error(f"Error exporting activity logs: {e}")
         return jsonify({'error': 'Failed to export activity logs'}), 500
+
+
+# ==================== NOTIFICATION SETTINGS ====================
+
+@bp.route('/notification-settings', methods=['GET'])
+@require_admin
+def get_notification_settings():
+    """Get current user's notification settings"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        return jsonify({
+            'success': True,
+            'settings': {
+                'email_notifications': current_user.email_notifications,
+                'notify_new_comments': current_user.notify_new_comments,
+                'notify_weekly_digest': current_user.notify_weekly_digest
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting notification settings: {e}")
+        return jsonify({'error': 'Failed to get notification settings'}), 500
+
+
+@bp.route('/notification-settings', methods=['PUT'])
+@require_admin
+def update_notification_settings():
+    """Update current user's notification settings"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        data = request.get_json()
+
+        # Update settings if provided
+        if 'email_notifications' in data:
+            current_user.email_notifications = bool(data['email_notifications'])
+        if 'notify_new_comments' in data:
+            current_user.notify_new_comments = bool(data['notify_new_comments'])
+        if 'notify_weekly_digest' in data:
+            current_user.notify_weekly_digest = bool(data['notify_weekly_digest'])
+
+        db.session.commit()
+
+        log_activity(
+            activity_type='admin.notification_settings_updated',
+            description='Updated notification settings',
+            category='admin'
+        )
+
+        return jsonify({
+            'success': True,
+            'message': 'Notification settings updated',
+            'settings': {
+                'email_notifications': current_user.email_notifications,
+                'notify_new_comments': current_user.notify_new_comments,
+                'notify_weekly_digest': current_user.notify_weekly_digest
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating notification settings: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update notification settings'}), 500
+
+
+@bp.route('/send-test-notification', methods=['POST'])
+@require_admin
+def send_test_notification():
+    """Send a test notification email to the current user"""
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'error': 'Not authenticated'}), 401
+
+        from src.services.notification_service import send_new_comments_notification
+
+        # Create a sample comment for the test
+        test_comments = [{
+            'name': 'Test User',
+            'organization': 'Test Organization',
+            'actionFmp': 'Snapper-Grouper',
+            'commentText': 'This is a test comment to verify that email notifications are working correctly.'
+        }]
+
+        success = send_new_comments_notification(
+            current_user.email,
+            test_comments,
+            current_user.name or 'Admin'
+        )
+
+        if success:
+            log_activity(
+                activity_type='admin.test_notification_sent',
+                description=f'Sent test notification to {current_user.email}',
+                category='admin'
+            )
+            return jsonify({
+                'success': True,
+                'message': f'Test notification sent to {current_user.email}'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to send test notification. Check email configuration.'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error sending test notification: {e}")
+        return jsonify({'error': 'Failed to send test notification'}), 500

@@ -14,6 +14,12 @@ class User(db.Model):
     last_login = db.Column(db.DateTime, nullable=True)
     login_token = db.Column(db.String(255), nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
+
+    # Notification preferences
+    email_notifications = db.Column(db.Boolean, default=True, nullable=False)
+    notify_new_comments = db.Column(db.Boolean, default=True, nullable=False)
+    notify_weekly_digest = db.Column(db.Boolean, default=True, nullable=False)
+
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -26,7 +32,10 @@ class User(db.Model):
             'role': self.role,
             'is_active': self.is_active,
             'last_login': self.last_login.isoformat() if self.last_login else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'email_notifications': self.email_notifications,
+            'notify_new_comments': self.notify_new_comments,
+            'notify_weekly_digest': self.notify_weekly_digest
         }
 
     def __repr__(self):

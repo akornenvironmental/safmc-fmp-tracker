@@ -320,6 +320,32 @@ def run_comment_migration():
         logger.error(f"Error running comment migration: {e}")
         db.session.rollback()
 
+def run_user_notification_migration():
+    """Add notification preference columns to users table"""
+    try:
+        with app.app_context():
+            # Check if email_notifications column exists
+            result = db.session.execute(text("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name = 'users' AND column_name = 'email_notifications'
+            """))
+            if not result.fetchone():
+                logger.info("Adding notification columns to users table...")
+                db.session.execute(text("""
+                    ALTER TABLE users
+                    ADD COLUMN IF NOT EXISTS email_notifications BOOLEAN DEFAULT TRUE,
+                    ADD COLUMN IF NOT EXISTS notify_new_comments BOOLEAN DEFAULT TRUE,
+                    ADD COLUMN IF NOT EXISTS notify_weekly_digest BOOLEAN DEFAULT TRUE
+                """))
+                db.session.commit()
+                logger.info("✓ User notification columns added")
+            else:
+                logger.info("User notification columns already exist")
+
+    except Exception as e:
+        logger.error(f"Error running user notification migration: {e}")
+        db.session.rollback()
+
 def init_contacts_and_orgs():
     """Create contacts and organizations tables on startup if they don't exist"""
     try:
@@ -623,6 +649,7 @@ with app.app_context():
     ensure_stock_assessment_columns()
     init_fisherypulse_columns()
     run_comment_migration()
+    run_user_notification_migration()
     init_contacts_and_orgs()
     init_ai_query_log()
     init_fmp_document_tables()
