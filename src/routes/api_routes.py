@@ -1374,3 +1374,59 @@ def get_scrape_queue_status():
     except Exception as e:
         logger.error(f"Error getting scrape queue status: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/comments/fix-links', methods=['POST'])
+def fix_comment_links():
+    """
+    Fix comment-action links by re-matching comments to actions.
+    Also sets FMP on actions that are missing it.
+    """
+    try:
+        fixed_count = 0
+        fmp_updated = 0
+
+        # First, fix the Coral 11 / Shrimp 12 action to have proper FMP
+        coral_shrimp_action = Action.query.filter(
+            Action.action_id == 'coral-11-shrimp-12'
+        ).first()
+
+        if coral_shrimp_action and not coral_shrimp_action.fmp:
+            coral_shrimp_action.fmp = 'Coral, Shrimp'
+            fmp_updated += 1
+            logger.info(f"Set FMP for coral-11-shrimp-12 to 'Coral, Shrimp'")
+
+        # Get all comments that have 'general-comment' as action_id
+        general_comments = Comment.query.filter(
+            Comment.action_id == 'general-comment'
+        ).all()
+
+        logger.info(f"Found {len(general_comments)} comments with 'general-comment' action_id")
+
+        # Try to match each comment to a proper action based on data source
+        # Comments from the Coral/Shrimp sheet should link to coral-11-shrimp-12
+        for comment in general_comments:
+            if comment.data_source and 'Comprehensive' in (comment.data_source or ''):
+                # This is from the main comprehensive sheet
+                if coral_shrimp_action:
+                    comment.action_id = coral_shrimp_action.action_id
+                    fixed_count += 1
+            elif comment.data_source and ('Additional 1' in comment.data_source or 'Additional 2' in comment.data_source):
+                # These sheets also have Coral/Shrimp comments based on the URL
+                if coral_shrimp_action:
+                    comment.action_id = coral_shrimp_action.action_id
+                    fixed_count += 1
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Fixed {fixed_count} comment links, updated FMP on {fmp_updated} actions',
+            'fixed_count': fixed_count,
+            'fmp_updated': fmp_updated
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error fixing comment links: {e}")
+        return jsonify({'error': str(e)}), 500
