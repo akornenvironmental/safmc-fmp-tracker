@@ -338,25 +338,25 @@ const MeetingsEnhanced = () => {
   };
 
   const getTypeColor = (type) => {
-    if (!type) return 'bg-gray-100 text-gray-800';
+    if (!type) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
 
     const typeLower = type.toLowerCase();
-    if (typeLower.includes('council')) return 'bg-blue-100 text-blue-800';
-    if (typeLower.includes('committee')) return 'bg-green-100 text-green-800';
-    if (typeLower.includes('workshop')) return 'bg-purple-100 text-purple-800';
-    if (typeLower.includes('webinar')) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-gray-100 text-gray-800';
+    if (typeLower.includes('council')) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
+    if (typeLower.includes('committee')) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
+    if (typeLower.includes('workshop')) return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200';
+    if (typeLower.includes('webinar')) return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
+    return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
   };
 
   return (
     <div>
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Meeting Calendar</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Meeting Calendar</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Showing {filteredAndSortedMeetings.length} of {meetings.length} meetings
           </p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Meetings are automatically synced from SAFMC and 16 other fishery management organizations.
           </p>
         </div>
@@ -387,26 +387,26 @@ const MeetingsEnhanced = () => {
               <Download size={14} />
               Export
             </button>
-            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-10">
               <div className="py-1">
-                <div className="px-4 py-2 text-xs text-gray-500 border-b">
+                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
                   {selectedMeetings.size > 0 ? `Export ${selectedMeetings.size} selected` : 'Export all meetings'}
                 </div>
                 <button
                   onClick={exportToCSV}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                 >
                   CSV Format (.csv)
                 </button>
                 <button
                   onClick={exportToTSV}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                 >
                   TSV Format (.tsv)
                 </button>
                 <button
                   onClick={exportToExcel}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
                 >
                   Excel Format (.xls)
                 </button>
@@ -433,15 +433,15 @@ const MeetingsEnhanced = () => {
       </div>
 
       {/* Meeting data sources description */}
-      <div className="mt-2 text-xs text-gray-600">
+      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
         Meeting data aggregated from: Federal Register API, NOAA Events, 8 regional fishery management councils, 3 interstate marine fisheries commissions, and 4 state agencies (NC, SC, GA, FL)
       </div>
 
 
       {/* Column selector */}
       {showColumnSelector && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Show/Hide Columns</h3>
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Show/Hide Columns</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {allColumns.map(col => (
               <label key={col.key} className="flex items-center gap-2">
@@ -450,9 +450,9 @@ const MeetingsEnhanced = () => {
                   checked={visibleColumns[col.key]}
                   onChange={() => toggleColumn(col.key)}
                   disabled={col.core}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                 />
-                <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
+                <span className={`text-sm ${col.core ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
                   {col.label} {col.core && '(required)'}
                 </span>
               </label>

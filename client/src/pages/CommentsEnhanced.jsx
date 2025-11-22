@@ -251,11 +251,11 @@ const CommentsEnhanced = () => {
     <div>
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Public Comments</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Public Comments</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Showing {filteredAndSortedComments.length} of {comments.length} comments
           </p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Comments are automatically synced weekly from SAFMC public hearings and comment periods.
           </p>
         </div>
@@ -428,22 +428,22 @@ const CommentsEnhanced = () => {
                             {comment.organization || '—'}
                           </button>
                         ) : (
-                          <div className="text-xs text-gray-700">{comment.organization || '—'}</div>
+                          <div className="text-xs text-gray-700 dark:text-gray-300">{comment.organization || '—'}</div>
                         )
                       ) : col.key === 'state' ? (
-                        <div className="text-xs text-gray-700">{comment.state || '—'}</div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300">{comment.state || '—'}</div>
                       ) : col.key === 'position' ? (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                          comment.position?.toLowerCase().includes('support') ? 'bg-green-100 text-green-800' :
-                          comment.position?.toLowerCase().includes('oppose') ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
+                          comment.position?.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' :
+                          comment.position?.toLowerCase().includes('oppose') ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200' :
+                          'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                         }`}>
                           {comment.position || 'Neutral'}
                         </span>
                       ) : col.key === 'commentDate' ? (
-                        <div className="text-xs text-gray-500">{formatDate(comment.commentDate)}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(comment.commentDate)}</div>
                       ) : col.key === 'comment_text' ? (
-                        <div className="text-xs text-gray-600 max-w-md truncate">{comment.comment_text || '—'}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 max-w-md truncate">{comment.comment_text || '—'}</div>
                       ) : null}
                     </td>
                   ))}
