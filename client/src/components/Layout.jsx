@@ -23,7 +23,7 @@ const Layout = () => {
     { to: '/actions', label: 'Actions' },
     { to: '/meetings', label: 'Meetings' },
     { to: '/comments', label: 'Comments' },
-    { to: '/stocks', label: 'Species & Stocks' },
+    { to: '/stocks', label: 'Stocks' },
     { to: '/compare', label: 'Compare' },
     { to: '/workplan', label: 'Workplan' },
     // Admin links - conditionally shown based on role

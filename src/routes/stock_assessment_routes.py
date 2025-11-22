@@ -48,10 +48,9 @@ def get_assessments():
             SELECT
                 id, sedar_number, species_common_name, species_scientific_name, stock_region,
                 assessment_type, status, start_date, completion_date,
-                stock_status,
-                overfishing_limit, acceptable_biological_catch, annual_catch_limit,
-                optimum_yield, units, fmp, sedar_url, assessment_report_url,
-                created_at, updated_at
+                stock_status, overfished, overfishing_occurring,
+                b_bmsy, f_fmsy, fmp, sedar_url, assessment_report_url,
+                fmps_affected, created_at, updated_at
             FROM stock_assessments
             WHERE 1=1
         """
@@ -115,31 +114,24 @@ def get_assessments():
             assessments.append({
                 'id': row[0],
                 'sedar_number': row[1],
-                'species': row[2],
+                'species': row[2],  # species_common_name
                 'scientific_name': row[3],
-                'stock_name': row[4],
+                'stock_name': row[4],  # stock_region
                 'assessment_type': row[5],
                 'status': row[6],
                 'start_date': row[7].isoformat() if row[7] else None,
                 'completion_date': row[8].isoformat() if row[8] else None,
                 'stock_status': row[9],
-                'overfishing_occurring': row[10],
-                'overfished': row[11],
-                'biomass_current': float(row[12]) if row[12] else None,
-                'biomass_msy': float(row[13]) if row[13] else None,
-                'b_bmsy': float(row[12] / row[13]) if row[12] and row[13] and row[13] != 0 else None,
-                'fishing_mortality_current': float(row[14]) if row[14] else None,
-                'fishing_mortality_msy': float(row[15]) if row[15] else None,
-                'f_fmsy': float(row[14] / row[15]) if row[14] and row[15] and row[15] != 0 else None,
-                'overfishing_limit': float(row[16]) if row[16] else None,
-                'acceptable_biological_catch': float(row[17]) if row[17] else None,
-                'annual_catch_limit': float(row[18]) if row[18] else None,
-                'keywords': row[19],
-                'fmps_affected': row[20],
-                'source_url': row[21],
-                'document_url': row[22],
-                'created_at': row[23].isoformat() if row[23] else None,
-                'updated_at': row[24].isoformat() if row[24] else None
+                'overfished': row[10],
+                'overfishing_occurring': row[11],
+                'b_bmsy': float(row[12]) if row[12] else None,
+                'f_fmsy': float(row[13]) if row[13] else None,
+                'fmp': row[14],
+                'source_url': row[15],
+                'document_url': row[16],
+                'fmps_affected': row[17],
+                'created_at': row[18].isoformat() if row[18] else None,
+                'updated_at': row[19].isoformat() if row[19] else None
             })
 
         cur.close()

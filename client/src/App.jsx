@@ -22,7 +22,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-22-v1-species-stocks-combined';
+const BUILD_VERSION = '2025-11-22-v2-stock-data-seeded';
 
 function App() {
   // Log build version on mount (forces this code into bundle)
