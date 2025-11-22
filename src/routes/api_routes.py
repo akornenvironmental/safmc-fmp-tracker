@@ -740,6 +740,124 @@ def ai_search():
         logger.error(f"Error in AI search: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+@bp.route('/ai/analyze-comments', methods=['POST'])
+@require_auth
+def ai_analyze_comments():
+    """Analyze public comments using AI to identify themes, sentiment, and concerns"""
+    try:
+        data = request.get_json() or {}
+
+        # Get filter parameters
+        fmp = data.get('fmp')
+        position = data.get('position')
+        state = data.get('state')
+        commenter_type = data.get('commenterType')
+
+        # Build query with filters
+        query = Comment.query
+
+        if fmp:
+            # Need to join with Action to filter by FMP
+            query = query.join(Action, Comment.action_id == Action.action_id).filter(Action.fmp.ilike(f'%{fmp}%'))
+
+        if position:
+            query = query.filter(Comment.position == position)
+
+        if state:
+            query = query.filter(Comment.state == state)
+
+        if commenter_type:
+            query = query.filter(Comment.commenter_type == commenter_type)
+
+        # Get comments (limit to prevent overwhelming the AI)
+        comments = query.order_by(desc(Comment.comment_date)).limit(200).all()
+
+        if not comments:
+            return jsonify({
+                'success': False,
+                'error': 'No comments found matching the specified filters'
+            }), 404
+
+        # Convert to dict format
+        comments_data = []
+        for c in comments:
+            comment_dict = c.to_dict()
+            # Add action info if available
+            if c.action_id:
+                action = Action.query.filter_by(action_id=c.action_id).first()
+                if action:
+                    comment_dict['actionFmp'] = action.fmp
+                    comment_dict['actionTitle'] = action.title
+            comments_data.append(comment_dict)
+
+        # Filter params for AI context
+        filter_params = {
+            'fmp': fmp,
+            'position': position,
+            'state': state,
+            'commenterType': commenter_type
+        }
+
+        # Run AI analysis
+        result = ai_service.analyze_comments(comments_data, filter_params)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error in AI comment analysis: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/ai/summarize-comments', methods=['POST'])
+@require_auth
+def ai_summarize_comments():
+    """Generate summaries of comments grouped by a specified field"""
+    try:
+        data = request.get_json() or {}
+        group_by = data.get('groupBy', 'fmp')
+
+        # Validate group_by parameter
+        valid_groups = ['fmp', 'position', 'state', 'commenterType']
+        if group_by not in valid_groups:
+            return jsonify({
+                'error': f'Invalid groupBy parameter. Must be one of: {", ".join(valid_groups)}'
+            }), 400
+
+        # Get all comments with action info
+        comments = Comment.query.order_by(desc(Comment.comment_date)).limit(500).all()
+
+        if not comments:
+            return jsonify({
+                'success': False,
+                'error': 'No comments found in database'
+            }), 404
+
+        # Convert to dict format with action info
+        comments_data = []
+        for c in comments:
+            comment_dict = c.to_dict()
+            if c.action_id:
+                action = Action.query.filter_by(action_id=c.action_id).first()
+                if action:
+                    comment_dict['actionFmp'] = action.fmp
+                    comment_dict['actionTitle'] = action.title
+            comments_data.append(comment_dict)
+
+        # Run AI summarization
+        result = ai_service.summarize_comment_group(comments_data, group_by)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error in AI comment summarization: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 @bp.route('/ai/query-logs', methods=['GET'])
 @require_admin
 def get_ai_query_logs():

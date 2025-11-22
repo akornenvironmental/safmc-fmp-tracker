@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2 } from 'lucide-react';
 
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
@@ -18,6 +18,13 @@ const CommentsEnhanced = () => {
   const [profileType, setProfileType] = useState(null); // 'contact' or 'organization'
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [showDashboard, setShowDashboard] = useState(true);
+
+  // AI Analysis state
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [analysisError, setAnalysisError] = useState(null);
+  const [analysisFilter, setAnalysisFilter] = useState({ fmp: '', position: '', state: '' });
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -299,16 +306,75 @@ const CommentsEnhanced = () => {
     setProfileType(null);
   };
 
+  // AI Analysis functions
+  const runAIAnalysis = async () => {
+    try {
+      setAnalyzing(true);
+      setAnalysisError(null);
+      setAnalysisResult(null);
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/ai/analyze-comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fmp: analysisFilter.fmp || undefined,
+          position: analysisFilter.position || undefined,
+          state: analysisFilter.state || undefined
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAnalysisResult(data);
+      } else {
+        setAnalysisError(data.error || 'Analysis failed');
+      }
+    } catch (error) {
+      console.error('Error running AI analysis:', error);
+      setAnalysisError('Failed to connect to AI service');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const closeAnalysisModal = () => {
+    setShowAnalysisModal(false);
+    setAnalysisResult(null);
+    setAnalysisError(null);
+  };
+
+  // Get unique values for filter dropdowns
+  const uniqueFmps = useMemo(() => {
+    const fmps = new Set(comments.map(c => c.actionFmp).filter(Boolean));
+    return Array.from(fmps).sort();
+  }, [comments]);
+
+  const uniquePositions = useMemo(() => {
+    const positions = new Set(comments.map(c => c.position).filter(Boolean));
+    return Array.from(positions).sort();
+  }, [comments]);
+
+  const uniqueStates = useMemo(() => {
+    const states = new Set(comments.map(c => c.state).filter(Boolean));
+    return Array.from(states).sort();
+  }, [comments]);
+
   // Handle ESC key to close modal
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && showProfileModal) {
-        closeProfileModal();
+      if (e.key === 'Escape') {
+        if (showAnalysisModal) closeAnalysisModal();
+        else if (showProfileModal) closeProfileModal();
       }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [showProfileModal]);
+  }, [showProfileModal, showAnalysisModal]);
 
   return (
     <div>
@@ -349,6 +415,18 @@ const CommentsEnhanced = () => {
           >
             <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
             {syncing ? 'Syncing...' : 'Sync Comments'}
+          </button>
+          <button
+            onClick={() => setShowAnalysisModal(true)}
+            disabled={comments.length === 0}
+            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
+              comments.length === 0
+                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'border-violet-300 dark:border-violet-600 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-900/30 dark:to-fuchsia-900/30 text-violet-700 dark:text-violet-300 hover:from-violet-100 hover:to-fuchsia-100 dark:hover:from-violet-900/50 dark:hover:to-fuchsia-900/50 hover:border-violet-400'
+            }`}
+          >
+            <Sparkles size={14} />
+            AI Analysis
           </button>
         </div>
       </div>
@@ -812,6 +890,168 @@ const CommentsEnhanced = () => {
               <button
                 onClick={closeProfileModal}
                 className="w-full px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-blue-light transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Analysis Modal */}
+      {showAnalysisModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={closeAnalysisModal}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="analysis-modal-title"
+          >
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-violet-100 dark:bg-violet-900/50 rounded-lg">
+                  <Brain className="text-violet-600 dark:text-violet-300" size={24} />
+                </div>
+                <div>
+                  <h2 id="analysis-modal-title" className="font-heading text-xl font-bold text-gray-900 dark:text-gray-100">
+                    AI Comment Analysis
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Powered by Claude AI
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closeAnalysisModal}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close analysis modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="px-6 py-4">
+              {/* Filters */}
+              {!analysisResult && !analyzing && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filter Comments (Optional)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">FMP</label>
+                      <select
+                        value={analysisFilter.fmp}
+                        onChange={(e) => setAnalysisFilter(prev => ({ ...prev, fmp: e.target.value }))}
+                        className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="">All FMPs</option>
+                        {uniqueFmps.map(fmp => (
+                          <option key={fmp} value={fmp}>{fmp}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Position</label>
+                      <select
+                        value={analysisFilter.position}
+                        onChange={(e) => setAnalysisFilter(prev => ({ ...prev, position: e.target.value }))}
+                        className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="">All Positions</option>
+                        {uniquePositions.map(pos => (
+                          <option key={pos} value={pos}>{pos}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">State</label>
+                      <select
+                        value={analysisFilter.state}
+                        onChange={(e) => setAnalysisFilter(prev => ({ ...prev, state: e.target.value }))}
+                        className="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="">All States</option>
+                        {uniqueStates.map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={runAIAnalysis}
+                    disabled={analyzing}
+                    className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-lg font-medium hover:from-violet-700 hover:to-fuchsia-700 transition-all shadow-lg shadow-violet-500/25"
+                  >
+                    <Sparkles size={18} />
+                    Analyze {comments.length} Comments with AI
+                  </button>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {analyzing && (
+                <div className="text-center py-12">
+                  <Loader2 size={48} className="animate-spin text-violet-600 dark:text-violet-400 mx-auto mb-4" />
+                  <p className="text-gray-700 dark:text-gray-300 font-medium">Analyzing comments...</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    This may take 15-30 seconds depending on the number of comments
+                  </p>
+                </div>
+              )}
+
+              {/* Error State */}
+              {analysisError && (
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                  <p className="text-red-700 dark:text-red-300 font-medium">Analysis Failed</p>
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">{analysisError}</p>
+                  <button
+                    onClick={() => {
+                      setAnalysisError(null);
+                      setAnalysisResult(null);
+                    }}
+                    className="mt-3 text-sm text-red-700 dark:text-red-300 underline hover:no-underline"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {/* Results */}
+              {analysisResult && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/30 rounded-lg p-3 mb-4">
+                    <span className="text-sm text-violet-700 dark:text-violet-300">
+                      Analyzed {analysisResult.comments_analyzed} of {analysisResult.total_comments} comments
+                    </span>
+                    <button
+                      onClick={() => {
+                        setAnalysisResult(null);
+                        setAnalysisFilter({ fmp: '', position: '', state: '' });
+                      }}
+                      className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
+                    >
+                      New Analysis
+                    </button>
+                  </div>
+
+                  {/* Analysis Content - Rendered as Markdown-like */}
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 whitespace-pre-wrap text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
+                      {analysisResult.answer}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+              <button
+                onClick={closeAnalysisModal}
+                className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
               >
                 Close
               </button>
