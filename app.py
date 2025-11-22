@@ -277,7 +277,7 @@ def init_fisherypulse_columns():
         db.session.rollback()
 
 def run_comment_migration():
-    """Run migration to make action_id nullable in comments table"""
+    """Run migration to make action_id nullable and add species_mentioned column"""
     try:
         with app.app_context():
             # Check if action_id is already nullable
@@ -299,6 +299,23 @@ def run_comment_migration():
                 logger.info("✓ action_id is now nullable")
             else:
                 logger.info("action_id already nullable, skipping migration")
+
+            # Add species_mentioned column if it doesn't exist
+            result = db.session.execute(text("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name = 'comments' AND column_name = 'species_mentioned'
+            """))
+            if not result.fetchone():
+                logger.info("Adding species_mentioned column to comments table...")
+                db.session.execute(text("""
+                    ALTER TABLE comments
+                    ADD COLUMN IF NOT EXISTS species_mentioned TEXT
+                """))
+                db.session.commit()
+                logger.info("✓ species_mentioned column added")
+            else:
+                logger.info("species_mentioned column already exists")
+
     except Exception as e:
         logger.error(f"Error running comment migration: {e}")
         db.session.rollback()

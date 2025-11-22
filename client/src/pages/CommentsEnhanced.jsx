@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2 } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag } from 'lucide-react';
 
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
@@ -26,8 +26,12 @@ const CommentsEnhanced = () => {
   const [analysisError, setAnalysisError] = useState(null);
   const [analysisFilter, setAnalysisFilter] = useState({ fmp: '', position: '', state: '' });
 
+  // Species detection state
+  const [detectingSpecies, setDetectingSpecies] = useState(false);
+  const [speciesStats, setSpeciesStats] = useState(null);
+
   // Dashboard filter state (click-to-filter)
-  const [activeFilters, setActiveFilters] = useState({ fmp: '', position: '', state: '', commenterType: '' });
+  const [activeFilters, setActiveFilters] = useState({ fmp: '', position: '', state: '', commenterType: '', species: '' });
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -37,6 +41,7 @@ const CommentsEnhanced = () => {
     organization: true,
     state: true,
     position: false,
+    speciesMentioned: false,
     commentDate: true,
     commentText: true,
   });
@@ -49,13 +54,55 @@ const CommentsEnhanced = () => {
     { key: 'organization', label: 'Affiliation', core: false },
     { key: 'state', label: 'State', core: false },
     { key: 'position', label: 'Position', core: false },
+    { key: 'speciesMentioned', label: 'Species', core: false },
     { key: 'commentDate', label: 'Date', core: true },
     { key: 'commentText', label: 'Comment', core: false },
   ];
 
   useEffect(() => {
     fetchComments();
+    fetchSpeciesStats();
   }, []);
+
+  const fetchSpeciesStats = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/comments/species-stats`);
+      const data = await response.json();
+      if (data.success) {
+        setSpeciesStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching species stats:', error);
+    }
+  };
+
+  const detectSpecies = async () => {
+    try {
+      setDetectingSpecies(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/comments/detect-species`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Species detection complete! Updated ${data.updated} comments. Found species in ${data.with_species} comments.`);
+        fetchComments(); // Refresh comments with new species data
+        fetchSpeciesStats(); // Refresh stats
+      } else {
+        alert('Species detection failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error detecting species:', error);
+      alert('Error running species detection');
+    } finally {
+      setDetectingSpecies(false);
+    }
+  };
 
   const fetchComments = async () => {
     try {
@@ -101,7 +148,7 @@ const CommentsEnhanced = () => {
     setSortDirection('desc');
     setCurrentPage(1);
     setSelectedComments(new Set());
-    setActiveFilters({ fmp: '', position: '', state: '', commenterType: '' });
+    setActiveFilters({ fmp: '', position: '', state: '', commenterType: '', species: '' });
     setShowColumnSelector(false);
   };
 
@@ -123,6 +170,10 @@ const CommentsEnhanced = () => {
       if (activeFilters.position && comment.position !== activeFilters.position) return false;
       if (activeFilters.state && comment.state !== activeFilters.state) return false;
       if (activeFilters.commenterType && comment.commenterType !== activeFilters.commenterType) return false;
+      if (activeFilters.species) {
+        const species = comment.speciesMentioned || [];
+        if (!species.some(s => s.toLowerCase().includes(activeFilters.species.toLowerCase()))) return false;
+      }
       return true;
     });
 
@@ -167,7 +218,7 @@ const CommentsEnhanced = () => {
       return;
     }
 
-    const headers = ['Name', 'Organization', 'Email', 'City', 'State', 'FMP', 'Action', 'Position', 'Commenter Type', 'Date', 'Comment'];
+    const headers = ['Name', 'Organization', 'Email', 'City', 'State', 'FMP', 'Action', 'Position', 'Commenter Type', 'Species Mentioned', 'Date', 'Comment'];
     const rows = dataToExport.map(c => [
       c.name || '',
       c.organization || '',
@@ -178,6 +229,7 @@ const CommentsEnhanced = () => {
       c.actionTitle || '',
       c.position || '',
       c.commenterType || '',
+      (c.speciesMentioned || []).join('; '),
       c.commentDate ? new Date(c.commentDate).toLocaleDateString() : '',
       (c.commentText || '').replace(/"/g, '""') // Escape quotes
     ]);
@@ -493,6 +545,18 @@ const CommentsEnhanced = () => {
             AI Analysis
           </button>
           <button
+            onClick={detectSpecies}
+            disabled={detectingSpecies || comments.length === 0}
+            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
+              detectingSpecies || comments.length === 0
+                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'border-teal-300 dark:border-teal-600 bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 text-teal-700 dark:text-teal-300 hover:from-teal-100 hover:to-emerald-100 dark:hover:from-teal-900/50 dark:hover:to-emerald-900/50 hover:border-teal-400'
+            }`}
+          >
+            <Fish size={14} className={detectingSpecies ? 'animate-pulse' : ''} />
+            {detectingSpecies ? 'Detecting...' : 'Detect Species'}
+          </button>
+          <button
             onClick={exportToCSV}
             disabled={filteredAndSortedComments.length === 0}
             className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
@@ -547,8 +611,18 @@ const CommentsEnhanced = () => {
               <X size={12} />
             </button>
           )}
+          {activeFilters.species && (
+            <button
+              onClick={() => toggleFilter('species', activeFilters.species)}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 rounded-full text-xs hover:bg-teal-200 dark:hover:bg-teal-800"
+            >
+              <Fish size={10} />
+              Species: {activeFilters.species}
+              <X size={12} />
+            </button>
+          )}
           <button
-            onClick={() => setActiveFilters({ fmp: '', position: '', state: '', commenterType: '' })}
+            onClick={() => setActiveFilters({ fmp: '', position: '', state: '', commenterType: '', species: '' })}
             className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
           >
             Clear all
@@ -702,6 +776,37 @@ const CommentsEnhanced = () => {
                           {count} comments
                         </span>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Species Mentioned - Click to filter */}
+              {speciesStats && speciesStats.top_species && speciesStats.top_species.length > 0 && (
+                <div className="md:col-span-2 lg:col-span-4 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 rounded-lg p-4 border border-teal-200 dark:border-teal-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Fish className="text-teal-600 dark:text-teal-300" size={18} />
+                      <p className="text-sm font-medium text-teal-900 dark:text-teal-100">
+                        Species Mentioned in Comments
+                        <span className="text-xs font-normal text-teal-600 dark:text-teal-400 ml-2">
+                          ({speciesStats.comments_with_species} of {speciesStats.total_comments} comments)
+                        </span>
+                      </p>
+                    </div>
+                    <span className="text-xs text-teal-600 dark:text-teal-400">(click to filter)</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {speciesStats.top_species.slice(0, 15).map(({ species, count }) => (
+                      <button
+                        key={species}
+                        onClick={() => toggleFilter('species', species)}
+                        className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-800 text-teal-700 dark:text-teal-300 border hover:bg-teal-200 dark:hover:bg-teal-700 transition-colors ${activeFilters.species === species ? 'border-teal-500 ring-2 ring-teal-500' : 'border-teal-200 dark:border-teal-600'}`}
+                      >
+                        <Tag size={10} />
+                        {species}
+                        <span className="font-medium text-teal-900 dark:text-teal-100">{count}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -861,6 +966,26 @@ const CommentsEnhanced = () => {
                         }`}>
                           {comment.position || 'Neutral'}
                         </span>
+                      ) : col.key === 'speciesMentioned' ? (
+                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                          {comment.speciesMentioned && comment.speciesMentioned.length > 0 ? (
+                            comment.speciesMentioned.slice(0, 3).map((sp, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => toggleFilter('species', sp)}
+                                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 rounded text-[10px] hover:bg-teal-200 dark:hover:bg-teal-800"
+                              >
+                                <Fish size={8} />
+                                {sp}
+                              </button>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-400">—</span>
+                          )}
+                          {comment.speciesMentioned && comment.speciesMentioned.length > 3 && (
+                            <span className="text-[10px] text-teal-600 dark:text-teal-400">+{comment.speciesMentioned.length - 3}</span>
+                          )}
+                        </div>
                       ) : col.key === 'commentDate' ? (
                         <div className="text-xs text-gray-700 dark:text-gray-300">{formatDate(comment.commentDate)}</div>
                       ) : col.key === 'commentText' ? (

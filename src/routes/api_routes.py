@@ -263,6 +263,105 @@ def get_comments():
         logger.error(f"Error getting comments: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+@bp.route('/comments/detect-species', methods=['POST'])
+@require_admin
+def detect_species_in_comments():
+    """Detect and tag species mentioned in comment text"""
+    try:
+        from src.services.species_service import SpeciesService
+        species_service = SpeciesService()
+
+        # Get comments without species_mentioned populated
+        comments = Comment.query.filter(
+            (Comment.species_mentioned == None) | (Comment.species_mentioned == '')
+        ).filter(
+            Comment.comment_text != None,
+            Comment.comment_text != ''
+        ).all()
+
+        if not comments:
+            return jsonify({
+                'success': True,
+                'message': 'No comments need species detection',
+                'processed': 0
+            })
+
+        updated_count = 0
+        species_counts = {}
+
+        for comment in comments:
+            if comment.comment_text:
+                # Use the species service to extract species from text
+                detected = species_service.extract_species_from_text(comment.comment_text)
+                if detected:
+                    comment.species_mentioned = ','.join(sorted(detected))
+                    updated_count += 1
+                    # Track counts
+                    for species in detected:
+                        species_counts[species] = species_counts.get(species, 0) + 1
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Detected species in {updated_count} comments',
+            'processed': updated_count,
+            'totalComments': len(comments),
+            'speciesCounts': species_counts
+        })
+
+    except Exception as e:
+        logger.error(f"Error detecting species in comments: {e}")
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@bp.route('/comments/species-stats', methods=['GET'])
+def get_comment_species_stats():
+    """Get statistics on species mentioned in comments"""
+    try:
+        # Get all comments with species_mentioned
+        comments = Comment.query.filter(
+            Comment.species_mentioned != None,
+            Comment.species_mentioned != ''
+        ).all()
+
+        species_counts = {}
+        comments_by_species = {}
+
+        for comment in comments:
+            if comment.species_mentioned:
+                species_list = comment.species_mentioned.split(',')
+                for species in species_list:
+                    species = species.strip()
+                    if species:
+                        species_counts[species] = species_counts.get(species, 0) + 1
+                        if species not in comments_by_species:
+                            comments_by_species[species] = []
+                        comments_by_species[species].append({
+                            'id': comment.comment_id,
+                            'name': comment.name,
+                            'position': comment.position,
+                            'date': comment.comment_date.isoformat() if comment.comment_date else None
+                        })
+
+        # Sort by count descending
+        sorted_species = sorted(species_counts.items(), key=lambda x: x[1], reverse=True)
+
+        return jsonify({
+            'success': True,
+            'totalCommentsWithSpecies': len(comments),
+            'speciesCounts': dict(sorted_species),
+            'topSpecies': [{'name': s, 'count': c} for s, c in sorted_species[:10]],
+            'commentsBySpecies': comments_by_species
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting species stats: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @bp.route('/contacts')
 def get_contacts():
     """Get all contacts"""

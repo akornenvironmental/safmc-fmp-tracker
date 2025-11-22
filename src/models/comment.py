@@ -44,6 +44,9 @@ class Comment(db.Model):
     source_url = db.Column(db.String(500))
     data_source = db.Column(db.String(300))  # Name of the comment collection
 
+    # Species detected in comment text
+    species_mentioned = db.Column(db.Text)  # Comma-separated list of species detected
+
     # Tracking
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -73,6 +76,7 @@ class Comment(db.Model):
             'source': self.source,
             'sourceUrl': self.source_url,
             'dataSource': self.data_source,
+            'speciesMentioned': self.species_mentioned.split(',') if self.species_mentioned else [],
             'updatedAt': self.updated_at.isoformat() if self.updated_at else None
         }
 
