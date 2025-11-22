@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { Calendar, MapPin, RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
+import {
+  Calendar, MapPin, RefreshCw, Download, Settings, RotateCcw,
+  Table, LayoutGrid, List, ChevronLeft, ChevronRight, Clock, ExternalLink
+} from 'lucide-react';
 
 const MeetingsEnhanced = () => {
   const [meetings, setMeetings] = useState([]);
@@ -19,6 +22,11 @@ const MeetingsEnhanced = () => {
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [showRegionDropdown, setShowRegionDropdown] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
+
+  // View mode: 'table', 'calendar', 'agenda'
+  const [viewMode, setViewMode] = useState('table');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -348,6 +356,67 @@ const MeetingsEnhanced = () => {
     return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
   };
 
+  // Calendar view helpers
+  const calendarDays = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startPadding = firstDay.getDay();
+    const days = [];
+
+    for (let i = startPadding - 1; i >= 0; i--) {
+      days.push({ date: new Date(year, month, -i), isCurrentMonth: false });
+    }
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push({ date: new Date(year, month, i), isCurrentMonth: true });
+    }
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
+    }
+    return days;
+  }, [currentDate]);
+
+  const meetingsByDate = useMemo(() => {
+    const map = {};
+    filteredAndSortedMeetings.forEach(meeting => {
+      if (!meeting.start_date) return;
+      const dateKey = meeting.start_date.split('T')[0];
+      if (!map[dateKey]) map[dateKey] = [];
+      map[dateKey].push(meeting);
+    });
+    return map;
+  }, [filteredAndSortedMeetings]);
+
+  const selectedDateMeetings = useMemo(() => {
+    if (!selectedDate) return [];
+    const dateKey = selectedDate.toISOString().split('T')[0];
+    return meetingsByDate[dateKey] || [];
+  }, [selectedDate, meetingsByDate]);
+
+  const upcomingMeetings = useMemo(() => {
+    const now = new Date();
+    return filteredAndSortedMeetings
+      .filter(m => m.start_date && new Date(m.start_date) >= now)
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+      .slice(0, 20);
+  }, [filteredAndSortedMeetings]);
+
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const goToToday = () => { setCurrentDate(new Date()); setSelectedDate(new Date()); };
+  const isToday = (date) => date.toDateString() === new Date().toDateString();
+
+  const getMeetingDotColor = (meeting) => {
+    const title = (meeting.title || '').toLowerCase();
+    if (title.includes('council')) return 'bg-blue-500';
+    if (title.includes('committee')) return 'bg-green-500';
+    if (title.includes('public')) return 'bg-purple-500';
+    if (title.includes('webinar')) return 'bg-orange-500';
+    return 'bg-gray-500';
+  };
+
   return (
     <div>
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -361,21 +430,56 @@ const MeetingsEnhanced = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
+          {/* View Toggle */}
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-l-md border ${
+                viewMode === 'table'
+                  ? 'bg-brand-blue text-white border-brand-blue'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              <Table size={14} /> Table
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border-t border-b ${
+                viewMode === 'calendar'
+                  ? 'bg-brand-blue text-white border-brand-blue'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              <LayoutGrid size={14} /> Calendar
+            </button>
+            <button
+              onClick={() => setViewMode('agenda')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-r-md border ${
+                viewMode === 'agenda'
+                  ? 'bg-brand-blue text-white border-brand-blue'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              <List size={14} /> Agenda
+            </button>
+          </div>
           <button
             onClick={handleReset}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 dark:border-slate-600 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800 dark:to-gray-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:from-slate-100 hover:to-gray-100 dark:hover:from-slate-700 dark:hover:to-gray-700 hover:border-slate-400 transition-all"
             title="Reset filters, sorting, and selection"
           >
             <RotateCcw size={14} />
             Reset
           </button>
-          <button
-            onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
-          >
-            <Settings size={14} />
-            Columns
-          </button>
+          {viewMode === 'table' && (
+            <button
+              onClick={() => setShowColumnSelector(!showColumnSelector)}
+              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 dark:border-indigo-600 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 shadow-sm hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/50 dark:hover:to-purple-900/50 hover:border-indigo-400 transition-all"
+            >
+              <Settings size={14} />
+              Columns
+            </button>
+          )}
           <div className="relative">
             <button
               className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
@@ -847,8 +951,9 @@ const MeetingsEnhanced = () => {
         </select>
       </div>
 
-      {/* Meetings Table */}
-      <div className="mt-6 bg-white shadow overflow-x-auto sm:rounded-lg">
+      {/* Table View */}
+      {viewMode === 'table' && (
+      <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <caption className="sr-only">
             Meeting calendar with {filteredAndSortedMeetings.length} meetings. Table includes columns for selection, title, council, date, location, and type. Click column headers to sort.
@@ -969,32 +1074,186 @@ const MeetingsEnhanced = () => {
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination - Table View Only */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Showing {filteredAndSortedMeetings.length} of {meetings.length} meetings
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Go to previous page"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700" aria-current="page" aria-label={`Page ${currentPage} of ${totalPages}`}>
+            <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300" aria-current="page" aria-label={`Page ${currentPage} of ${totalPages}`}>
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Go to next page"
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+      )}
+
+      {/* Calendar View */}
+      {viewMode === 'calendar' && (
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Calendar Grid */}
+          <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            {/* Calendar Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <button onClick={prevMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <ChevronLeft size={20} className="text-gray-700 dark:text-gray-300" />
+              </button>
+              <div className="text-center">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </h2>
+                <button onClick={goToToday} className="text-xs text-brand-blue hover:underline">Today</button>
+              </div>
+              <button onClick={nextMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <ChevronRight size={20} className="text-gray-700 dark:text-gray-300" />
+              </button>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="p-4">
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{day}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {calendarDays.map((day, idx) => {
+                  const dateKey = day.date.toISOString().split('T')[0];
+                  const dayMeetings = meetingsByDate[dateKey] || [];
+                  const isSelected = selectedDate && day.date.toDateString() === selectedDate.toDateString();
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => setSelectedDate(day.date)}
+                      className={`min-h-[80px] p-1 border rounded-lg cursor-pointer transition-colors ${
+                        day.isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
+                      } ${isSelected ? 'ring-2 ring-brand-blue' : ''} ${
+                        isToday(day.date) ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700' : 'border-gray-100 dark:border-gray-700'
+                      } hover:border-gray-300 dark:hover:border-gray-500`}
+                    >
+                      <div className={`text-sm font-medium mb-1 ${
+                        day.isCurrentMonth ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-600'
+                      } ${isToday(day.date) ? 'text-brand-blue' : ''}`}>
+                        {day.date.getDate()}
+                      </div>
+                      <div className="space-y-0.5">
+                        {dayMeetings.slice(0, 3).map((meeting, midx) => (
+                          <div key={midx} className={`text-[10px] text-white px-1 py-0.5 rounded truncate ${getMeetingDotColor(meeting)}`} title={meeting.title}>
+                            {meeting.title}
+                          </div>
+                        ))}
+                        {dayMeetings.length > 3 && <div className="text-[10px] text-gray-500 dark:text-gray-400">+{dayMeetings.length - 3} more</div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Selected Date / Upcoming Sidebar */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            {selectedDate ? (
+              <>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  {selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </h3>
+                {selectedDateMeetings.length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No meetings scheduled</p>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedDateMeetings.map((meeting, idx) => (
+                      <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{meeting.title}</h4>
+                        {meeting.location && <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1"><MapPin size={12} /> {meeting.location}</p>}
+                        {meeting.council && <p className="text-xs text-gray-500 dark:text-gray-400">{meeting.council}</p>}
+                        {meeting.source_url && (
+                          <a href={meeting.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-blue hover:underline flex items-center gap-1 mt-2">
+                            Details <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Upcoming Meetings</h3>
+                <div className="space-y-2">
+                  {upcomingMeetings.slice(0, 8).map((meeting, idx) => (
+                    <div key={idx} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer" onClick={() => setSelectedDate(new Date(meeting.start_date))}>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{meeting.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(meeting.start_date).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Agenda View */}
+      {viewMode === 'agenda' && (
+        <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Upcoming Meetings</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{upcomingMeetings.length} upcoming meetings</p>
+          </div>
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {loading ? (
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">Loading...</div>
+            ) : upcomingMeetings.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400">No upcoming meetings match your filters</div>
+            ) : (
+              upcomingMeetings.map((meeting, idx) => (
+                <div key={idx} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">{meeting.title}</h3>
+                      <div className="mt-1 flex flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {new Date(meeting.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                        {meeting.location && (
+                          <span className="flex items-center gap-1"><MapPin size={14} /> {meeting.location}</span>
+                        )}
+                        {meeting.council && (
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">{meeting.council}</span>
+                        )}
+                      </div>
+                      {meeting.description && (
+                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{meeting.description}</p>
+                      )}
+                    </div>
+                    {meeting.source_url && (
+                      <a href={meeting.source_url} target="_blank" rel="noopener noreferrer" className="ml-4 text-brand-blue hover:text-brand-green flex items-center gap-1 text-sm">
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
