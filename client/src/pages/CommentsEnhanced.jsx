@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw, X } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
@@ -17,6 +17,7 @@ const CommentsEnhanced = () => {
   const [profileData, setProfileData] = useState(null);
   const [profileType, setProfileType] = useState(null); // 'contact' or 'organization'
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(true);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -146,6 +147,68 @@ const CommentsEnhanced = () => {
   }, [filteredAndSortedComments, currentPage, pageSize]);
 
   const totalPages = pageSize >= 999999 ? 1 : Math.ceil(filteredAndSortedComments.length / pageSize);
+
+  // Compute dashboard analytics
+  const dashboardStats = useMemo(() => {
+    if (comments.length === 0) return null;
+
+    const stats = {
+      total: comments.length,
+      byPosition: {},
+      byCommenterType: {},
+      byState: {},
+      byFmp: {},
+      recentComments: 0,
+      topOrganizations: []
+    };
+
+    // Count comments from last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const orgCounts = {};
+
+    comments.forEach(comment => {
+      // By position
+      const position = comment.position || 'Neutral';
+      stats.byPosition[position] = (stats.byPosition[position] || 0) + 1;
+
+      // By commenter type
+      const type = comment.commenterType || 'Unknown';
+      stats.byCommenterType[type] = (stats.byCommenterType[type] || 0) + 1;
+
+      // By state
+      if (comment.state) {
+        stats.byState[comment.state] = (stats.byState[comment.state] || 0) + 1;
+      }
+
+      // By FMP
+      if (comment.actionFmp) {
+        stats.byFmp[comment.actionFmp] = (stats.byFmp[comment.actionFmp] || 0) + 1;
+      }
+
+      // Recent comments
+      if (comment.commentDate) {
+        const commentDate = new Date(comment.commentDate);
+        if (commentDate >= thirtyDaysAgo) {
+          stats.recentComments++;
+        }
+      }
+
+      // Organization counts
+      if (comment.organization) {
+        orgCounts[comment.organization] = (orgCounts[comment.organization] || 0) + 1;
+      }
+    });
+
+    // Get top 5 organizations
+    stats.topOrganizations = Object.entries(orgCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }));
+
+    return stats;
+  }, [comments]);
 
   // Toggle selection
   const toggleSelectComment = (comment) => {
@@ -289,6 +352,145 @@ const CommentsEnhanced = () => {
           </button>
         </div>
       </div>
+
+      {/* Dashboard Section */}
+      {dashboardStats && (
+        <div className="mt-6">
+          <button
+            onClick={() => setShowDashboard(!showDashboard)}
+            className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-blue dark:hover:text-brand-blue-light transition-colors mb-3"
+          >
+            <BarChart3 size={18} />
+            Comment Analytics Dashboard
+            {showDashboard ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {showDashboard && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Total Comments Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                    <FileText className="text-blue-600 dark:text-blue-300" size={20} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{dashboardStats.total}</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Total Comments</p>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-blue-700 dark:text-blue-300">
+                  {dashboardStats.recentComments} in last 30 days
+                </div>
+              </div>
+
+              {/* Position Breakdown Card */}
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-lg">
+                    <BarChart3 className="text-emerald-600 dark:text-emerald-300" size={20} />
+                  </div>
+                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">By Position</p>
+                </div>
+                <div className="space-y-1.5">
+                  {Object.entries(dashboardStats.byPosition)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 4)
+                    .map(([position, count]) => (
+                      <div key={position} className="flex justify-between items-center">
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          position.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' :
+                          position.toLowerCase().includes('oppose') ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
+                          'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        }`}>
+                          {position}
+                        </span>
+                        <span className="text-xs font-medium text-emerald-800 dark:text-emerald-200">{count}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Commenter Type Card */}
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                    <Users className="text-purple-600 dark:text-purple-300" size={20} />
+                  </div>
+                  <p className="text-sm font-medium text-purple-900 dark:text-purple-100">By Sector</p>
+                </div>
+                <div className="space-y-1.5">
+                  {Object.entries(dashboardStats.byCommenterType)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 4)
+                    .map(([type, count]) => (
+                      <div key={type} className="flex justify-between items-center">
+                        <span className="text-xs text-purple-700 dark:text-purple-300 truncate max-w-[120px]">{type}</span>
+                        <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{count}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Top States Card */}
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-800 rounded-lg">
+                    <MapPin className="text-amber-600 dark:text-amber-300" size={20} />
+                  </div>
+                  <p className="text-sm font-medium text-amber-900 dark:text-amber-100">Top States</p>
+                </div>
+                <div className="space-y-1.5">
+                  {Object.entries(dashboardStats.byState)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 4)
+                    .map(([state, count]) => (
+                      <div key={state} className="flex justify-between items-center">
+                        <span className="text-xs text-amber-700 dark:text-amber-300">{state}</span>
+                        <span className="text-xs font-medium text-amber-800 dark:text-amber-200">{count}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* FMP Breakdown - Full Width */}
+              {Object.keys(dashboardStats.byFmp).length > 0 && (
+                <div className="md:col-span-2 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Comments by FMP</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(dashboardStats.byFmp)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([fmp, count]) => (
+                        <span key={fmp} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                          {fmp}
+                          <span className="font-medium text-slate-900 dark:text-slate-100">{count}</span>
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Organizations */}
+              {dashboardStats.topOrganizations.length > 0 && (
+                <div className="md:col-span-2 bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30 rounded-lg p-4 border border-cyan-200 dark:border-cyan-800">
+                  <p className="text-sm font-medium text-cyan-900 dark:text-cyan-100 mb-3">Top Commenting Organizations</p>
+                  <div className="space-y-2">
+                    {dashboardStats.topOrganizations.map(({ name, count }, idx) => (
+                      <div key={name} className="flex justify-between items-center">
+                        <span className="text-xs text-cyan-700 dark:text-cyan-300 truncate max-w-[300px]">
+                          {idx + 1}. {name}
+                        </span>
+                        <span className="text-xs font-medium bg-cyan-100 dark:bg-cyan-800 text-cyan-800 dark:text-cyan-200 px-2 py-0.5 rounded">
+                          {count} comments
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Column selector */}
       {showColumnSelector && (

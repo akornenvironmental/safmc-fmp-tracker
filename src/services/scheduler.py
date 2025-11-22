@@ -19,6 +19,90 @@ def init_scheduler(app):
     # Only run scheduler if enabled
     if os.getenv('ENABLE_SCHEDULER', 'true').lower() == 'true':
 
+        # Schedule daily comment scraping at 6 AM EST (11 AM UTC)
+        @scheduler.scheduled_job(CronTrigger(hour=11, minute=0))
+        def daily_comments_scrape():
+            """Daily scraping job for public comments from all SAFMC sources"""
+            with app.app_context():
+                try:
+                    logger.info("Starting daily comments scrape job")
+
+                    from src.scrapers.comments_scraper import CommentsScraper
+                    from src.config.extensions import db
+                    from src.models.comment import Comment
+                    from src.models.scrape_log import ScrapeLog
+
+                    start_time = datetime.utcnow()
+
+                    # Scrape comments from all configured sources
+                    comments_scraper = CommentsScraper()
+                    results = comments_scraper.scrape_all_comments()
+
+                    items_new = 0
+                    items_updated = 0
+
+                    for comment_data in results['comments']:
+                        # Check if comment already exists
+                        existing = Comment.query.filter_by(comment_id=comment_data['comment_id']).first()
+
+                        if existing:
+                            # Update existing comment
+                            existing.comment_text = comment_data.get('comment_text')
+                            existing.position = comment_data.get('position')
+                            existing.key_topics = comment_data.get('key_topics')
+                            existing.updated_at = datetime.utcnow()
+                            items_updated += 1
+                        else:
+                            # Create new comment
+                            comment = Comment(
+                                comment_id=comment_data['comment_id'],
+                                name=comment_data.get('name'),
+                                organization=comment_data.get('organization'),
+                                email=comment_data.get('email'),
+                                city=comment_data.get('city'),
+                                state=comment_data.get('state'),
+                                contact_id=comment_data.get('contact_id'),
+                                organization_id=comment_data.get('organization_id'),
+                                action_id=comment_data.get('action_id'),
+                                comment_date=datetime.strptime(comment_data['submit_date'], '%m/%d/%Y') if comment_data.get('submit_date') else None,
+                                comment_type='Written',
+                                commenter_type=comment_data.get('commenter_type'),
+                                position=comment_data.get('position'),
+                                key_topics=comment_data.get('key_topics'),
+                                comment_text=comment_data.get('comment_text'),
+                                amendment_phase=comment_data.get('amendment_phase'),
+                                source='SAFMC Google Sheets',
+                                source_url=comment_data.get('source_url'),
+                                data_source=comment_data.get('data_source')
+                            )
+                            db.session.add(comment)
+                            items_new += 1
+
+                    db.session.commit()
+
+                    # Log the operation
+                    duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+                    log = ScrapeLog(
+                        source='scheduled_daily_comments',
+                        action_type='daily_comments_scrape',
+                        status='success',
+                        items_found=results['total_found'],
+                        items_new=items_new,
+                        items_updated=items_updated,
+                        duration_ms=duration_ms,
+                        completed_at=datetime.utcnow()
+                    )
+                    db.session.add(log)
+                    db.session.commit()
+
+                    logger.info(f"Daily comments scrape completed: {items_new} new, {items_updated} updated from {len(results['by_source'])} sources")
+
+                except Exception as e:
+                    logger.error(f"Error in daily comments scrape job: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    db.session.rollback()
+
         # Schedule weekly scraping at 2 AM on Sundays
         @scheduler.scheduled_job(CronTrigger(day_of_week='sun', hour=2, minute=0))
         def weekly_scrape():

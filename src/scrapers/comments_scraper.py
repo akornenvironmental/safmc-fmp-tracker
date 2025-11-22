@@ -14,27 +14,83 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+# Base Google Spreadsheet containing all public comments
+# Each amendment/topic has its own tab (gid parameter)
+_BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml'
+
+
 class CommentsScraper:
     """Scraper for SAFMC public comments"""
 
+    BASE_SPREADSHEET_URL = _BASE_URL
+
     # Known comment sources (Google Sheets pubhtml URLs)
+    # Each source corresponds to a tab in the master SAFMC public comment spreadsheet
     COMMENT_SOURCES = [
+        # General Comments
         {
-            'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=246666200&single=true',
-            'name': 'Public Comments - Comprehensive',
-            'source_id': 'comments-main',  # For ID generation only, not for action_id FK
+            'url': f'{_BASE_URL}?gid=440075844&single=true',
+            'name': 'General Comments',
+            'source_id': 'general',
+            'phase': 'Public Comment'
+        },
+        # Comprehensive Amendments
+        {
+            'url': f'{_BASE_URL}?gid=246666200&single=true',
+            'name': 'Coral Amendment 11 / Shrimp Amendment 12',
+            'source_id': 'coral-11-shrimp-12',
+            'phase': 'Public Comment'
+        },
+        # Snapper Grouper Amendments
+        {
+            'url': f'{_BASE_URL}?gid=558136995&single=true',
+            'name': 'Snapper Grouper Amendment 56',
+            'source_id': 'sg-56',
             'phase': 'Public Comment'
         },
         {
-            'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=440075844&single=true',
-            'name': 'Public Comments - Additional 1',
-            'source_id': 'comments-1',  # For ID generation only, not for action_id FK
+            'url': f'{_BASE_URL}?gid=1960605361&single=true',
+            'name': 'Snapper Grouper Amendment 60',
+            'source_id': 'sg-60',
             'phase': 'Public Comment'
         },
         {
-            'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjyRSAei_lEHn4bmBpCxlkhq_s0RpBdzoUhzM490fgfYTJZbJMuFT6SFF8oeW34JzkkoY6pYOKBjT3/pubhtml?gid=2112604420&single=true',
-            'name': 'Public Comments - Additional 2',
-            'source_id': 'comments-2',  # For ID generation only, not for action_id FK
+            'url': f'{_BASE_URL}?gid=722727565&single=true',
+            'name': 'Snapper Grouper Amendment 61',
+            'source_id': 'sg-61',
+            'phase': 'Public Comment'
+        },
+        {
+            'url': f'{_BASE_URL}?gid=98280559&single=true',
+            'name': 'Snapper Grouper Amendment 46',
+            'source_id': 'sg-46',
+            'phase': 'Public Comment'
+        },
+        {
+            'url': f'{_BASE_URL}?gid=1255853288&single=true',
+            'name': 'Snapper Grouper Amendment 48',
+            'source_id': 'sg-48',
+            'phase': 'Public Comment'
+        },
+        # Snapper Grouper Regulatory Amendments
+        {
+            'url': f'{_BASE_URL}?gid=1662674427&single=true',
+            'name': 'Snapper Grouper Regulatory Amendment 36',
+            'source_id': 'sg-ra-36',
+            'phase': 'Public Comment'
+        },
+        # CMP Amendments
+        {
+            'url': f'{_BASE_URL}?gid=2112604420&single=true',
+            'name': 'CMP Framework Amendment 13',
+            'source_id': 'cmp-fa-13',
+            'phase': 'Public Comment'
+        },
+        # Dolphin Wahoo Amendments
+        {
+            'url': f'{_BASE_URL}?gid=1284034190&single=true',
+            'name': 'Dolphin Wahoo Regulatory Amendment 3',
+            'source_id': 'dw-ra-3',
             'phase': 'Public Comment'
         }
     ]
