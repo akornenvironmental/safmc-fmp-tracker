@@ -211,10 +211,10 @@ const DashboardEnhanced = () => {
           </div>
         </Link>
 
-        <Link to="/species" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+        <Link to="/stocks" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Species Tracked</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Species & Stocks</p>
               <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
             </div>
             <Fish className="w-10 h-10 text-cyan-200 dark:text-cyan-800" />
@@ -334,15 +334,15 @@ const DashboardEnhanced = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <Link
-          to="/species"
+          to="/stocks"
           className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
           <Fish className="w-8 h-8 text-cyan-500" />
           <div>
-            <p className="font-medium text-gray-900 dark:text-gray-100">Species Profiles</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">View species data</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">Species & Stock Status</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">View species and assessments</p>
           </div>
         </Link>
 
@@ -367,17 +367,6 @@ const DashboardEnhanced = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400">Amendment schedule</p>
           </div>
         </Link>
-
-        <Link
-          to="/assessments"
-          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
-        >
-          <AlertCircle className="w-8 h-8 text-red-500" />
-          <div>
-            <p className="font-medium text-gray-900 dark:text-gray-100">Stock Status</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">SEDAR assessments</p>
-          </div>
-        </Link>
       </div>
 
       {/* Top Species */}
@@ -388,7 +377,7 @@ const DashboardEnhanced = () => {
               <Fish className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               Most Active Species
             </h2>
-            <Link to="/species" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
+            <Link to="/stocks" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
               View all
             </Link>
           </div>

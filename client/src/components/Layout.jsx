@@ -22,11 +22,9 @@ const Layout = () => {
     { to: '/', label: 'Dashboard' },
     { to: '/actions', label: 'Actions' },
     { to: '/meetings', label: 'Meetings' },
-    { to: '/calendar', label: 'Calendar' },
     { to: '/comments', label: 'Comments' },
-    { to: '/species', label: 'Species' },
+    { to: '/stocks', label: 'Species & Stocks' },
     { to: '/compare', label: 'Compare' },
-    { to: '/assessments', label: 'Stocks' },
     { to: '/workplan', label: 'Workplan' },
     // Admin links - conditionally shown based on role
     ...(isAdmin() ? [{ to: '/admin/logs', label: 'Activity Logs' }] : []),
