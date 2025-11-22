@@ -428,10 +428,10 @@ const CommentsEnhanced = () => {
                             {comment.organization || '—'}
                           </button>
                         ) : (
-                          <div className="text-xs text-gray-700 dark:text-gray-300">{comment.organization || '—'}</div>
+                          <div className="text-xs text-gray-900 dark:text-gray-100">{comment.organization || '—'}</div>
                         )
                       ) : col.key === 'state' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300">{comment.state || '—'}</div>
+                        <div className="text-xs text-gray-900 dark:text-gray-100">{comment.state || '—'}</div>
                       ) : col.key === 'position' ? (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           comment.position?.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' :
@@ -441,9 +441,9 @@ const CommentsEnhanced = () => {
                           {comment.position || 'Neutral'}
                         </span>
                       ) : col.key === 'commentDate' ? (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(comment.commentDate)}</div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300">{formatDate(comment.commentDate)}</div>
                       ) : col.key === 'comment_text' ? (
-                        <div className="text-xs text-gray-600 dark:text-gray-400 max-w-md truncate">{comment.comment_text || '—'}</div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300 max-w-md truncate">{comment.comment_text || '—'}</div>
                       ) : null}
                     </td>
                   ))}
