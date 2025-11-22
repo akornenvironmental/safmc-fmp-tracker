@@ -26,6 +26,9 @@ const CommentsEnhanced = () => {
   const [analysisError, setAnalysisError] = useState(null);
   const [analysisFilter, setAnalysisFilter] = useState({ fmp: '', position: '', state: '' });
 
+  // Dashboard filter state (click-to-filter)
+  const [activeFilters, setActiveFilters] = useState({ fmp: '', position: '', state: '', commenterType: '' });
+
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
@@ -98,6 +101,7 @@ const CommentsEnhanced = () => {
     setSortDirection('desc');
     setCurrentPage(1);
     setSelectedComments(new Set());
+    setActiveFilters({ fmp: '', position: '', state: '', commenterType: '' });
     setShowColumnSelector(false);
   };
 
@@ -113,18 +117,27 @@ const CommentsEnhanced = () => {
 
   // Filter and sort comments
   const filteredAndSortedComments = useMemo(() => {
+    // Apply dashboard filters first
+    let filtered = comments.filter(comment => {
+      if (activeFilters.fmp && comment.actionFmp !== activeFilters.fmp) return false;
+      if (activeFilters.position && comment.position !== activeFilters.position) return false;
+      if (activeFilters.state && comment.state !== activeFilters.state) return false;
+      if (activeFilters.commenterType && comment.commenterType !== activeFilters.commenterType) return false;
+      return true;
+    });
+
     // Apply search filter
-    const filtered = comments.filter(comment => {
+    if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      return (
+      filtered = filtered.filter(comment => (
         comment.name?.toLowerCase().includes(searchLower) ||
         comment.organization?.toLowerCase().includes(searchLower) ||
         comment.position?.toLowerCase().includes(searchLower) ||
         comment.commentText?.toLowerCase().includes(searchLower) ||
         comment.actionFmp?.toLowerCase().includes(searchLower) ||
         comment.actionTitle?.toLowerCase().includes(searchLower)
-      );
-    });
+      ));
+    }
 
     // Then sort
     return [...filtered].sort((a, b) => {
@@ -144,7 +157,58 @@ const CommentsEnhanced = () => {
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [comments, searchTerm, sortField, sortDirection]);
+  }, [comments, searchTerm, sortField, sortDirection, activeFilters]);
+
+  // Export comments to CSV
+  const exportToCSV = () => {
+    const dataToExport = filteredAndSortedComments;
+    if (dataToExport.length === 0) {
+      alert('No comments to export');
+      return;
+    }
+
+    const headers = ['Name', 'Organization', 'Email', 'City', 'State', 'FMP', 'Action', 'Position', 'Commenter Type', 'Date', 'Comment'];
+    const rows = dataToExport.map(c => [
+      c.name || '',
+      c.organization || '',
+      c.email || '',
+      c.city || '',
+      c.state || '',
+      c.actionFmp || '',
+      c.actionTitle || '',
+      c.position || '',
+      c.commenterType || '',
+      c.commentDate ? new Date(c.commentDate).toLocaleDateString() : '',
+      (c.commentText || '').replace(/"/g, '""') // Escape quotes
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `safmc-comments-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Toggle dashboard filter
+  const toggleFilter = (filterType, value) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [filterType]: prev[filterType] === value ? '' : value
+    }));
+    setCurrentPage(1);
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = Object.values(activeFilters).some(v => v !== '');
 
   // Pagination
   const paginatedComments = useMemo(() => {
@@ -428,8 +492,69 @@ const CommentsEnhanced = () => {
             <Sparkles size={14} />
             AI Analysis
           </button>
+          <button
+            onClick={exportToCSV}
+            disabled={filteredAndSortedComments.length === 0}
+            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
+              filteredAndSortedComments.length === 0
+                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'border-sky-300 dark:border-sky-600 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30 text-sky-700 dark:text-sky-300 hover:from-sky-100 hover:to-cyan-100 dark:hover:from-sky-900/50 dark:hover:to-cyan-900/50 hover:border-sky-400'
+            }`}
+          >
+            <Download size={14} />
+            Export CSV
+          </button>
         </div>
       </div>
+
+      {/* Active Filters Indicator */}
+      {hasActiveFilters && (
+        <div className="mt-4 flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-gray-500 dark:text-gray-400">Active filters:</span>
+          {activeFilters.fmp && (
+            <button
+              onClick={() => toggleFilter('fmp', activeFilters.fmp)}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-xs hover:bg-blue-200 dark:hover:bg-blue-800"
+            >
+              FMP: {activeFilters.fmp}
+              <X size={12} />
+            </button>
+          )}
+          {activeFilters.position && (
+            <button
+              onClick={() => toggleFilter('position', activeFilters.position)}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-xs hover:bg-green-200 dark:hover:bg-green-800"
+            >
+              Position: {activeFilters.position}
+              <X size={12} />
+            </button>
+          )}
+          {activeFilters.state && (
+            <button
+              onClick={() => toggleFilter('state', activeFilters.state)}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full text-xs hover:bg-amber-200 dark:hover:bg-amber-800"
+            >
+              State: {activeFilters.state}
+              <X size={12} />
+            </button>
+          )}
+          {activeFilters.commenterType && (
+            <button
+              onClick={() => toggleFilter('commenterType', activeFilters.commenterType)}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
+            >
+              Type: {activeFilters.commenterType}
+              <X size={12} />
+            </button>
+          )}
+          <button
+            onClick={() => setActiveFilters({ fmp: '', position: '', state: '', commenterType: '' })}
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       {/* Dashboard Section */}
       {dashboardStats && (
@@ -474,7 +599,11 @@ const CommentsEnhanced = () => {
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 4)
                     .map(([position, count]) => (
-                      <div key={position} className="flex justify-between items-center">
+                      <button
+                        key={position}
+                        onClick={() => toggleFilter('position', position)}
+                        className={`w-full flex justify-between items-center hover:opacity-80 transition-opacity ${activeFilters.position === position ? 'ring-2 ring-emerald-500 rounded' : ''}`}
+                      >
                         <span className={`text-xs px-2 py-0.5 rounded ${
                           position.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' :
                           position.toLowerCase().includes('oppose') ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
@@ -483,7 +612,7 @@ const CommentsEnhanced = () => {
                           {position}
                         </span>
                         <span className="text-xs font-medium text-emerald-800 dark:text-emerald-200">{count}</span>
-                      </div>
+                      </button>
                     ))}
                 </div>
               </div>
@@ -501,10 +630,14 @@ const CommentsEnhanced = () => {
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 4)
                     .map(([type, count]) => (
-                      <div key={type} className="flex justify-between items-center">
+                      <button
+                        key={type}
+                        onClick={() => toggleFilter('commenterType', type)}
+                        className={`w-full flex justify-between items-center hover:opacity-80 transition-opacity ${activeFilters.commenterType === type ? 'ring-2 ring-purple-500 rounded' : ''}`}
+                      >
                         <span className="text-xs text-purple-700 dark:text-purple-300 truncate max-w-[120px]">{type}</span>
                         <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{count}</span>
-                      </div>
+                      </button>
                     ))}
                 </div>
               </div>
@@ -522,10 +655,14 @@ const CommentsEnhanced = () => {
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 4)
                     .map(([state, count]) => (
-                      <div key={state} className="flex justify-between items-center">
+                      <button
+                        key={state}
+                        onClick={() => toggleFilter('state', state)}
+                        className={`w-full flex justify-between items-center hover:opacity-80 transition-opacity ${activeFilters.state === state ? 'ring-2 ring-amber-500 rounded' : ''}`}
+                      >
                         <span className="text-xs text-amber-700 dark:text-amber-300">{state}</span>
                         <span className="text-xs font-medium text-amber-800 dark:text-amber-200">{count}</span>
-                      </div>
+                      </button>
                     ))}
                 </div>
               </div>
@@ -533,15 +670,19 @@ const CommentsEnhanced = () => {
               {/* FMP Breakdown - Full Width */}
               {Object.keys(dashboardStats.byFmp).length > 0 && (
                 <div className="md:col-span-2 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Comments by FMP</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Comments by FMP <span className="text-xs font-normal text-slate-500">(click to filter)</span></p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(dashboardStats.byFmp)
                       .sort((a, b) => b[1] - a[1])
                       .map(([fmp, count]) => (
-                        <span key={fmp} className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                        <button
+                          key={fmp}
+                          onClick={() => toggleFilter('fmp', fmp)}
+                          className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors ${activeFilters.fmp === fmp ? 'border-blue-500 ring-2 ring-blue-500' : 'border-slate-200 dark:border-slate-600'}`}
+                        >
                           {fmp}
                           <span className="font-medium text-slate-900 dark:text-slate-100">{count}</span>
-                        </span>
+                        </button>
                       ))}
                   </div>
                 </div>

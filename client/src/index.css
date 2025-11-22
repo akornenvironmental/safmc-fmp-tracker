@@ -68,6 +68,47 @@ html.text-size-large {
   font-size: 18px;
 }
 
+/* ============================================ */
+/* LIGHT MODE - EXPLICIT STYLES */
+/* ============================================ */
+
+:root:not(.dark) body {
+  background-color: #f3f4f6; /* gray-100 */
+  color: #111827; /* gray-900 */
+}
+
+:root:not(.dark) .bg-white {
+  background-color: #ffffff !important;
+}
+
+:root:not(.dark) .bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+:root:not(.dark) .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+:root:not(.dark) .text-gray-900 {
+  color: #111827 !important;
+}
+
+:root:not(.dark) .text-gray-700 {
+  color: #374151 !important;
+}
+
+:root:not(.dark) .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+:root:not(.dark) .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+/* ============================================ */
+/* DARK MODE - BASE STYLES */
+/* ============================================ */
+
 /* Dark Mode Styles */
 .dark {
   color-scheme: dark;
@@ -484,6 +525,38 @@ label input[type="radio"],
 
 .dark .bg-gray-300 {
   background-color: #4a4a4a !important;
+}
+
+/* ============================================ */
+/* LIGHT MODE - TABLE SPECIFIC STYLES */
+/* ============================================ */
+
+:root:not(.dark) table {
+  background-color: #ffffff;
+}
+
+:root:not(.dark) thead {
+  background-color: #f9fafb;
+}
+
+:root:not(.dark) tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+:root:not(.dark) tbody tr:nth-child(odd) {
+  background-color: #f9fafb;
+}
+
+:root:not(.dark) tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+:root:not(.dark) th {
+  color: #374151;
+}
+
+:root:not(.dark) td {
+  color: #111827;
 }
 
 /* ============================================ */
