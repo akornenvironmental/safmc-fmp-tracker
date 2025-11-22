@@ -28,6 +28,7 @@ const ActionsEnhanced = () => {
   const [visibleColumns, setVisibleColumns] = useState({
     title: true,
     fmp: true,
+    species: true,
     progress_stage: true,
     progress: true,
     last_updated: true,
@@ -39,6 +40,7 @@ const ActionsEnhanced = () => {
   const [columnOrder, setColumnOrder] = useState([
     { key: 'title', label: 'Title', core: true, locked: true, minWidth: 'min-w-[300px]' },
     { key: 'fmp', label: 'FMP', core: true, minWidth: 'min-w-[150px]' },
+    { key: 'species', label: 'Species', core: true, minWidth: 'min-w-[180px]' },
     { key: 'progress_stage', label: 'Stage', core: true, minWidth: 'min-w-[180px]' },
     { key: 'progress', label: 'Progress', core: true, minWidth: 'min-w-[120px]' },
     { key: 'last_updated', label: 'Last Action', core: true, minWidth: 'min-w-[140px]' },
@@ -72,7 +74,8 @@ const ActionsEnhanced = () => {
 
   const fetchActions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/actions`);
+      // Use the enhanced endpoint that includes species with stock status
+      const response = await fetch(`${API_BASE_URL}/api/actions/with-stock-status`);
       const data = await response.json();
 
       if (data.success) {
@@ -81,6 +84,16 @@ const ActionsEnhanced = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching actions:', error);
+      // Fallback to regular endpoint if enhanced fails
+      try {
+        const fallbackResponse = await fetch(`${API_BASE_URL}/api/actions`);
+        const fallbackData = await fallbackResponse.json();
+        if (fallbackData.success) {
+          setActions(fallbackData.actions || []);
+        }
+      } catch (e) {
+        console.error('Fallback also failed:', e);
+      }
       setLoading(false);
     }
   };
@@ -770,6 +783,39 @@ const ActionsEnhanced = () => {
                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{action.description.substring(0, 100)}...</div>
                           )}
                         </>
+                      ) : col.key === 'species' ? (
+                        <div className="flex flex-wrap gap-1">
+                          {action.species && action.species.length > 0 ? (
+                            <>
+                              {action.species.slice(0, 3).map((sp, idx) => (
+                                <span
+                                  key={idx}
+                                  className={`inline-flex items-center px-1.5 py-0.5 text-xs rounded ${
+                                    sp.overfished && sp.overfishing
+                                      ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200'
+                                      : sp.overfished
+                                      ? 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200'
+                                      : sp.overfishing
+                                      ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200'
+                                      : sp.stock_status && sp.stock_status !== 'Unknown'
+                                      ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200'
+                                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                  }`}
+                                  title={`${sp.name}: ${sp.stock_status || 'Unknown'}${sp.b_bmsy ? ` (B/BMSY: ${sp.b_bmsy.toFixed(2)})` : ''}`}
+                                >
+                                  {sp.name}
+                                </span>
+                              ))}
+                              {action.species.length > 3 && (
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  +{action.species.length - 3}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+                          )}
+                        </div>
                       ) : col.key === 'progress_stage' ? (
                         <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
                           {action.progress_stage || 'Unknown'}

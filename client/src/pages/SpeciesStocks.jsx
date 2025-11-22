@@ -7,6 +7,92 @@ import {
   LayoutGrid, Table
 } from 'lucide-react';
 
+// Species name synonyms and aliases for better matching
+const SPECIES_SYNONYMS = {
+  'dolphin': ['mahi mahi', 'mahi-mahi', 'dorado', 'dolphinfish'],
+  'king mackerel': ['kingfish', 'king'],
+  'spanish mackerel': ['spanish'],
+  'wahoo': ['ono'],
+  'greater amberjack': ['amberjack', 'aj'],
+  'red snapper': ['snapper'],
+  'vermilion snapper': ['vermilion', 'beeliners', 'beeliner'],
+  'black sea bass': ['sea bass', 'blackfish'],
+  'gag grouper': ['gag'],
+  'red grouper': ['red grouper'],
+  'snowy grouper': ['snowy'],
+  'scamp': ['scamp grouper'],
+  'golden tilefish': ['tilefish', 'golden tile'],
+  'blueline tilefish': ['blueline', 'blueline tile'],
+  'gray triggerfish': ['triggerfish', 'trigger'],
+  'hogfish': ['hog snapper'],
+  'yellowtail snapper': ['yellowtail'],
+  'mutton snapper': ['mutton'],
+  'spiny lobster': ['lobster', 'florida lobster', 'caribbean spiny lobster'],
+  'golden crab': ['deep sea golden crab'],
+  'rock shrimp': ['rock'],
+  'pink shrimp': ['pink'],
+  'goliath grouper': ['goliath', 'jewfish'],
+  'wreckfish': ['wreck fish'],
+};
+
+// Normalize species name for comparison
+const normalizeSpeciesName = (name) => {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/south atlantic|atlantic|gulf of mexico|gulf|florida|keys/gi, '')
+    .replace(/stock|complex|unit/gi, '')
+    .trim();
+};
+
+// Find matching assessment for a species
+const findMatchingAssessment = (speciesName, assessments) => {
+  if (!speciesName || !assessments?.length) return null;
+
+  const normalizedSpecies = normalizeSpeciesName(speciesName);
+
+  // 1. Exact match
+  let match = assessments.find(a =>
+    normalizeSpeciesName(a.species) === normalizedSpecies
+  );
+  if (match) return match;
+
+  // 2. Check synonyms - does species name match any assessment synonym?
+  for (const [canonical, synonyms] of Object.entries(SPECIES_SYNONYMS)) {
+    const allNames = [canonical, ...synonyms];
+    const speciesMatches = allNames.some(syn =>
+      normalizedSpecies.includes(syn) || syn.includes(normalizedSpecies)
+    );
+
+    if (speciesMatches) {
+      match = assessments.find(a => {
+        const normalizedAssessment = normalizeSpeciesName(a.species);
+        return allNames.some(syn =>
+          normalizedAssessment.includes(syn) || syn.includes(normalizedAssessment)
+        );
+      });
+      if (match) return match;
+    }
+  }
+
+  // 3. Partial match (contains)
+  match = assessments.find(a => {
+    const normalizedAssessment = normalizeSpeciesName(a.species);
+    return normalizedSpecies.includes(normalizedAssessment) ||
+           normalizedAssessment.includes(normalizedSpecies);
+  });
+  if (match) return match;
+
+  // 4. Scientific name match
+  match = assessments.find(a =>
+    a.scientific_name &&
+    normalizeSpeciesName(a.scientific_name).includes(normalizedSpecies)
+  );
+
+  return match;
+};
+
 const SpeciesStocks = () => {
   const navigate = useNavigate();
 
@@ -119,15 +205,11 @@ const SpeciesStocks = () => {
     );
   };
 
-  // Merge species with assessment data
+  // Merge species with assessment data using improved matching
   const mergedData = useMemo(() => {
     return species.map(sp => {
-      // Find matching assessment by species name
-      const assessment = assessments.find(a =>
-        a.species?.toLowerCase() === sp.name?.toLowerCase() ||
-        sp.name?.toLowerCase().includes(a.species?.toLowerCase()) ||
-        a.species?.toLowerCase().includes(sp.name?.toLowerCase())
-      );
+      // Find matching assessment using improved matching logic
+      const assessment = findMatchingAssessment(sp.name, assessments);
 
       return {
         ...sp,
@@ -137,7 +219,8 @@ const SpeciesStocks = () => {
         f_fmsy: assessment?.f_fmsy || null,
         sedar_number: assessment?.sedar_number || null,
         overfished: assessment?.overfished || false,
-        overfishing: assessment?.overfishing_occurring || false
+        overfishing: assessment?.overfishing_occurring || false,
+        scientific_name: assessment?.scientific_name || null
       };
     });
   }, [species, assessments]);

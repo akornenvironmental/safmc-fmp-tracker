@@ -494,6 +494,101 @@ def scrape_stocksmart():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@stock_assessment_bp.route('/api/actions/with-stock-status', methods=['GET'])
+def get_actions_with_stock_status():
+    """
+    Get all actions enriched with species stock status information.
+    Links actions to species via title/description text matching,
+    then joins with stock assessments to show overfished/healthy status.
+    """
+    try:
+        from src.database import get_db_connection
+        from src.services.species_service import SpeciesService
+
+        # Get all species with their action associations
+        all_species = SpeciesService.get_all_species()
+
+        # Build a map of action_id -> species list
+        action_species_map = {}
+        for sp in all_species:
+            for action in sp.get('actions', []):
+                action_id = action.get('id')
+                if action_id:
+                    if action_id not in action_species_map:
+                        action_species_map[action_id] = []
+                    action_species_map[action_id].append(sp['name'])
+
+        # Get stock assessments
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT species_common_name, overfished, overfishing_occurring, b_bmsy, f_fmsy, stock_status
+            FROM stock_assessments
+        """)
+        assessment_rows = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        # Build assessment lookup by normalized name
+        assessment_map = {}
+        for row in assessment_rows:
+            name = row[0].lower().strip() if row[0] else ''
+            assessment_map[name] = {
+                'overfished': row[1],
+                'overfishing': row[2],
+                'b_bmsy': float(row[3]) if row[3] else None,
+                'f_fmsy': float(row[4]) if row[4] else None,
+                'stock_status': row[5]
+            }
+
+        # Get all actions
+        from src.models.action import Action
+        actions = Action.query.order_by(Action.updated_at.desc()).all()
+
+        result = []
+        for action in actions:
+            action_dict = action.to_dict()
+
+            # Get species for this action
+            species_names = action_species_map.get(action.id, [])
+
+            # Enrich with stock status
+            species_with_status = []
+            for sp_name in species_names:
+                normalized = sp_name.lower().strip()
+                assessment = assessment_map.get(normalized)
+
+                species_info = {
+                    'name': sp_name,
+                    'overfished': assessment['overfished'] if assessment else None,
+                    'overfishing': assessment['overfishing'] if assessment else None,
+                    'b_bmsy': assessment['b_bmsy'] if assessment else None,
+                    'stock_status': assessment['stock_status'] if assessment else 'Unknown'
+                }
+                species_with_status.append(species_info)
+
+            action_dict['species'] = species_with_status
+            action_dict['species_count'] = len(species_with_status)
+
+            # Summary flags
+            action_dict['has_overfished_species'] = any(s.get('overfished') for s in species_with_status)
+            action_dict['has_overfishing_species'] = any(s.get('overfishing') for s in species_with_status)
+
+            result.append(action_dict)
+
+        return jsonify({
+            'success': True,
+            'actions': result,
+            'total': len(result)
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting actions with stock status: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @stock_assessment_bp.route('/api/assessments/seed', methods=['POST'])
 def seed_assessments():
     """Seed the database with known SAFMC stock assessment data"""
