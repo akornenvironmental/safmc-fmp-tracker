@@ -26,6 +26,7 @@ from src.scrapers.multi_council_scraper import MultiCouncilScraper
 from src.scrapers.comments_scraper import CommentsScraper
 from src.scrapers.briefing_books_scraper import BriefingBooksScraper
 from src.services.ai_service import AIService
+from src.middleware.auth_middleware import require_auth, require_admin
 
 bp = Blueprint('api', __name__)
 logger = logging.getLogger(__name__)
@@ -322,6 +323,7 @@ def get_organizations():
 # ==================== SCRAPING ENDPOINTS ====================
 
 @bp.route('/scrape/amendments', methods=['POST'])
+@require_admin
 def scrape_amendments():
     """Manually trigger amendments scraping"""
     try:
@@ -402,6 +404,7 @@ def scrape_amendments():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/scrape/meetings', methods=['POST'])
+@require_admin
 def scrape_meetings():
     """Manually trigger meetings scraping from all councils"""
     try:
@@ -489,6 +492,7 @@ def scrape_meetings():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/scrape/fisherypulse', methods=['POST'])
+@require_admin
 def scrape_fisherypulse():
     """Trigger comprehensive FisheryPulse meeting scraping from Federal Register, NOAA, and all councils"""
     try:
@@ -534,6 +538,7 @@ def scrape_fisherypulse():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/scrape/all', methods=['POST'])
+@require_admin
 def scrape_all():
     """Trigger scraping of all data"""
     try:
@@ -558,6 +563,7 @@ def scrape_all():
 # ==================== AI QUERY ENDPOINTS ====================
 
 @bp.route('/ai/query', methods=['POST'])
+@require_auth
 def ai_query():
     """Query the AI system"""
     start_time = time.time()
@@ -676,6 +682,7 @@ def ai_query():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/ai/analyze', methods=['POST'])
+@require_auth
 def ai_analyze():
     """Analyze FMP patterns"""
     try:
@@ -691,6 +698,7 @@ def ai_analyze():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/ai/report', methods=['POST'])
+@require_auth
 def ai_report():
     """Generate status report"""
     try:
@@ -711,6 +719,7 @@ def ai_report():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/ai/search', methods=['POST'])
+@require_auth
 def ai_search():
     """Search FMP content"""
     try:
@@ -732,6 +741,7 @@ def ai_search():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/ai/query-logs', methods=['GET'])
+@require_admin
 def get_ai_query_logs():
     """Get AI query logs for admin review and troubleshooting"""
     try:
@@ -812,6 +822,7 @@ def get_ai_query_logs():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/ai/query-stats', methods=['GET'])
+@require_admin
 def get_ai_query_stats():
     """Get AI query statistics for admin dashboard"""
     try:
@@ -925,6 +936,7 @@ def get_comments_analytics():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/scrape/comments', methods=['POST'])
+@require_admin
 def scrape_comments():
     """Manually trigger comments scraping"""
     try:
@@ -1282,6 +1294,7 @@ def get_document_stats():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/scrape/documents/briefing-books', methods=['POST'])
+@require_admin
 def scrape_briefing_books():
     """Manually trigger briefing books scraping"""
     try:

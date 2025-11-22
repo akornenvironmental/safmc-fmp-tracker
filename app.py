@@ -38,7 +38,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
     'postgresql://localhost/safmc_fmp_tracker'
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Security: Enforce strong SECRET_KEY in production
+secret_key = os.getenv('SECRET_KEY')
+if not secret_key:
+    if os.getenv('FLASK_ENV') == 'production' or os.getenv('RENDER'):
+        raise ValueError("SECRET_KEY environment variable must be set in production!")
+    secret_key = 'dev-secret-key-for-local-only'
+    logger.warning("Using development SECRET_KEY - NOT FOR PRODUCTION")
+app.config['SECRET_KEY'] = secret_key
 
 # Database connection pool settings to handle timeouts
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -63,7 +71,26 @@ CORS(app, origins=[
     "http://localhost:5173",  # Local development (Vite dev server)
     "https://safmc-fmp-tracker.onrender.com",  # Current monolithic deployment
     "https://safmc-fmp-tracker-frontend.onrender.com",  # New separated frontend Static Site
-])
+], supports_credentials=True)
+
+# Security headers middleware
+@app.after_request
+def add_security_headers(response):
+    """Add security headers to all responses"""
+    # Prevent MIME type sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Prevent clickjacking
+    response.headers['X-Frame-Options'] = 'DENY'
+    # XSS protection (legacy but still useful)
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    # Referrer policy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    # Permissions policy (disable unnecessary features)
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    # Cache control for sensitive endpoints
+    if request.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return response
 
 # Import models after db initialization
 from src.models.action import Action
@@ -603,52 +630,10 @@ def health_check():
             'error': str(e)
         }), 500
 
-# Debug endpoint to list all routes
-@app.route('/debug/routes')
-def debug_routes():
-    """List all registered routes"""
-    routes = []
-    for rule in app.url_map.iter_rules():
-        routes.append({
-            'endpoint': rule.endpoint,
-            'methods': list(rule.methods),
-            'path': str(rule)
-        })
-    return jsonify({'routes': sorted(routes, key=lambda x: x['path'])})
-
-# Debug endpoint to check static folder
-@app.route('/debug/static')
-def debug_static():
-    """Debug endpoint to check static folder setup"""
-    import glob
-    static_folder = static_path
-
-    # Check various possible locations
-    possible_locations = [
-        os.path.join(app_dir, 'client', 'dist'),
-        os.path.join(app_dir, 'client'),
-        os.path.join(os.getcwd(), 'client', 'dist'),
-        os.path.join(os.getcwd(), 'client'),
-    ]
-
-    location_checks = {}
-    for loc in possible_locations:
-        location_checks[loc] = {
-            'exists': os.path.exists(loc),
-            'files': os.listdir(loc) if os.path.exists(loc) else None
-        }
-
-    return jsonify({
-        'static_folder': static_folder,
-        'static_folder_exists': os.path.exists(static_folder) if static_folder else False,
-        'static_folder_absolute': os.path.abspath(static_folder) if static_folder else None,
-        'index_html_exists': os.path.exists(os.path.join(static_folder, 'index.html')) if static_folder else False,
-        'files_in_static': os.listdir(static_folder) if static_folder and os.path.exists(static_folder) else [],
-        'cwd': os.getcwd(),
-        'app_dir': app_dir,
-        'possible_client_locations': location_checks,
-        'app_dir_files': os.listdir(app_dir) if os.path.exists(app_dir) else []
-    })
+# Debug endpoints removed for security - uncomment only for local development
+# @app.route('/debug/routes')
+# @app.route('/debug/static')
+# These endpoints exposed sensitive information about the application structure
 
 # Import and register API routes
 from src.routes.api_routes import bp as api_bp

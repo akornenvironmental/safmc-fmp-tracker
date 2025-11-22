@@ -12,13 +12,29 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+# Rate limiting
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    limiter = Limiter(key_func=get_remote_address, default_limits=[])
+    RATE_LIMITING_ENABLED = True
+except ImportError:
+    limiter = None
+    RATE_LIMITING_ENABLED = False
+
 logger = logging.getLogger(__name__)
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
-# JWT Configuration
-JWT_SECRET = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-JWT_EXPIRATION_HOURS = 24
+# JWT Configuration - enforce strong secret in production
+JWT_SECRET = os.getenv('SECRET_KEY')
+if not JWT_SECRET:
+    if os.getenv('FLASK_ENV') == 'production' or os.getenv('RENDER'):
+        raise ValueError("SECRET_KEY must be set in production!")
+    JWT_SECRET = 'dev-secret-key-for-local-only'
+    logger.warning("Using development JWT_SECRET - NOT FOR PRODUCTION")
+
+JWT_EXPIRATION_HOURS = 1  # Reduced from 24 for security
 
 # Email Configuration
 EMAIL_USER = os.getenv('EMAIL_USER')
@@ -77,7 +93,17 @@ def send_magic_link_email(user_email, user_name, magic_link):
         return False
 
 
+def rate_limit_decorator(limit_string):
+    """Apply rate limit if flask-limiter is available"""
+    def decorator(f):
+        if RATE_LIMITING_ENABLED and limiter:
+            return limiter.limit(limit_string)(f)
+        return f
+    return decorator
+
+
 @bp.route('/request-login', methods=['POST'])
+@rate_limit_decorator("5 per hour")  # Limit login requests to prevent brute force
 def request_login():
     """Request a magic link for login"""
     try:
@@ -87,20 +113,26 @@ def request_login():
         if not email:
             return jsonify({'error': 'Email is required'}), 400
 
+        # Validate email format
         email = email.lower().strip()
+        if len(email) > 255 or '@' not in email or '.' not in email.split('@')[-1]:
+            return jsonify({'error': 'Invalid email format'}), 400
 
-        # Find user
+        # Find user - use generic error to prevent user enumeration
         user = User.query.filter_by(email=email).first()
 
         if not user:
+            # Generic error to prevent user enumeration
+            logger.warning(f"Login attempt for non-existent user: {email}")
             return jsonify({
-                'error': 'User not found. Please contact the administrator to get access.'
-            }), 404
+                'error': 'If this email is registered, a login link has been sent.'
+            }), 200  # Return 200 to not reveal if email exists
 
         if not user.is_active:
+            logger.warning(f"Login attempt for deactivated user: {email}")
             return jsonify({
-                'error': 'Your account has been deactivated. Please contact the administrator.'
-            }), 403
+                'error': 'If this email is registered, a login link has been sent.'
+            }), 200  # Return 200 to not reveal account status
 
         # Generate secure token
         login_token = secrets.token_urlsafe(32)

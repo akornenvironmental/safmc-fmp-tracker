@@ -20,6 +20,9 @@ instance/
 # Environment
 .env
 .env.local
+.env.save
+.env.backup
+*.env
 
 # IDE
 .vscode/
