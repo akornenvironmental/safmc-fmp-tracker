@@ -21,20 +21,25 @@ const Workplan = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [showVersionHistory, setShowVersionHistory] = useState(false);
-  const [viewMode, setViewMode] = useState('timeline'); // 'timeline' or 'list'
+  const [selectedVersionId, setSelectedVersionId] = useState(null);
 
   useEffect(() => {
     fetchWorkplan();
     fetchVersions();
   }, []);
 
-  const fetchWorkplan = async () => {
+  const fetchWorkplan = async (versionId = null) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/workplan/current`);
+      setLoading(true);
+      const url = versionId
+        ? `${API_BASE_URL}/api/workplan/version/${versionId}`
+        : `${API_BASE_URL}/api/workplan/current`;
+      const response = await fetch(url);
       const data = await response.json();
 
       if (data.success) {
         setWorkplan(data);
+        setSelectedVersionId(data.version?.id || null);
       }
       setLoading(false);
     } catch (error) {
@@ -45,15 +50,26 @@ const Workplan = () => {
 
   const fetchVersions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/workplan/versions`);
-      const data = await response.json();
+      const response = await fetch(`${API_BASE_URL}/api/workplan/stats`);
+      const statsData = await response.json();
+
+      const versionsResponse = await fetch(`${API_BASE_URL}/api/workplan/versions`);
+      const data = await versionsResponse.json();
 
       if (data.success) {
-        setVersions(data.versions || []);
+        // Add item counts to versions
+        const versionsWithCounts = data.versions || [];
+        setVersions(versionsWithCounts);
       }
     } catch (error) {
       console.error('Error fetching versions:', error);
     }
+  };
+
+  const handleVersionSelect = (versionId) => {
+    setSelectedVersionId(versionId);
+    fetchWorkplan(versionId);
+    setShowVersionHistory(false);
   };
 
   const toggleItemExpanded = (itemId) => {
@@ -214,25 +230,39 @@ const Workplan = () => {
       {/* Version History Panel */}
       {showVersionHistory && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Previous Versions</h3>
-          <div className="space-y-2">
-            {versions.map(version => (
+          <h3 className="text-lg font-semibold mb-4">All Workplan Versions (Click to view)</h3>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {versions
+              .sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate))
+              .map(version => (
               <div
                 key={version.id}
-                className={`p-4 border rounded-lg ${version.isActive ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}
+                onClick={() => handleVersionSelect(version.id)}
+                className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                  selectedVersionId === version.id
+                    ? 'bg-blue-50 border-blue-400 ring-2 ring-blue-200'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{version.versionName}</p>
                     <p className="text-sm text-gray-600">
-                      {new Date(version.effectiveDate).toLocaleDateString()} • {version.itemCount} items
+                      {new Date(version.effectiveDate).toLocaleDateString()}
                     </p>
                   </div>
-                  {version.isActive && (
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-600 text-white rounded">
-                      Active
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {version.isActive && (
+                      <span className="px-2 py-1 text-xs font-medium bg-green-600 text-white rounded">
+                        Current
+                      </span>
+                    )}
+                    {selectedVersionId === version.id && (
+                      <span className="px-2 py-1 text-xs font-medium bg-blue-600 text-white rounded">
+                        Viewing
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -240,16 +270,22 @@ const Workplan = () => {
         </div>
       )}
 
-      {/* Stats Summary */}
+      {/* Stats Summary - Clickable to filter */}
       <div className="grid grid-cols-4 gap-4">
         {Object.entries(itemsByStatus).map(([status, items]) => (
           <div
             key={status}
-            className={`p-4 border rounded-lg ${getStatusColor(status)}`}
+            onClick={() => setSelectedStatus(selectedStatus === status ? 'all' : status)}
+            className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${getStatusColor(status)} ${
+              selectedStatus === status ? 'ring-2 ring-blue-400 shadow-md' : ''
+            }`}
           >
             <div className="flex items-center gap-2 mb-1">
               {getStatusIcon(status)}
               <span className="text-sm font-medium text-gray-700">{status}</span>
+              {selectedStatus === status && (
+                <span className="ml-auto text-xs text-blue-600">(filtered)</span>
+              )}
             </div>
             <p className="text-2xl font-bold text-gray-900">{items.length}</p>
           </div>

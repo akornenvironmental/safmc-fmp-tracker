@@ -91,6 +91,28 @@ def get_current_workplan():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@bp.route('/version/<int:version_id>', methods=['GET'])
+def get_workplan_by_version(version_id):
+    """Get a specific workplan version by ID"""
+    try:
+        version = WorkplanVersion.query.get(version_id)
+
+        if not version:
+            return jsonify({'success': False, 'error': 'Version not found'}), 404
+
+        items = WorkplanItem.query.filter_by(workplan_version_id=version.id).all()
+
+        return jsonify({
+            'success': True,
+            'version': version.to_dict(),
+            'items': [item.to_dict(include_milestones=True) for item in items]
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting workplan version: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @bp.route('/versions', methods=['GET'])
 def get_workplan_versions():
     """Get all workplan versions"""
