@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag, TrendingUp } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CommentsEnhanced = () => {
   const [comments, setComments] = useState([]);
@@ -29,6 +30,9 @@ const CommentsEnhanced = () => {
   // Species detection state
   const [detectingSpecies, setDetectingSpecies] = useState(false);
   const [speciesStats, setSpeciesStats] = useState(null);
+
+  // Timeline chart state
+  const [showTimeline, setShowTimeline] = useState(true);
 
   // Dashboard filter state (click-to-filter)
   const [activeFilters, setActiveFilters] = useState({ fmp: '', position: '', state: '', commenterType: '', species: '' });
@@ -331,6 +335,39 @@ const CommentsEnhanced = () => {
       .map(([name, count]) => ({ name, count }));
 
     return stats;
+  }, [comments]);
+
+  // Compute timeline data for chart
+  const timelineData = useMemo(() => {
+    if (comments.length === 0) return [];
+
+    // Group comments by month
+    const monthCounts = {};
+
+    comments.forEach(comment => {
+      if (comment.commentDate) {
+        const date = new Date(comment.commentDate);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+      }
+    });
+
+    // Convert to array and sort by date
+    const data = Object.entries(monthCounts)
+      .map(([month, count]) => {
+        const [year, monthNum] = month.split('-');
+        const date = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
+        return {
+          month,
+          label: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+          count,
+          fullDate: date
+        };
+      })
+      .sort((a, b) => a.fullDate - b.fullDate);
+
+    // Keep last 24 months max for readability
+    return data.slice(-24);
   }, [comments]);
 
   // Toggle selection
@@ -809,6 +846,74 @@ const CommentsEnhanced = () => {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Timeline Chart - Full Width */}
+              {timelineData.length > 1 && (
+                <div className="md:col-span-2 lg:col-span-4 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/30 dark:to-violet-900/30 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="text-indigo-600 dark:text-indigo-300" size={18} />
+                      <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
+                        Comment Timeline
+                        <span className="text-xs font-normal text-indigo-600 dark:text-indigo-400 ml-2">
+                          (Monthly)
+                        </span>
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowTimeline(!showTimeline)}
+                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                    >
+                      {showTimeline ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                  {showTimeline && (
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-700" />
+                          <XAxis
+                            dataKey="label"
+                            tick={{ fontSize: 10, fill: '#6b7280' }}
+                            tickLine={false}
+                            axisLine={{ stroke: '#d1d5db' }}
+                          />
+                          <YAxis
+                            tick={{ fontSize: 10, fill: '#6b7280' }}
+                            tickLine={false}
+                            axisLine={{ stroke: '#d1d5db' }}
+                            width={30}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              fontSize: '12px'
+                            }}
+                            formatter={(value) => [value, 'Comments']}
+                            labelFormatter={(label) => `Month: ${label}`}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="count"
+                            stroke="#6366f1"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorCount)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
