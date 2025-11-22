@@ -262,7 +262,7 @@ const CommentsEnhanced = () => {
         <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
           <button
             onClick={handleReset}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 dark:border-slate-600 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800 dark:to-gray-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:from-slate-100 hover:to-gray-100 dark:hover:from-slate-700 dark:hover:to-gray-700 hover:border-slate-400 transition-all"
             title="Reset filters, sorting, and selection"
           >
             <RotateCcw size={14} />
@@ -270,7 +270,7 @@ const CommentsEnhanced = () => {
           </button>
           <button
             onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 dark:border-indigo-600 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 shadow-sm hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/50 dark:hover:to-purple-900/50 hover:border-indigo-400 transition-all"
           >
             <Settings size={14} />
             Columns
@@ -292,8 +292,8 @@ const CommentsEnhanced = () => {
 
       {/* Column selector */}
       {showColumnSelector && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Columns</h3>
+        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Columns</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {allColumns.map(col => (
               <label key={col.key} className="flex items-center gap-2">
@@ -302,9 +302,9 @@ const CommentsEnhanced = () => {
                   checked={visibleColumns[col.key] || col.key === 'name' || col.key === 'commentDate'}
                   onChange={() => toggleColumn(col.key)}
                   disabled={col.key === 'name' || col.key === 'commentDate'}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                 />
-                <span className={`text-sm ${(col.key === 'name' || col.key === 'commentDate') ? 'text-gray-400' : 'text-gray-700'}`}>
+                <span className={`text-sm ${(col.key === 'name' || col.key === 'commentDate') ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
                   {col.label} {(col.key === 'name' || col.key === 'commentDate') && '(required)'}
                 </span>
               </label>
@@ -323,7 +323,7 @@ const CommentsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
+          className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
           aria-label="Search comments by name, organization, position, or comment text"
         />
         <select
@@ -332,7 +332,7 @@ const CommentsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
+          className="rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white dark:bg-gray-800 dark:text-gray-100"
           aria-label="Number of comments to display per page"
         >
           <option value={20}>Show 20</option>
@@ -343,16 +343,16 @@ const CommentsEnhanced = () => {
       </div>
 
       {/* Comments Table */}
-      <div className="mt-6 bg-white shadow overflow-x-auto sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
                 <input
                   type="checkbox"
                   checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
                   onChange={toggleSelectAll}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                   aria-label={`Select all ${paginatedComments.length} comments on this page`}
                 />
               </th>
@@ -360,7 +360,7 @@ const CommentsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -375,28 +375,28 @@ const CommentsEnhanced = () => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {loading ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   Loading comments...
                 </td>
               </tr>
             ) : paginatedComments.length === 0 ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   No comments found
                 </td>
               </tr>
             ) : (
               paginatedComments.map((comment, index) => (
-                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
+                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedComments.has(comment.id)}
                       onChange={() => toggleSelectComment(comment)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                       aria-label={`Select comment from ${comment.name || 'Anonymous'}`}
                     />
                   </td>
@@ -411,12 +411,12 @@ const CommentsEnhanced = () => {
                             {comment.name || 'Anonymous'}
                           </button>
                         ) : (
-                          <div className="text-xs font-medium text-gray-900">{comment.name || 'Anonymous'}</div>
+                          <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{comment.name || 'Anonymous'}</div>
                         )
                       ) : col.key === 'actionFmp' ? (
-                        <div className="text-xs text-gray-700 font-medium">{comment.actionFmp || '—'}</div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300 font-medium">{comment.actionFmp || '—'}</div>
                       ) : col.key === 'actionTitle' ? (
-                        <div className="text-xs text-gray-700 max-w-xs truncate" title={comment.actionTitle || 'No action specified'}>
+                        <div className="text-xs text-gray-700 dark:text-gray-300 max-w-xs truncate" title={comment.actionTitle || 'No action specified'}>
                           {comment.actionTitle || '—'}
                         </div>
                       ) : col.key === 'organization' ? (
@@ -457,21 +457,21 @@ const CommentsEnhanced = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Page {currentPage} of {totalPages}
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Previous
             </button>
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Next
             </button>
@@ -486,19 +486,19 @@ const CommentsEnhanced = () => {
           onClick={closeProfileModal}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-labelledby="profile-modal-title"
           >
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 id="profile-modal-title" className="font-heading text-2xl font-bold text-gray-900">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <h2 id="profile-modal-title" className="font-heading text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {profileType === 'contact' ? 'Contact Profile' : 'Organization Profile'}
               </h2>
               <button
                 onClick={closeProfileModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 aria-label="Close profile modal"
               >
                 <X size={24} />
@@ -507,18 +507,18 @@ const CommentsEnhanced = () => {
 
             <div className="px-6 py-4">
               {loadingProfile ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
               ) : profileData ? (
                 profileType === 'contact' ? (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-gray-500">Name</h3>
-                      <p className="mt-1 text-base text-gray-900">{profileData.name || '—'}</p>
+                      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</h3>
+                      <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.name || '—'}</p>
                     </div>
                     {profileData.email && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                        <p className="mt-1 text-base text-gray-900">
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
                           <a href={`mailto:${profileData.email}`} className="text-brand-blue hover:text-brand-green hover:underline">
                             {profileData.email}
                           </a>
@@ -527,55 +527,55 @@ const CommentsEnhanced = () => {
                     )}
                     {profileData.phone && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Phone</h3>
-                        <p className="mt-1 text-base text-gray-900">{profileData.phone}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.phone}</p>
                       </div>
                     )}
                     {(profileData.city || profileData.state) && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                        <p className="mt-1 text-base text-gray-900">
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
                           {[profileData.city, profileData.state].filter(Boolean).join(', ')}
                         </p>
                       </div>
                     )}
                     {profileData.affiliation && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Affiliation</h3>
-                        <p className="mt-1 text-base text-gray-900">{profileData.affiliation}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Affiliation</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.affiliation}</p>
                       </div>
                     )}
                     {profileData.comment_count > 0 && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Total Comments</h3>
-                        <p className="mt-1 text-base text-gray-900">{profileData.comment_count}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Comments</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.comment_count}</p>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-gray-500">Organization Name</h3>
-                      <p className="mt-1 text-base text-gray-900">{profileData.name || '—'}</p>
+                      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Organization Name</h3>
+                      <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.name || '—'}</p>
                     </div>
                     {profileData.type && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Type</h3>
-                        <p className="mt-1 text-base text-gray-900">{profileData.type}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.type}</p>
                       </div>
                     )}
                     {(profileData.city || profileData.state) && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                        <p className="mt-1 text-base text-gray-900">
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
                           {[profileData.city, profileData.state].filter(Boolean).join(', ')}
                         </p>
                       </div>
                     )}
                     {profileData.website && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Website</h3>
-                        <p className="mt-1 text-base text-gray-900">
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Website</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
                           <a
                             href={profileData.website}
                             target="_blank"
@@ -589,24 +589,24 @@ const CommentsEnhanced = () => {
                     )}
                     {profileData.description && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                        <p className="mt-1 text-base text-gray-900">{profileData.description}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.description}</p>
                       </div>
                     )}
                     {profileData.comment_count > 0 && (
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Total Comments</h3>
-                        <p className="mt-1 text-base text-gray-900">{profileData.comment_count}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Comments</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.comment_count}</p>
                       </div>
                     )}
                   </div>
                 )
               ) : (
-                <div className="text-center py-8 text-gray-500">No profile data available</div>
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">No profile data available</div>
               )}
             </div>
 
-            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4">
+            <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
               <button
                 onClick={closeProfileModal}
                 className="w-full px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-brand-blue-light transition-colors"
