@@ -20,7 +20,8 @@ import {
   Shield,
   UserCheck,
   AlertCircle,
-  Building2
+  Building2,
+  Send
 } from 'lucide-react';
 
 const UserManagement = () => {
@@ -226,6 +227,32 @@ const UserManagement = () => {
     }
   };
 
+  // Resend invite
+  const handleResendInvite = async (userId, userEmail) => {
+    try {
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/resend-invite`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send invite');
+      }
+
+      alert(`Invite email sent to ${userEmail}`);
+
+    } catch (err) {
+      console.error('Error sending invite:', err);
+      alert(`Error: ${err.message}`);
+    }
+  };
+
   // Get role badge color - high contrast for accessibility
   const getRoleBadgeClass = (role) => {
     switch (role) {
@@ -422,6 +449,13 @@ const UserManagement = () => {
                       </div>
                     ) : (
                       <div className="inline-flex items-center gap-2">
+                        <button
+                          onClick={() => handleResendInvite(user.id, user.email)}
+                          className="text-green-600 hover:text-green-800 inline-flex items-center gap-1"
+                          title="Send login invite"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => handleEdit(user)}
                           className="text-brand-blue hover:text-brand-blue-light inline-flex items-center gap-1"

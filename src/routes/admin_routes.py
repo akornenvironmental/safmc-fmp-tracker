@@ -6,6 +6,11 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy import text, desc
 from datetime import datetime, timedelta
 import logging
+import os
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 from src.config.extensions import db
 from src.models.user import User
@@ -15,6 +20,11 @@ from src.middleware.auth_middleware import (
     get_current_user,
     log_activity
 )
+
+# Email configuration
+EMAIL_USER = os.getenv('EMAIL_USER')
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+CLIENT_URL = os.getenv('CLIENT_URL', 'https://safmc-fmp-tracker.onrender.com')
 
 # Rate limiting for admin endpoints
 try:
@@ -38,6 +48,83 @@ def admin_rate_limit(limit_string):
 logger = logging.getLogger(__name__)
 
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
+
+
+def send_user_invite_email(user_email, user_name, role, organization, magic_link, invited_by):
+    """Send welcome/invite email to new user with magic link"""
+    try:
+        if not EMAIL_USER or not EMAIL_PASSWORD:
+            logger.warning("Email not configured - skipping invite email")
+            return False
+
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = 'Welcome to SAFMC FMP Tracker - Your Account is Ready'
+        msg['From'] = f'"SAFMC FMP Tracker" <{EMAIL_USER}>'
+        msg['To'] = user_email
+
+        role_display = {
+            'super_admin': 'Super Admin',
+            'admin': 'Admin',
+            'editor': 'Editor'
+        }.get(role, role)
+
+        html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #08306b;">Welcome to SAFMC FMP Tracker!</h2>
+            <p>Hello {user_name or 'there'},</p>
+            <p><strong>{invited_by}</strong> has created an account for you on the SAFMC FMP Tracker system.</p>
+
+            <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0 0 8px 0;"><strong>Your Account Details:</strong></p>
+                <p style="margin: 4px 0; font-size: 14px;">Email: {user_email}</p>
+                <p style="margin: 4px 0; font-size: 14px;">Role: {role_display}</p>
+                {f'<p style="margin: 4px 0; font-size: 14px;">Organization: {organization}</p>' if organization else ''}
+            </div>
+
+            <p>Click the button below to log in and get started:</p>
+            <div style="margin: 30px 0;">
+                <a href="{magic_link}"
+                   style="background-color: #08306b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                  Log In to FMP Tracker
+                </a>
+            </div>
+
+            <p style="color: #666; font-size: 14px;">
+                This login link will expire in 24 hours. After that, you can request a new login link from the login page.
+            </p>
+
+            <div style="background: #e8f4f8; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 14px;"><strong>What is SAFMC FMP Tracker?</strong></p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #666;">
+                    A system for tracking South Atlantic Fishery Management Plan amendments, meetings, public comments, and stock assessments.
+                    All data is sourced from publicly available information on SAFMC.net, SEDAR, and NOAA.
+                </p>
+            </div>
+
+            <p style="color: #666; font-size: 14px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; word-break: break-all;">{magic_link}</code>
+            </p>
+
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <p style="color: #9ca3af; font-size: 12px;">
+                SAFMC FMP Tracker<br>
+                Built by <a href="https://akornenvironmental.com" style="color: #08306b;">akorn environmental</a>
+            </p>
+        </div>
+        """
+
+        msg.attach(MIMEText(html, 'html'))
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(EMAIL_USER, EMAIL_PASSWORD)
+            server.send_message(msg)
+
+        logger.info(f"Invite email sent to {user_email}")
+        return True
+    except Exception as e:
+        logger.error(f"Error sending invite email: {e}")
+        return False
 
 
 # ==================== USER MANAGEMENT (SUPER ADMIN ONLY) ====================
@@ -162,20 +249,39 @@ def create_user():
         if existing_user:
             return jsonify({'error': 'User with this email already exists'}), 409
 
-        # Create new user
+        # Get current admin user for invite email
+        current_user = get_current_user()
+
+        # Generate magic link token for invite (24 hour expiry)
+        login_token = secrets.token_urlsafe(32)
+        token_expiry = datetime.utcnow() + timedelta(hours=24)
+
+        # Create new user with login token already set
         user = User(
             email=email,
             name=name,
             organization=organization or None,
             role=role,
-            is_active=True
+            is_active=True,
+            login_token=login_token,
+            token_expiry=token_expiry
         )
 
         db.session.add(user)
         db.session.commit()
 
+        # Send invite email with magic link
+        magic_link = f"{CLIENT_URL}/auth/verify?token={login_token}&email={email}"
+        invite_sent = send_user_invite_email(
+            user_email=email,
+            user_name=name,
+            role=role,
+            organization=organization,
+            magic_link=magic_link,
+            invited_by=current_user.name or current_user.email
+        )
+
         # Log activity
-        current_user = get_current_user()
         log_activity(
             activity_type='user.created',
             description=f'Created user {email} with role {role}',
@@ -183,22 +289,82 @@ def create_user():
             resource_type='user',
             resource_id=user.id,
             resource_name=email,
-            changes_made={'created': True},
+            changes_made={'created': True, 'invite_sent': invite_sent},
             new_values={'email': email, 'name': name, 'role': role}
         )
 
-        logger.info(f"User {email} created by {current_user.email}")
+        logger.info(f"User {email} created by {current_user.email}, invite sent: {invite_sent}")
 
         return jsonify({
             'success': True,
             'user': user.to_dict(),
-            'message': 'User created successfully'
+            'message': 'User created successfully' + (' and invite email sent' if invite_sent else ' (invite email failed to send)'),
+            'invite_sent': invite_sent
         }), 201
 
     except Exception as e:
         logger.error(f"Error creating user: {e}")
         db.session.rollback()
         return jsonify({'error': 'Failed to create user'}), 500
+
+
+@bp.route('/users/<user_id>/resend-invite', methods=['POST'])
+@admin_rate_limit("10 per hour")
+@require_super_admin
+def resend_invite(user_id):
+    """Resend invite email to existing user (super_admin only)"""
+    try:
+        user = User.query.filter_by(id=user_id).first()
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Generate new magic link token (24 hour expiry)
+        login_token = secrets.token_urlsafe(32)
+        token_expiry = datetime.utcnow() + timedelta(hours=24)
+
+        user.login_token = login_token
+        user.token_expiry = token_expiry
+        db.session.commit()
+
+        # Get current admin for invite
+        current_user = get_current_user()
+
+        # Send invite email
+        magic_link = f"{CLIENT_URL}/auth/verify?token={login_token}&email={user.email}"
+        invite_sent = send_user_invite_email(
+            user_email=user.email,
+            user_name=user.name,
+            role=user.role,
+            organization=user.organization,
+            magic_link=magic_link,
+            invited_by=current_user.name or current_user.email
+        )
+
+        if not invite_sent:
+            return jsonify({'error': 'Failed to send invite email'}), 500
+
+        # Log activity
+        log_activity(
+            activity_type='user.invite_resent',
+            description=f'Resent invite to {user.email}',
+            category='admin',
+            resource_type='user',
+            resource_id=user_id,
+            resource_name=user.email
+        )
+
+        logger.info(f"Invite resent to {user.email} by {current_user.email}")
+
+        return jsonify({
+            'success': True,
+            'message': f'Invite email sent to {user.email}'
+        })
+
+    except Exception as e:
+        logger.error(f"Error resending invite: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to resend invite'}), 500
 
 
 @bp.route('/users/<user_id>', methods=['PUT', 'PATCH'])
