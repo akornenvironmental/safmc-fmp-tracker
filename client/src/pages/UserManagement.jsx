@@ -19,7 +19,8 @@ import {
   Mail,
   Shield,
   UserCheck,
-  AlertCircle
+  AlertCircle,
+  Building2
 } from 'lucide-react';
 
 const UserManagement = () => {
@@ -41,6 +42,7 @@ const UserManagement = () => {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
+    organization: '',
     role: 'editor'
   });
   const [formErrors, setFormErrors] = useState({});
@@ -99,6 +101,7 @@ const UserManagement = () => {
     setFormData({
       email: '',
       name: '',
+      organization: '',
       role: 'editor'
     });
     setFormErrors({});
@@ -112,6 +115,7 @@ const UserManagement = () => {
     setFormData({
       email: user.email,
       name: user.name || '',
+      organization: user.organization || '',
       role: user.role
     });
     setFormErrors({});
@@ -123,7 +127,7 @@ const UserManagement = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedUser(null);
-    setFormData({ email: '', name: '', role: 'editor' });
+    setFormData({ email: '', name: '', organization: '', role: 'editor' });
     setFormErrors({});
   };
 
@@ -222,17 +226,17 @@ const UserManagement = () => {
     }
   };
 
-  // Get role badge color
+  // Get role badge color - high contrast for accessibility
   const getRoleBadgeClass = (role) => {
     switch (role) {
       case 'super_admin':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+        return 'bg-purple-700 text-white dark:bg-purple-600 dark:text-white';
       case 'admin':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+        return 'bg-blue-700 text-white dark:bg-blue-600 dark:text-white';
       case 'editor':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-gray-600 text-white dark:bg-gray-500 dark:text-white';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-gray-600 text-white dark:bg-gray-500 dark:text-white';
     }
   };
 
@@ -346,6 +350,9 @@ const UserManagement = () => {
                 User
               </th>
               <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Organization
+              </th>
+              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Role
               </th>
               <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -359,7 +366,7 @@ const UserManagement = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
                   <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p>No users found</p>
                   {searchQuery && (
@@ -382,6 +389,11 @@ const UserManagement = () => {
                         <div className="text-xs text-gray-500">{user.email}</div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-2 py-0.5 whitespace-nowrap">
+                    <span className="text-xs text-gray-700">
+                      {user.organization || '-'}
+                    </span>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(user.role)}`}>
@@ -498,6 +510,24 @@ const UserManagement = () => {
                 {formErrors.name && (
                   <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
                 )}
+              </div>
+
+              {/* Organization */}
+              <div className="mb-4">
+                <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-1">
+                  Organization
+                </label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    id="organization"
+                    value={formData.organization}
+                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+                    placeholder="Company or organization"
+                  />
+                </div>
               </div>
 
               {/* Role */}

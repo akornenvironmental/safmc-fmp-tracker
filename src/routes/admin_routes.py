@@ -150,6 +150,7 @@ def create_user():
 
         email = data['email'].lower().strip()
         name = data.get('name', '').strip()
+        organization = data.get('organization', '').strip()
         role = data.get('role', 'editor')
 
         # Validate role
@@ -165,6 +166,7 @@ def create_user():
         user = User(
             email=email,
             name=name,
+            organization=organization or None,
             role=role,
             is_active=True
         )
@@ -214,6 +216,7 @@ def update_user(user_id):
         # Track old values for audit
         old_values = {
             'name': user.name,
+            'organization': user.organization,
             'role': user.role,
             'is_active': user.is_active
         }
@@ -224,6 +227,10 @@ def update_user(user_id):
         if 'name' in data:
             user.name = data['name'].strip()
             changes['name'] = data['name']
+
+        if 'organization' in data:
+            user.organization = data['organization'].strip() or None
+            changes['organization'] = data['organization']
 
         if 'role' in data:
             if data['role'] not in ['super_admin', 'admin', 'editor']:

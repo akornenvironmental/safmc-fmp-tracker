@@ -9,6 +9,7 @@ class User(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     name = db.Column(db.String(255), nullable=True)
+    organization = db.Column(db.String(255), nullable=True)  # User's organization/affiliation
     role = db.Column(db.Enum('admin', 'editor', 'super_admin', name='user_roles'), nullable=False, default='editor')
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
@@ -33,6 +34,7 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'name': self.name,
+            'organization': self.organization,
             'role': self.role,
             'is_active': self.is_active,
             'last_login': self.last_login.isoformat() if self.last_login else None,

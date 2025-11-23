@@ -15,6 +15,10 @@ python seed_stock_assessments.py
 echo "Running refresh token migration..."
 python migrations/add_refresh_token_to_users.py
 
+# Run organization column migration
+echo "Running organization column migration..."
+python migrations/add_organization_to_users.py
+
 # Start Gunicorn
 echo "Starting Gunicorn web server..."
 exec gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120

@@ -28,7 +28,14 @@ const Layout = () => {
     { to: '/workplan', label: 'Workplan' },
     // Admin links - conditionally shown based on role
     ...(isAdmin() ? [{ to: '/admin/logs', label: 'Activity Logs' }] : []),
-    ...(isSuperAdmin() ? [{ to: '/admin/users', label: 'Users' }] : [])
+  ];
+
+  // Build additional menu items for user dropdown (admin links)
+  const additionalUserMenuItems = [
+    ...(isSuperAdmin() ? [
+      { type: 'divider' },
+      { label: 'User Management', to: '/admin/users', icon: 'users' }
+    ] : [])
   ];
 
   const customDescription = (
@@ -75,6 +82,7 @@ const Layout = () => {
         userEmail={user?.email}
         userRole={user?.role}
         onLogoutClick={handleLogout}
+        additionalMenuItems={additionalUserMenuItems}
         headerClassName="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50"
         containerClassName="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"
       />
