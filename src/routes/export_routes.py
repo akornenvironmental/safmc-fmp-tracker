@@ -13,6 +13,7 @@ from src.config.extensions import db
 from src.models.action import Action
 from src.models.meeting import Meeting
 from src.models.comment import Comment
+from src.utils.security import safe_error_response
 
 logger = logging.getLogger(__name__)
 

@@ -8,6 +8,7 @@ from sqlalchemy import or_, desc
 
 from src.config.extensions import db
 from src.models.safe_sedar import SEDARAssessment, AssessmentActionLink, SAFESEDARScrapeLog
+from src.utils.security import safe_error_response
 
 logger = logging.getLogger(__name__)
 

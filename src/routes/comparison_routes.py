@@ -5,6 +5,7 @@ Amendment Comparison API Routes
 import logging
 from flask import Blueprint, jsonify, request
 from src.services.comparison_service import ComparisonService
+from src.utils.security import safe_error_response
 
 logger = logging.getLogger(__name__)
 

@@ -10,6 +10,7 @@ from sqlalchemy import text
 from src.config.extensions import db
 from src.models.workplan import WorkplanVersion, WorkplanItem, WorkplanMilestone
 from src.services.workplan_service import WorkplanService
+from src.utils.security import safe_error_response
 
 logger = logging.getLogger(__name__)
 

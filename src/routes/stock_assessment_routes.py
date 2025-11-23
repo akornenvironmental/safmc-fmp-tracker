@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 from sqlalchemy import text, func
 from src.config.extensions import db
+from src.utils.security import safe_error_response
 
 logger = logging.getLogger(__name__)
 

@@ -27,6 +27,7 @@ from src.scrapers.comments_scraper import CommentsScraper
 from src.scrapers.briefing_books_scraper import BriefingBooksScraper
 from src.services.ai_service import AIService
 from src.middleware.auth_middleware import require_auth, require_admin
+from src.utils.security import validate_pagination_params, validate_string_length, safe_error_response
 
 bp = Blueprint('api', __name__)
 logger = logging.getLogger(__name__)
@@ -101,13 +102,15 @@ def dashboard_stats():
 
     except Exception as e:
         logger.error(f"Error getting dashboard stats: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/dashboard/recent-amendments')
 def recent_amendments():
     """Get recent amendments"""
     try:
         limit = request.args.get('limit', 10, type=int)
+        # Validate limit bounds (1-100)
+        limit = max(1, min(limit or 10, 100))
 
         actions = Action.query.order_by(desc(Action.updated_at)).limit(limit).all()
 
@@ -118,7 +121,7 @@ def recent_amendments():
 
     except Exception as e:
         logger.error(f"Error getting recent amendments: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== ACTIONS ENDPOINTS ====================
 
@@ -154,7 +157,7 @@ def get_actions():
 
     except Exception as e:
         logger.error(f"Error getting actions: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/actions/<action_id>')
 def get_action(action_id):
@@ -177,7 +180,7 @@ def get_action(action_id):
 
     except Exception as e:
         logger.error(f"Error getting action {action_id}: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== MEETINGS ENDPOINTS ====================
 
@@ -209,7 +212,7 @@ def get_meetings():
 
     except Exception as e:
         logger.error(f"Error getting meetings: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/meetings/<meeting_id>')
 def get_meeting(meeting_id):
@@ -224,7 +227,7 @@ def get_meeting(meeting_id):
 
     except Exception as e:
         logger.error(f"Error getting meeting {meeting_id}: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== COMMENTS ENDPOINTS ====================
 
@@ -261,7 +264,7 @@ def get_comments():
 
     except Exception as e:
         logger.error(f"Error getting comments: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/comments/detect-species', methods=['POST'])
@@ -314,7 +317,7 @@ def detect_species_in_comments():
     except Exception as e:
         logger.error(f"Error detecting species in comments: {e}")
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/comments/species-stats', methods=['GET'])
@@ -359,7 +362,7 @@ def get_comment_species_stats():
 
     except Exception as e:
         logger.error(f"Error getting species stats: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/contacts')
@@ -390,7 +393,7 @@ def get_contacts():
 
     except Exception as e:
         logger.error(f"Error getting contacts: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/organizations')
 def get_organizations():
@@ -417,7 +420,7 @@ def get_organizations():
 
     except Exception as e:
         logger.error(f"Error getting organizations: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== SCRAPING ENDPOINTS ====================
 
@@ -500,7 +503,7 @@ def scrape_amendments():
     except Exception as e:
         logger.error(f"Error in scrape_amendments: {e}")
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/meetings', methods=['POST'])
 @require_admin
@@ -588,7 +591,7 @@ def scrape_meetings():
     except Exception as e:
         logger.error(f"Error in scrape_meetings: {e}")
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/fisherypulse', methods=['POST'])
 @require_admin
@@ -634,7 +637,7 @@ def scrape_fisherypulse():
         import traceback
         logger.error(traceback.format_exc())
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/all', methods=['POST'])
 @require_admin
@@ -657,7 +660,7 @@ def scrape_all():
 
     except Exception as e:
         logger.error(f"Error in scrape_all: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== AI QUERY ENDPOINTS ====================
 
@@ -778,7 +781,7 @@ def ai_query():
             logger.error(f"Failed to log failed AI query: {log_error}")
             db.session.rollback()
 
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/ai/analyze', methods=['POST'])
 @require_auth
@@ -794,7 +797,7 @@ def ai_analyze():
 
     except Exception as e:
         logger.error(f"Error in AI analysis: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/ai/report', methods=['POST'])
 @require_auth
@@ -815,7 +818,7 @@ def ai_report():
 
     except Exception as e:
         logger.error(f"Error generating report: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/ai/search', methods=['POST'])
 @require_auth
@@ -837,7 +840,7 @@ def ai_search():
 
     except Exception as e:
         logger.error(f"Error in AI search: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/ai/analyze-comments', methods=['POST'])
@@ -907,7 +910,7 @@ def ai_analyze_comments():
         logger.error(f"Error in AI comment analysis: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/ai/summarize-comments', methods=['POST'])
@@ -954,7 +957,7 @@ def ai_summarize_comments():
         logger.error(f"Error in AI comment summarization: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/ai/query-logs', methods=['GET'])
@@ -1036,7 +1039,7 @@ def get_ai_query_logs():
 
     except Exception as e:
         logger.error(f"Error fetching AI query logs: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/ai/query-stats', methods=['GET'])
 @require_admin
@@ -1091,7 +1094,7 @@ def get_ai_query_stats():
 
     except Exception as e:
         logger.error(f"Error fetching AI query stats: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== ENHANCED COMMENTS ENDPOINTS ====================
 
@@ -1150,7 +1153,7 @@ def get_comments_analytics():
 
     except Exception as e:
         logger.error(f"Error getting comment analytics: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/comments', methods=['POST'])
 @require_admin
@@ -1265,7 +1268,7 @@ def scrape_comments():
     except Exception as e:
         logger.error(f"Error in scrape_comments: {e}")
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== LOGS ENDPOINTS ====================
 
@@ -1283,7 +1286,7 @@ def get_scrape_logs():
 
     except Exception as e:
         logger.error(f"Error getting scrape logs: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 # ==================== DOCUMENT ENDPOINTS ====================
 
@@ -1379,7 +1382,7 @@ def get_documents():
 
     except Exception as e:
         logger.error(f"Error getting documents: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/documents/<document_id>')
 def get_document(document_id):
@@ -1451,7 +1454,7 @@ def get_document(document_id):
 
     except Exception as e:
         logger.error(f"Error getting document {document_id}: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/documents/stats')
 def get_document_stats():
@@ -1508,7 +1511,7 @@ def get_document_stats():
 
     except Exception as e:
         logger.error(f"Error getting document stats: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/documents/briefing-books', methods=['POST'])
 @require_admin
@@ -1551,7 +1554,7 @@ def scrape_briefing_books():
     except Exception as e:
         logger.error(f"Error in scrape_briefing_books: {e}")
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/queue/status')
 def get_scrape_queue_status():
@@ -1603,7 +1606,7 @@ def get_scrape_queue_status():
 
     except Exception as e:
         logger.error(f"Error getting scrape queue status: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
 @bp.route('/comments/fix-links', methods=['POST'])
@@ -1659,4 +1662,4 @@ def fix_comment_links():
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error fixing comment links: {e}")
-        return jsonify({'error': str(e)}), 500
+        return safe_error_response(e)[0], safe_error_response(e)[1]

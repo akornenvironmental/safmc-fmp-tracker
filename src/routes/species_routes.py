@@ -6,6 +6,7 @@ Provides endpoints for species profiles and data
 import logging
 from flask import Blueprint, jsonify, request
 from src.services.species_service import SpeciesService
+from src.utils.security import safe_error_response
 
 logger = logging.getLogger(__name__)
 
