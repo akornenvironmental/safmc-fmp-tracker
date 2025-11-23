@@ -16,6 +16,25 @@ from src.middleware.auth_middleware import (
     log_activity
 )
 
+# Rate limiting for admin endpoints
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    admin_limiter = Limiter(key_func=get_remote_address, default_limits=[])
+    RATE_LIMITING_ENABLED = True
+except ImportError:
+    admin_limiter = None
+    RATE_LIMITING_ENABLED = False
+
+
+def admin_rate_limit(limit_string):
+    """Apply rate limit if flask-limiter is available"""
+    def decorator(f):
+        if RATE_LIMITING_ENABLED and admin_limiter:
+            return admin_limiter.limit(limit_string)(f)
+        return f
+    return decorator
+
 logger = logging.getLogger(__name__)
 
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
@@ -118,6 +137,7 @@ def get_user(user_id):
 
 
 @bp.route('/users', methods=['POST'])
+@admin_rate_limit("10 per hour")  # Strict limit on user creation
 @require_super_admin
 def create_user():
     """Create new user (super_admin only)"""
@@ -248,6 +268,7 @@ def update_user(user_id):
 
 
 @bp.route('/users/<user_id>', methods=['DELETE'])
+@admin_rate_limit("5 per hour")  # Very strict limit on user deletion
 @require_super_admin
 def delete_user(user_id):
     """Delete user (super_admin only)"""
@@ -696,6 +717,7 @@ def get_duplicate_stats():
 
 
 @bp.route('/contacts/merge', methods=['POST'])
+@admin_rate_limit("20 per hour")  # Limit contact merging
 @require_super_admin
 def merge_duplicate_contacts():
     """Merge duplicate contacts into a primary contact (super_admin only)"""

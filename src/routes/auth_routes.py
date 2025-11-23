@@ -169,6 +169,7 @@ def request_login():
 
 
 @bp.route('/verify', methods=['GET'])
+@rate_limit_decorator("30 per hour")  # Limit verify attempts
 def verify_login():
     """Verify magic link token and issue JWT"""
     try:
@@ -262,6 +263,7 @@ def verify_login():
 
 
 @bp.route('/refresh', methods=['POST'])
+@rate_limit_decorator("60 per hour")  # Allow reasonable refresh rate
 def refresh_token():
     """Refresh JWT using refresh token - allows persistent sessions"""
     try:
