@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { API_BASE_URL } from '../config';
 
 const AuthContext = createContext(null);
@@ -15,6 +15,73 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const refreshTimeoutRef = useRef(null);
+
+  // Refresh token function - gets new JWT before expiry
+  const refreshToken = useCallback(async () => {
+    try {
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+
+      if (!storedRefreshToken) {
+        return false;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: storedRefreshToken }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.token) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        setUser(data.user);
+        setAuthenticated(true);
+
+        // Schedule next refresh 5 minutes before expiry
+        scheduleRefresh(data.expiresIn);
+        return true;
+      } else {
+        // Refresh failed - clear tokens
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+        setAuthenticated(false);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return false;
+    }
+  }, []);
+
+  // Schedule token refresh before expiry
+  const scheduleRefresh = useCallback((expiresInSeconds) => {
+    // Clear any existing timeout
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    // Refresh 5 minutes (300s) before expiry, minimum 30 seconds
+    const refreshIn = Math.max((expiresInSeconds - 300) * 1000, 30000);
+
+    refreshTimeoutRef.current = setTimeout(() => {
+      refreshToken();
+    }, refreshIn);
+  }, [refreshToken]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -24,8 +91,17 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem('authToken');
+      const storedRefreshToken = localStorage.getItem('refreshToken');
 
       if (!token) {
+        // No JWT - try to get one using refresh token
+        if (storedRefreshToken) {
+          const refreshed = await refreshToken();
+          if (refreshed) {
+            setLoading(false);
+            return;
+          }
+        }
         setUser(null);
         setAuthenticated(false);
         setLoading(false);
@@ -42,16 +118,37 @@ export const AuthProvider = ({ children }) => {
       if (data.authenticated && data.user) {
         setUser(data.user);
         setAuthenticated(true);
+        // Schedule refresh for the current token (assume 8 hours = 28800 seconds)
+        scheduleRefresh(28800);
       } else {
+        // JWT invalid - try refresh token
+        if (storedRefreshToken) {
+          const refreshed = await refreshToken();
+          if (refreshed) {
+            setLoading(false);
+            return;
+          }
+        }
         setUser(null);
         setAuthenticated(false);
         localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
       }
     } catch (error) {
       console.error('Error checking auth:', error);
+      // Try refresh token before giving up
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      if (storedRefreshToken) {
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          setLoading(false);
+          return;
+        }
+      }
       setUser(null);
       setAuthenticated(false);
       localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
     } finally {
       setLoading(false);
     }
@@ -91,11 +188,19 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.error || 'Failed to verify login');
       }
 
-      // Store JWT token in localStorage
+      // Store JWT token and refresh token in localStorage
       localStorage.setItem('authToken', data.token);
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
 
       setUser(data.user);
       setAuthenticated(true);
+
+      // Schedule token refresh before expiry
+      if (data.expiresIn) {
+        scheduleRefresh(data.expiresIn);
+      }
 
       return { success: true, user: data.user };
     } catch (error) {
@@ -105,19 +210,28 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      // Clear refresh timeout
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
 
-      if (token) {
+      const token = localStorage.getItem('authToken');
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+
+      if (token || storedRefreshToken) {
         await fetch(`${API_BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ refreshToken: storedRefreshToken }),
         });
       }
 
-      // Remove token from localStorage
+      // Remove tokens from localStorage
       localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
 
       setUser(null);
       setAuthenticated(false);
@@ -125,6 +239,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Error logging out:', error);
       // Still clear local state even if API call fails
       localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
       setUser(null);
       setAuthenticated(false);
     }

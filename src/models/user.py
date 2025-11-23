@@ -15,6 +15,10 @@ class User(db.Model):
     login_token = db.Column(db.String(255), nullable=True)
     token_expiry = db.Column(db.DateTime, nullable=True)
 
+    # Refresh token for persistent sessions
+    refresh_token = db.Column(db.String(255), nullable=True, index=True)
+    refresh_token_expiry = db.Column(db.DateTime, nullable=True)
+
     # Notification preferences
     email_notifications = db.Column(db.Boolean, default=True, nullable=False)
     notify_new_comments = db.Column(db.Boolean, default=True, nullable=False)

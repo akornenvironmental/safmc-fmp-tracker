@@ -34,7 +34,8 @@ if not JWT_SECRET:
     JWT_SECRET = 'dev-secret-key-for-local-only'
     logger.warning("Using development JWT_SECRET - NOT FOR PRODUCTION")
 
-JWT_EXPIRATION_HOURS = 1  # Reduced from 24 for security
+JWT_EXPIRATION_HOURS = 8  # 8 hours for active sessions (a workday)
+REFRESH_TOKEN_DAYS = 7  # Refresh tokens valid for 7 days
 
 # Email Configuration
 EMAIL_USER = os.getenv('EMAIL_USER')
@@ -223,6 +224,12 @@ def verify_login():
             algorithm='HS256'
         )
 
+        # Generate refresh token for persistent sessions
+        refresh_token = secrets.token_urlsafe(48)
+        user.refresh_token = refresh_token
+        user.refresh_token_expiry = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_DAYS)
+        db.session.commit()
+
         logger.info(f"User {user.email} logged in successfully")
 
         # Log successful login activity
@@ -238,6 +245,8 @@ def verify_login():
         return jsonify({
             'success': True,
             'token': jwt_token,
+            'refreshToken': refresh_token,
+            'expiresIn': JWT_EXPIRATION_HOURS * 3600,  # seconds
             'user': {
                 'id': user.id,
                 'email': user.email,
@@ -252,17 +261,106 @@ def verify_login():
         return jsonify({'error': 'Internal server error'}), 500
 
 
+@bp.route('/refresh', methods=['POST'])
+def refresh_token():
+    """Refresh JWT using refresh token - allows persistent sessions"""
+    try:
+        data = request.get_json()
+        refresh_tok = data.get('refreshToken')
+
+        if not refresh_tok:
+            return jsonify({'error': 'Refresh token required'}), 400
+
+        # Find user with valid refresh token
+        user = User.query.filter_by(refresh_token=refresh_tok).first()
+
+        if not user:
+            logger.warning("Invalid refresh token attempted")
+            return jsonify({'error': 'Invalid refresh token'}), 401
+
+        # Check if refresh token is expired
+        if user.refresh_token_expiry < datetime.utcnow():
+            # Clear expired refresh token
+            user.refresh_token = None
+            user.refresh_token_expiry = None
+            db.session.commit()
+            logger.warning(f"Expired refresh token for {user.email}")
+            return jsonify({'error': 'Refresh token expired. Please log in again.'}), 401
+
+        # Check if user is still active
+        if not user.is_active:
+            logger.warning(f"Refresh attempt for deactivated user: {user.email}")
+            return jsonify({'error': 'Account is deactivated'}), 401
+
+        # Generate new JWT token
+        jwt_token = jwt.encode(
+            {
+                'user_id': user.id,
+                'email': user.email,
+                'name': user.name,
+                'role': user.role,
+                'exp': datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+            },
+            JWT_SECRET,
+            algorithm='HS256'
+        )
+
+        # Optionally rotate refresh token for extra security
+        new_refresh_token = secrets.token_urlsafe(48)
+        user.refresh_token = new_refresh_token
+        user.refresh_token_expiry = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_DAYS)
+        db.session.commit()
+
+        logger.info(f"Token refreshed for {user.email}")
+
+        return jsonify({
+            'success': True,
+            'token': jwt_token,
+            'refreshToken': new_refresh_token,
+            'expiresIn': JWT_EXPIRATION_HOURS * 3600,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'name': user.name,
+                'role': user.role
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error in refresh_token: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 @bp.route('/logout', methods=['POST'])
 def logout():
-    """Logout endpoint (client-side token removal)"""
-    # Log logout activity
-    log_activity(
-        activity_type='user.logout',
-        description='User logged out',
-        category='auth'
-    )
+    """Logout endpoint - invalidates refresh token server-side"""
+    try:
+        # Try to get refresh token from request to invalidate it
+        data = request.get_json() or {}
+        refresh_tok = data.get('refreshToken')
 
-    return jsonify({'success': True, 'message': 'Logged out successfully'})
+        if refresh_tok:
+            # Find and invalidate the refresh token
+            user = User.query.filter_by(refresh_token=refresh_tok).first()
+            if user:
+                user.refresh_token = None
+                user.refresh_token_expiry = None
+                db.session.commit()
+                logger.info(f"Refresh token invalidated for {user.email}")
+
+        # Log logout activity
+        log_activity(
+            activity_type='user.logout',
+            description='User logged out',
+            category='auth'
+        )
+
+        return jsonify({'success': True, 'message': 'Logged out successfully'})
+
+    except Exception as e:
+        logger.error(f"Error in logout: {e}")
+        return jsonify({'success': True, 'message': 'Logged out successfully'})
 
 
 @bp.route('/check', methods=['GET'])
