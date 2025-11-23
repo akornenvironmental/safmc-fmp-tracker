@@ -236,15 +236,17 @@ def _log_activity_to_db(
         ip_address = request.remote_addr
         user_agent = request.headers.get('User-Agent', '')
 
-        # Get request params
+        # Get request params with comprehensive sensitive data filtering
         request_params = {}
-        if request.method == 'GET':
-            request_params = dict(request.args)
-        elif request.method in ['POST', 'PUT', 'PATCH']:
-            # Don't log sensitive data like passwords
-            if request.is_json:
-                request_params = {k: v for k, v in request.get_json().items()
-                                  if k not in ['password', 'token', 'secret']}
+        try:
+            from src.utils.security import filter_sensitive_data
+            if request.method == 'GET':
+                request_params = filter_sensitive_data(dict(request.args))
+            elif request.method in ['POST', 'PUT', 'PATCH']:
+                if request.is_json:
+                    request_params = filter_sensitive_data(request.get_json() or {})
+        except Exception:
+            request_params = {'_error': 'Could not parse request params'}
 
         # Insert activity log
         db.session.execute(text("""

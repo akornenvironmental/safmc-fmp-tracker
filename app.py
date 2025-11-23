@@ -4,7 +4,7 @@ Comprehensive tracking system for South Atlantic Fishery Management Plan amendme
 """
 
 import os
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request, redirect
 from flask_cors import CORS
 from dotenv import load_dotenv
 from datetime import datetime
@@ -67,16 +67,33 @@ migrate.init_app(app, db)
 
 # CORS configuration - allows frontend to communicate with backend API
 # Supports both monolithic deployment (same origin) and separated deployment (different domains)
-CORS(app, origins=[
-    "http://localhost:5173",  # Local development (Vite dev server)
-    "https://safmc-fmp-tracker.onrender.com",  # Current monolithic deployment
-    "https://safmc-fmp-tracker-frontend.onrender.com",  # New separated frontend Static Site
-], supports_credentials=True)
+cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173,https://safmc-fmp-tracker.onrender.com,https://safmc-fmp-tracker-frontend.onrender.com').split(',')
+CORS(app, origins=cors_origins, supports_credentials=True,
+     allow_headers=['Content-Type', 'Authorization'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
+
+# Global rate limiting
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],  # Default limits for all routes
+        storage_uri="memory://",  # Use memory storage (consider Redis for production clusters)
+    )
+    RATE_LIMITING_ENABLED = True
+    logger.info("Rate limiting enabled")
+except ImportError:
+    limiter = None
+    RATE_LIMITING_ENABLED = False
+    logger.warning("flask-limiter not installed, rate limiting disabled")
 
 # Security headers middleware
 @app.after_request
 def add_security_headers(response):
-    """Add security headers to all responses"""
+    """Add security headers to all responses - 508/WCAG and security compliance"""
     # Prevent MIME type sniffing
     response.headers['X-Content-Type-Options'] = 'nosniff'
     # Prevent clickjacking
@@ -87,10 +104,44 @@ def add_security_headers(response):
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     # Permissions policy (disable unnecessary features)
     response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+
+    # HSTS - Force HTTPS in production (1 year max-age)
+    if os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production':
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+
+    # Content Security Policy - Prevent XSS and injection attacks
+    # Allow 'unsafe-inline' for styles due to Tailwind and inline styles
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://kit.fontawesome.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.typekit.net; "
+        "font-src 'self' https://fonts.gstatic.com https://use.typekit.net data:; "
+        "img-src 'self' data: https: blob:; "
+        "connect-src 'self' https://api.anthropic.com https://*.render.com https://docs.google.com https://sheets.googleapis.com; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
+    response.headers['Content-Security-Policy'] = csp
+
     # Cache control for sensitive endpoints
     if request.path.startswith('/api/'):
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+
     return response
+
+
+# HTTPS redirect for production
+@app.before_request
+def redirect_to_https():
+    """Redirect HTTP to HTTPS in production"""
+    if os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production':
+        # Check X-Forwarded-Proto header (set by reverse proxy)
+        if request.headers.get('X-Forwarded-Proto') == 'http':
+            url = request.url.replace('http://', 'https://', 1)
+            return redirect(url, code=301)
 
 # Import models after db initialization
 from src.models.action import Action
