@@ -455,191 +455,59 @@ const ActionsEnhanced = () => {
             Actions and amendments are automatically synced weekly
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-col gap-2 items-end">
-          <div className="flex flex-wrap gap-2">
+        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
+          <button
+            onClick={() => setShowColumnSelector(!showColumnSelector)}
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
+          >
+            <Settings size={14} />
+            Columns
+          </button>
+          <div className="relative">
             <button
-              onClick={handleReset}
-              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
-              title="Reset filters, sorting, and selection"
+              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
+              onClick={(e) => {
+                const menu = e.currentTarget.nextElementSibling;
+                menu.classList.toggle('hidden');
+              }}
             >
-              <RotateCcw size={14} />
-              Reset
+              <Download size={14} />
+              Export
             </button>
-            <button
-              onClick={() => setShowColumnSelector(!showColumnSelector)}
-              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
-            >
-              <Settings size={14} />
-              Columns
-            </button>
-            <div className="relative">
-              <button
-                className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
-                onClick={(e) => {
-                  const menu = e.currentTarget.nextElementSibling;
-                  menu.classList.toggle('hidden');
-                }}
-              >
-                <Download size={14} />
-                Export
-              </button>
-              <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
-                <div className="py-1">
-                  <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-                    {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
-                  </div>
-                  <button
-                    onClick={exportToCSV}
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                  >
-                    CSV Format (.csv)
-                  </button>
-                  <button
-                    onClick={exportToTSV}
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                  >
-                    TSV Format (.tsv)
-                  </button>
-                  <button
-                    onClick={exportToExcel}
-                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                  >
-                    Excel Format (.xls)
-                  </button>
+            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
+              <div className="py-1">
+                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                  {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
                 </div>
+                <button
+                  onClick={exportToCSV}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  CSV Format (.csv)
+                </button>
+                <button
+                  onClick={exportToTSV}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  TSV Format (.tsv)
+                </button>
+                <button
+                  onClick={exportToExcel}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  Excel Format (.xls)
+                </button>
               </div>
             </div>
-            <button
-              onClick={syncActions}
-              disabled={syncing}
-              className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-              {syncing ? 'Syncing...' : 'Sync Actions'}
-            </button>
           </div>
-          {/* Multi-select filter dropdowns */}
-          <div className="flex gap-2 flex-wrap">
-            {/* Progress Stage Filter */}
-            <div className="relative" ref={stageDropdownRef}>
-              <button
-                onClick={() => setShowStageDropdown(!showStageDropdown)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Progress Stage
-                {filterStage.length > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                    {filterStage.length}
-                  </span>
-                )}
-              </button>
-              {showStageDropdown && (
-                <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
-                  <div className="p-2 max-h-60 overflow-y-auto">
-                    {uniqueStages.map(stage => (
-                      <label key={stage} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filterStage.includes(stage)}
-                          onChange={() => toggleStageFilter(stage)}
-                          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-xs text-gray-700 dark:text-gray-300">{stage}</span>
-                        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                          ({actions.filter(a => a.progress_stage === stage).length})
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* FMP Filter */}
-            <div className="relative" ref={fmpDropdownRef}>
-              <button
-                onClick={() => setShowFMPDropdown(!showFMPDropdown)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                FMP
-                {filterFMP.length > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                    {filterFMP.length}
-                  </span>
-                )}
-              </button>
-              {showFMPDropdown && (
-                <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
-                  <div className="p-2 max-h-60 overflow-y-auto">
-                    {uniqueFMPs.map(fmp => (
-                      <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filterFMP.includes(fmp)}
-                          onChange={() => toggleFMPFilter(fmp)}
-                          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-xs text-gray-700 dark:text-gray-300">{fmp}</span>
-                        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                          ({actions.filter(a => a.fmp === fmp).length})
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Type Filter */}
-            <div className="relative" ref={typeDropdownRef}>
-              <button
-                onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Type
-                {filterType.length > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                    {filterType.length}
-                  </span>
-                )}
-              </button>
-              {showTypeDropdown && (
-                <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
-                  <div className="p-2 max-h-60 overflow-y-auto">
-                    {uniqueTypes.map(type => (
-                      <label key={type} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={filterType.includes(type)}
-                          onChange={() => toggleTypeFilter(type)}
-                          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-xs text-gray-700 dark:text-gray-300">{type}</span>
-                        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                          ({actions.filter(a => a.type === type).length})
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Clear Filters Button */}
-            {(filterStage.length > 0 || filterFMP.length > 0 || filterType.length > 0) && (
-              <button
-                onClick={() => {
-                  setFilterStage([]);
-                  setFilterFMP([]);
-                  setFilterType([]);
-                  setCurrentPage(1);
-                }}
-                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Clear Filters
-              </button>
-            )}
-          </div>
+          <button
+            onClick={syncActions}
+            disabled={syncing}
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync Actions'}
+          </button>
         </div>
       </div>
 
@@ -666,8 +534,8 @@ const ActionsEnhanced = () => {
         </div>
       )}
 
-      {/* Search and page size */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
+      {/* Search bar */}
+      <div className="mt-6">
         <input
           type="text"
           placeholder="Search actions..."
@@ -676,16 +544,129 @@ const ActionsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          className="w-full bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search actions by title, FMP, progress stage, or description"
         />
+      </div>
+
+      {/* Filters row: Progress Stage, FMP, Type | Show X | Reset */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {/* Progress Stage Filter */}
+        <div className="relative" ref={stageDropdownRef}>
+          <button
+            onClick={() => setShowStageDropdown(!showStageDropdown)}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            Progress Stage
+            {filterStage.length > 0 && (
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                {filterStage.length}
+              </span>
+            )}
+          </button>
+          {showStageDropdown && (
+            <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+              <div className="p-2 max-h-60 overflow-y-auto">
+                {uniqueStages.map(stage => (
+                  <label key={stage} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filterStage.includes(stage)}
+                      onChange={() => toggleStageFilter(stage)}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{stage}</span>
+                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
+                      ({actions.filter(a => a.progress_stage === stage).length})
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* FMP Filter */}
+        <div className="relative" ref={fmpDropdownRef}>
+          <button
+            onClick={() => setShowFMPDropdown(!showFMPDropdown)}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            FMP
+            {filterFMP.length > 0 && (
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                {filterFMP.length}
+              </span>
+            )}
+          </button>
+          {showFMPDropdown && (
+            <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+              <div className="p-2 max-h-60 overflow-y-auto">
+                {uniqueFMPs.map(fmp => (
+                  <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filterFMP.includes(fmp)}
+                      onChange={() => toggleFMPFilter(fmp)}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{fmp}</span>
+                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
+                      ({actions.filter(a => a.fmp === fmp).length})
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Type Filter */}
+        <div className="relative" ref={typeDropdownRef}>
+          <button
+            onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            Type
+            {filterType.length > 0 && (
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                {filterType.length}
+              </span>
+            )}
+          </button>
+          {showTypeDropdown && (
+            <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
+              <div className="p-2 max-h-60 overflow-y-auto">
+                {uniqueTypes.map(type => (
+                  <label key={type} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={filterType.includes(type)}
+                      onChange={() => toggleTypeFilter(type)}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{type}</span>
+                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
+                      ({actions.filter(a => a.type === type).length})
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Page Size */}
         <select
           value={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border text-gray-900 dark:text-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
           aria-label="Number of actions to display per page"
         >
           <option value={20}>Show 20</option>
@@ -693,6 +674,16 @@ const ActionsEnhanced = () => {
           <option value={100}>Show 100</option>
           <option value={999999}>Show ALL</option>
         </select>
+
+        {/* Reset Button */}
+        <button
+          onClick={handleReset}
+          className="inline-flex items-center gap-1.5 justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+          title="Reset filters, sorting, and selection"
+        >
+          <RotateCcw size={14} />
+          Reset
+        </button>
       </div>
 
       {/* Actions Table */}

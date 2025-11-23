@@ -463,14 +463,6 @@ const MeetingsEnhanced = () => {
               <List size={14} /> Agenda
             </button>
           </div>
-          <button
-            onClick={handleReset}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 dark:border-slate-600 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800 dark:to-gray-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:from-slate-100 hover:to-gray-100 dark:hover:from-slate-700 dark:hover:to-gray-700 hover:border-slate-400 transition-all"
-            title="Reset filters, sorting, and selection"
-          >
-            <RotateCcw size={14} />
-            Reset
-          </button>
           {viewMode === 'table' && (
             <button
               onClick={() => setShowColumnSelector(!showColumnSelector)}
@@ -520,7 +512,7 @@ const MeetingsEnhanced = () => {
           <button
             onClick={syncMeetings}
             disabled={syncing}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync SAFMC'}
@@ -528,7 +520,7 @@ const MeetingsEnhanced = () => {
           <button
             onClick={syncFisheryPulse}
             disabled={syncingFisheryPulse}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-gradient-to-r from-brand-green to-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-gradient-to-r from-brand-green to-green-600 px-4 py-2 text-xs font-medium text-white shadow-sm hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncingFisheryPulse ? 'animate-spin' : ''}`} />
             {syncingFisheryPulse ? 'Syncing...' : 'Sync All'}
@@ -565,9 +557,8 @@ const MeetingsEnhanced = () => {
         </div>
       )}
 
-      {/* Search, Filters and page size */}
-      <div className="mt-6 flex flex-col lg:flex-row gap-3 items-start lg:items-center">
-        {/* Search input */}
+      {/* Search bar */}
+      <div className="mt-6">
         <input
           type="text"
           placeholder="Search meetings..."
@@ -576,10 +567,13 @@ const MeetingsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[200px] rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
+          className="w-full bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search meetings by title, council, location, or type"
         />
+      </div>
 
+      {/* Filters row: Organization, Region, Upcoming | Show X | Reset */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {/* Organization multi-select filter */}
         <div className="relative">
           <button
@@ -587,277 +581,70 @@ const MeetingsEnhanced = () => {
               setShowOrgDropdown(!showOrgDropdown);
               setShowRegionDropdown(false);
             }}
-            className="min-w-[200px] flex items-center justify-between gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <span className="truncate">
-              {organizationFilter.length === 0
-                ? 'Organization'
-                : organizationFilter.length === 1
-                  ? organizationFilter[0].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-                  : `${organizationFilter.length} selected`}
-            </span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            Organization
+            {organizationFilter.length > 0 && (
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                {organizationFilter.length}
+              </span>
+            )}
           </button>
           {showOrgDropdown && (
-            <div className="absolute z-50 mt-1 w-80 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+            <div className="absolute z-50 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto">
               <div className="p-2 space-y-1">
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('south atlantic')}
-                    onChange={(e) => {
-                      const val = 'south atlantic';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">South Atlantic Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('new england')}
-                    onChange={(e) => {
-                      const val = 'new england';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">New England Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('mid-atlantic')}
-                    onChange={(e) => {
-                      const val = 'mid-atlantic';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Mid-Atlantic Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('gulf of mexico')}
-                    onChange={(e) => {
-                      const val = 'gulf of mexico';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Gulf of Mexico Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('caribbean')}
-                    onChange={(e) => {
-                      const val = 'caribbean';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Caribbean Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('pacific fishery')}
-                    onChange={(e) => {
-                      const val = 'pacific fishery';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Pacific Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('north pacific')}
-                    onChange={(e) => {
-                      const val = 'north pacific';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">North Pacific Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('western pacific')}
-                    onChange={(e) => {
-                      const val = 'western pacific';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Western Pacific Fishery Management Council</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('atlantic states')}
-                    onChange={(e) => {
-                      const val = 'atlantic states';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Atlantic States Marine Fisheries Commission</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('gulf states')}
-                    onChange={(e) => {
-                      const val = 'gulf states';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Gulf States Marine Fisheries Commission</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('pacific states')}
-                    onChange={(e) => {
-                      const val = 'pacific states';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Pacific States Marine Fisheries Commission</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('noaa')}
-                    onChange={(e) => {
-                      const val = 'noaa';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">NOAA Fisheries</span>
-                </label>
-                <div className="border-t border-gray-200 my-1"></div>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500">State Agencies</div>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('north carolina')}
-                    onChange={(e) => {
-                      const val = 'north carolina';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">North Carolina Division of Marine Fisheries</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('south carolina')}
-                    onChange={(e) => {
-                      const val = 'south carolina';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">South Carolina Department of Natural Resources</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('georgia')}
-                    onChange={(e) => {
-                      const val = 'georgia';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Georgia Department of Natural Resources</span>
-                </label>
-                <label className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={organizationFilter.includes('florida')}
-                    onChange={(e) => {
-                      const val = 'florida';
-                      setOrganizationFilter(prev =>
-                        e.target.checked ? [...prev, val] : prev.filter(v => v !== val)
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
-                  />
-                  <span className="text-sm">Florida Fish and Wildlife Conservation Commission</span>
-                </label>
-                {organizationFilter.length > 0 && (
-                  <div className="border-t border-gray-200 mt-2 pt-2">
-                    <button
-                      onClick={() => {
-                        setOrganizationFilter([]);
+                {[
+                  { val: 'south atlantic', label: 'South Atlantic Fishery Management Council' },
+                  { val: 'new england', label: 'New England Fishery Management Council' },
+                  { val: 'mid-atlantic', label: 'Mid-Atlantic Fishery Management Council' },
+                  { val: 'gulf of mexico', label: 'Gulf of Mexico Fishery Management Council' },
+                  { val: 'caribbean', label: 'Caribbean Fishery Management Council' },
+                  { val: 'pacific fishery', label: 'Pacific Fishery Management Council' },
+                  { val: 'north pacific', label: 'North Pacific Fishery Management Council' },
+                  { val: 'western pacific', label: 'Western Pacific Fishery Management Council' },
+                  { val: 'atlantic states', label: 'Atlantic States Marine Fisheries Commission' },
+                  { val: 'gulf states', label: 'Gulf States Marine Fisheries Commission' },
+                  { val: 'pacific states', label: 'Pacific States Marine Fisheries Commission' },
+                  { val: 'noaa', label: 'NOAA Fisheries' },
+                ].map(org => (
+                  <label key={org.val} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={organizationFilter.includes(org.val)}
+                      onChange={(e) => {
+                        setOrganizationFilter(prev =>
+                          e.target.checked ? [...prev, org.val] : prev.filter(v => v !== org.val)
+                        );
                         setCurrentPage(1);
                       }}
-                      className="w-full text-xs text-brand-blue hover:text-brand-green px-2 py-1 text-center"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                )}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{org.label}</span>
+                  </label>
+                ))}
+                <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                <div className="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">State Agencies</div>
+                {[
+                  { val: 'north carolina', label: 'North Carolina Division of Marine Fisheries' },
+                  { val: 'south carolina', label: 'South Carolina Department of Natural Resources' },
+                  { val: 'georgia', label: 'Georgia Department of Natural Resources' },
+                  { val: 'florida', label: 'Florida Fish and Wildlife Conservation Commission' },
+                ].map(org => (
+                  <label key={org.val} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={organizationFilter.includes(org.val)}
+                      onChange={(e) => {
+                        setOrganizationFilter(prev =>
+                          e.target.checked ? [...prev, org.val] : prev.filter(v => v !== org.val)
+                        );
+                        setCurrentPage(1);
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{org.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
           )}
@@ -870,24 +657,20 @@ const MeetingsEnhanced = () => {
               setShowRegionDropdown(!showRegionDropdown);
               setShowOrgDropdown(false);
             }}
-            className="min-w-[180px] flex items-center justify-between gap-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-green"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <span className="truncate">
-              {regionFilter.length === 0
-                ? 'Region'
-                : regionFilter.length === 1
-                  ? regionFilter[0].charAt(0).toUpperCase() + regionFilter[0].slice(1)
-                  : `${regionFilter.length} selected`}
-            </span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            Region
+            {regionFilter.length > 0 && (
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                {regionFilter.length}
+              </span>
+            )}
           </button>
           {showRegionDropdown && (
-            <div className="absolute z-50 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+            <div className="absolute z-50 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto">
               <div className="p-2 space-y-1">
                 {['northeast', 'mid-atlantic', 'southeast', 'gulf of mexico', 'caribbean', 'west coast', 'alaska', 'pacific islands', 'atlantic coast', 'gulf states', 'pacific states', 'north carolina', 'south carolina', 'georgia', 'florida'].map(region => (
-                  <label key={region} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
+                  <label key={region} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
                     <input
                       type="checkbox"
                       checked={regionFilter.includes(region)}
@@ -897,31 +680,18 @@ const MeetingsEnhanced = () => {
                         );
                         setCurrentPage(1);
                       }}
-                      className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
                     />
-                    <span className="text-sm capitalize">{region}</span>
+                    <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{region}</span>
                   </label>
                 ))}
-                {regionFilter.length > 0 && (
-                  <div className="border-t border-gray-200 mt-2 pt-2">
-                    <button
-                      onClick={() => {
-                        setRegionFilter([]);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full text-xs text-brand-blue hover:text-brand-green px-2 py-1 text-center"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           )}
         </div>
 
         {/* Upcoming only filter */}
-        <label className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer hover:bg-gray-50">
+        <label className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
           <input
             type="checkbox"
             checked={upcomingOnly}
@@ -929,10 +699,13 @@ const MeetingsEnhanced = () => {
               setUpcomingOnly(e.target.checked);
               setCurrentPage(1);
             }}
-            className="h-4 w-4 rounded border-gray-300 text-brand-green focus:ring-brand-green"
+            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
           />
-          <span className="text-sm whitespace-nowrap">Upcoming only</span>
+          <span className="text-sm whitespace-nowrap text-gray-700 dark:text-gray-300">Upcoming only</span>
         </label>
+
+        {/* Spacer */}
+        <div className="flex-1" />
 
         {/* Page size selector */}
         <select
@@ -941,7 +714,7 @@ const MeetingsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
+          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
           aria-label="Number of meetings to display per page"
         >
           <option value={20}>Show 20</option>
@@ -949,6 +722,16 @@ const MeetingsEnhanced = () => {
           <option value={100}>Show 100</option>
           <option value={999999}>Show ALL</option>
         </select>
+
+        {/* Reset Button */}
+        <button
+          onClick={handleReset}
+          className="inline-flex items-center gap-1.5 justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+          title="Reset filters, sorting, and selection"
+        >
+          <RotateCcw size={14} />
+          Reset
+        </button>
       </div>
 
       {/* Table View */}
