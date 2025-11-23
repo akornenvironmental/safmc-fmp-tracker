@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AIAssistant from './components/AIAssistant';
@@ -34,8 +35,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <Routes>
+        <SidebarProvider>
+          <Router>
+            <Routes>
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/auth/verify" element={<VerifyLogin />} />
@@ -65,9 +67,10 @@ function App() {
               <Route path="admin/logs" element={<ActivityLogs />} />
             </Route>
           </Routes>
-          <AIAssistant />
-          <ToastContainer position="top-right" autoClose={3000} />
-        </Router>
+            <AIAssistant />
+            <ToastContainer position="top-right" autoClose={3000} />
+          </Router>
+        </SidebarProvider>
       </AuthProvider>
     </ThemeProvider>
   );
