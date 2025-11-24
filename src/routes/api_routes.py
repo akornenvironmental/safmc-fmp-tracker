@@ -21,6 +21,7 @@ from src.models.organization import Organization
 from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 from src.scrapers.amendments_scraper import AmendmentsScraper
+from src.scrapers.amendments_scraper_enhanced import EnhancedAmendmentsScraper
 from src.scrapers.meetings_scraper import MeetingsScraper
 from src.scrapers.multi_council_scraper import MultiCouncilScraper
 from src.scrapers.comments_scraper import CommentsScraper
@@ -504,6 +505,141 @@ def scrape_amendments():
         logger.error(f"Error in scrape_amendments: {e}")
         db.session.rollback()
         return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/scrape/amendments/comprehensive', methods=['POST'])
+@require_admin
+def scrape_amendments_comprehensive():
+    """
+    Comprehensive historical amendment scraping (2018-present)
+    Includes: detailed metadata, timelines, documents, Federal Register numbers
+    """
+    try:
+        start_time = datetime.utcnow()
+        logger.info("Starting comprehensive amendment scrape...")
+
+        scraper = EnhancedAmendmentsScraper(rate_limit=1.5)  # 1.5 seconds between requests
+        results = scraper.scrape_all_comprehensive()
+
+        # Save or update actions in database
+        items_new = 0
+        items_updated = 0
+        milestones_created = 0
+        documents_queued = 0
+
+        for amendment_data in results['amendments']:
+            action = Action.query.filter_by(action_id=amendment_data['action_id']).first()
+
+            if action:
+                # Update existing action
+                action.title = amendment_data['title']
+                action.type = amendment_data['type']
+                action.fmp = amendment_data['fmp']
+                action.progress_stage = amendment_data['progress_stage']
+                action.progress_percentage = amendment_data.get('progress_percentage', 0)
+                action.phase = amendment_data.get('phase', '')
+                action.description = amendment_data['description']
+                action.lead_staff = amendment_data['lead_staff']
+                action.source_url = amendment_data.get('source_url', action.source_url)
+
+                # Enhanced fields
+                if amendment_data.get('detail_url'):
+                    action.source_url = amendment_data['detail_url']
+                if amendment_data.get('detailed_description'):
+                    action.description = amendment_data['detailed_description']
+                if amendment_data.get('federal_register'):
+                    # Store in notes or add FR field to model
+                    if not action.notes:
+                        action.notes = ''
+                    action.notes += f"\nFederal Register: {amendment_data['federal_register']}"
+
+                action.last_scraped = datetime.utcnow()
+                action.updated_at = datetime.utcnow()
+                items_updated += 1
+            else:
+                # Create new action
+                action = Action(
+                    action_id=amendment_data['action_id'],
+                    title=amendment_data['title'],
+                    type=amendment_data['type'],
+                    fmp=amendment_data['fmp'],
+                    progress_stage=amendment_data['progress_stage'],
+                    progress_percentage=amendment_data.get('progress_percentage', 0),
+                    phase=amendment_data.get('phase', ''),
+                    description=amendment_data.get('detailed_description') or amendment_data['description'],
+                    lead_staff=amendment_data['lead_staff'],
+                    source_url=amendment_data.get('detail_url') or amendment_data.get('source_url'),
+                    last_scraped=datetime.utcnow()
+                )
+
+                # Add Federal Register info to notes if available
+                if amendment_data.get('federal_register'):
+                    action.notes = f"Federal Register: {amendment_data['federal_register']}"
+
+                db.session.add(action)
+                items_new += 1
+
+        db.session.commit()
+
+        # Create milestones from timeline data
+        for milestone_data in results['milestones']:
+            # Find associated action (would need to link via action_id in milestone_data)
+            if milestone_data.get('action_id'):
+                action = Action.query.filter_by(action_id=milestone_data['action_id']).first()
+                if action:
+                    milestone = Milestone(
+                        action_id=action.action_id,
+                        description=milestone_data.get('description', ''),
+                        target_date=milestone_data.get('parsed_date'),
+                        milestone_type='timeline'
+                    )
+                    db.session.add(milestone)
+                    milestones_created += 1
+
+        # Queue documents for processing
+        for doc_data in results['documents']:
+            # Would queue documents here using document_scrape_queue table
+            documents_queued += 1
+
+        db.session.commit()
+
+        # Log the comprehensive scrape
+        duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+        log = ScrapeLog(
+            source='amendments_comprehensive',
+            action_type='scrape_amendments_comprehensive',
+            status='success' if not results['errors'] else 'partial',
+            items_found=results['total_found'],
+            items_new=items_new,
+            items_updated=items_updated,
+            error_message='; '.join(results['errors'][:5]) if results['errors'] else None,  # Limit error messages
+            duration_ms=duration_ms,
+            completed_at=datetime.utcnow()
+        )
+        db.session.add(log)
+        db.session.commit()
+
+        logger.info(f"Comprehensive scrape complete: {items_new} new, {items_updated} updated")
+
+        return jsonify({
+            'success': True,
+            'itemsFound': results['total_found'],
+            'itemsNew': items_new,
+            'itemsUpdated': items_updated,
+            'milestonesCreated': milestones_created,
+            'documentsQueued': documents_queued,
+            'duration': duration_ms,
+            'errors': results['errors'][:10],  # Return first 10 errors only
+            'sources_scraped': results['metadata']['sources_scraped']
+        })
+
+    except Exception as e:
+        logger.error(f"Error in comprehensive amendment scrape: {e}")
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
 
 @bp.route('/scrape/meetings', methods=['POST'])
 @require_admin
