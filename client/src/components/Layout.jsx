@@ -1,13 +1,24 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import Sidebar from './Sidebar';
 import AIAssistant from './AIAssistant';
+import FeedbackButton from './FeedbackButton';
+import { Sun, Moon, Type } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
+  const { theme, toggleTheme, textSize, setTextSize } = useTheme();
   const { user } = useAuth();
   const { effectiveCollapsed } = useSidebar();
+
+  const cycleTextSize = () => {
+    const sizes = ['small', 'medium', 'large'];
+    const currentIndex = sizes.indexOf(textSize);
+    const nextIndex = (currentIndex + 1) % sizes.length;
+    setTextSize(sizes[nextIndex]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -22,16 +33,40 @@ const Layout = () => {
       {/* Sidebar Navigation */}
       <Sidebar user={user} />
 
-      {/* Top Header Bar - page title only */}
+      {/* Top Header Bar */}
       <header
         className={`fixed top-0 right-0 h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30 transition-all duration-300 ${
           effectiveCollapsed ? 'left-14' : 'left-48'
         }`}
       >
-        <div className="h-full px-4 flex items-center">
+        <div className="h-full px-4 flex items-center justify-between">
+          {/* Page Title */}
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
             {getPageTitle(location.pathname)}
           </h1>
+
+          {/* Theme Controls */}
+          <div className="flex items-center gap-1">
+            {/* Text Size Toggle */}
+            <button
+              onClick={cycleTextSize}
+              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title={`Text size: ${textSize} (click to cycle)`}
+              aria-label={`Text size: ${textSize}. Click to cycle through sizes.`}
+            >
+              <Type className="w-4 h-4" />
+            </button>
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -72,6 +107,9 @@ const Layout = () => {
 
       {/* AI Assistant - Available on all pages */}
       <AIAssistant />
+
+      {/* Feedback Button */}
+      <FeedbackButton component={getPageTitle(location.pathname)} />
     </div>
   );
 };

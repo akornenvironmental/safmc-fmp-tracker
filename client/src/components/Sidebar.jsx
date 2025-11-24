@@ -8,7 +8,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from '../contexts/SidebarContext';
-import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -22,9 +21,6 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Sun,
-  Moon,
-  Type,
   ChevronDown,
   User,
   Settings,
@@ -105,7 +101,6 @@ const Sidebar = ({ user }) => {
     handleMouseLeave,
     isCollapsed,
   } = useSidebar();
-  const { theme, toggleTheme, textSize, setTextSize } = useTheme();
   const { logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
@@ -117,13 +112,6 @@ const Sidebar = ({ user }) => {
     setShowProfileMenu(false);
     await logout();
     navigate('/login');
-  };
-
-  const cycleTextSize = () => {
-    const sizes = ['small', 'medium', 'large'];
-    const currentIndex = sizes.indexOf(textSize);
-    const nextIndex = (currentIndex + 1) % sizes.length;
-    setTextSize(sizes[nextIndex]);
   };
 
   // Close dropdown when clicking outside
@@ -174,37 +162,23 @@ const Sidebar = ({ user }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Logo Section with Theme Toggles */}
-      <div className="h-14 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-2 flex-shrink-0">
+      {/* Logo Section */}
+      <div className="h-14 flex items-center border-b border-gray-200 dark:border-gray-700 px-2 flex-shrink-0">
         <Link to="/" className="flex items-center gap-2 overflow-hidden">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center flex-shrink-0">
             <Fish className="w-5 h-5 text-white" />
           </div>
           {!effectiveCollapsed && (
-            <h1 className="text-sm font-bold text-gray-900 dark:text-white truncate">
-              SAFMC
-            </h1>
+            <div className="min-w-0">
+              <h1 className="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">
+                SAFMC FMP
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate leading-tight">
+                Tracker
+              </p>
+            </div>
           )}
         </Link>
-        {/* Theme/Text Toggles - only when expanded */}
-        {!effectiveCollapsed && (
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={cycleTextSize}
-              className="flex items-center justify-center w-7 h-7 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              title={`Text size: ${textSize}`}
-            >
-              <Type className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={toggleTheme}
-              className="flex items-center justify-center w-7 h-7 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              title={theme === 'light' ? 'Dark mode' : 'Light mode'}
-            >
-              {theme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Navigation Sections */}

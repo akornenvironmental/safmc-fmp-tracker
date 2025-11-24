@@ -1663,3 +1663,56 @@ def fix_comment_links():
         db.session.rollback()
         logger.error(f"Error fixing comment links: {e}")
         return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+# ==================== FEEDBACK ENDPOINT ====================
+
+@bp.route('/feedback', methods=['POST'])
+@require_auth
+def submit_feedback():
+    """Submit user feedback - stores in database and logs for review"""
+    try:
+        data = request.get_json()
+
+        if not data or not data.get('feedback'):
+            return jsonify({'success': False, 'error': 'Feedback is required'}), 400
+
+        feedback_text = data.get('feedback', '').strip()
+        component = data.get('component', 'General')
+        url = data.get('url', '')
+        user_email = data.get('userEmail', session.get('email', 'anonymous'))
+        user_name = data.get('userName', session.get('name', 'Anonymous'))
+
+        # Validate feedback length
+        if len(feedback_text) > 5000:
+            return jsonify({'success': False, 'error': 'Feedback too long (max 5000 characters)'}), 400
+
+        # Store feedback in database
+        result = db.session.execute(text("""
+            INSERT INTO user_feedback (user_email, user_name, component, url, feedback, created_at)
+            VALUES (:email, :name, :component, :url, :feedback, :created_at)
+            RETURNING id
+        """), {
+            'email': user_email,
+            'name': user_name,
+            'component': component,
+            'url': url,
+            'feedback': feedback_text,
+            'created_at': datetime.utcnow()
+        })
+
+        feedback_id = result.fetchone()[0]
+        db.session.commit()
+
+        logger.info(f"Feedback received from {user_email}: {feedback_text[:100]}...")
+
+        return jsonify({
+            'success': True,
+            'message': 'Feedback submitted successfully',
+            'feedback_id': feedback_id
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error submitting feedback: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]

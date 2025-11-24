@@ -522,6 +522,49 @@ def init_ai_query_log():
         logger.error(f"Error creating AI query log table: {e}")
         db.session.rollback()
 
+def init_user_feedback_table():
+    """Create user_feedback table for storing feedback"""
+    try:
+        with app.app_context():
+            result = db.session.execute(text("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'user_feedback'
+                );
+            """))
+            exists = result.scalar()
+
+            if not exists:
+                logger.info("Creating user_feedback table...")
+                db.session.execute(text("""
+                    CREATE TABLE IF NOT EXISTS user_feedback (
+                        id SERIAL PRIMARY KEY,
+                        user_email VARCHAR(255),
+                        user_name VARCHAR(255),
+                        component VARCHAR(100),
+                        url TEXT,
+                        feedback TEXT NOT NULL,
+                        status VARCHAR(50) DEFAULT 'new',
+                        admin_notes TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        reviewed_at TIMESTAMP,
+                        reviewed_by VARCHAR(255)
+                    );
+                """))
+
+                db.session.execute(text("""
+                    CREATE INDEX idx_feedback_created ON user_feedback(created_at DESC);
+                    CREATE INDEX idx_feedback_status ON user_feedback(status);
+                """))
+
+                db.session.commit()
+                logger.info("User feedback table created successfully")
+            else:
+                logger.info("User feedback table already exists")
+    except Exception as e:
+        logger.error(f"Error creating user_feedback table: {e}")
+        db.session.rollback()
+
 def init_fmp_document_tables():
     """Create FMP document tables for document management system"""
     try:
@@ -703,6 +746,7 @@ with app.app_context():
     run_user_notification_migration()
     init_contacts_and_orgs()
     init_ai_query_log()
+    init_user_feedback_table()
     init_fmp_document_tables()
 
 # Health check endpoint (before blueprints)
