@@ -1212,7 +1212,7 @@ const CommentsEnhanced = () => {
                     </td>
                   ))}
                 </tr>
-              )}))
+              );})
             )}
           </tbody>
         </table>
