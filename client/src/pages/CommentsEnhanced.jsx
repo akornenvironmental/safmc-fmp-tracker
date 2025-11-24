@@ -540,13 +540,6 @@ const CommentsEnhanced = () => {
         </div>
         <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 items-center">
           <button
-            onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            <Settings size={14} />
-            Columns
-          </button>
-          <button
             onClick={syncComments}
             disabled={syncing}
             className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -1000,6 +993,15 @@ const CommentsEnhanced = () => {
         >
           <RotateCcw size={14} />
           Reset
+        </button>
+
+        {/* Columns Button */}
+        <button
+          onClick={() => setShowColumnSelector(!showColumnSelector)}
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+        >
+          <Settings size={14} />
+          Columns
         </button>
       </div>
 

@@ -460,15 +460,6 @@ const MeetingsEnhanced = () => {
               <List size={14} /> Agenda
             </button>
           </div>
-          {viewMode === 'table' && (
-            <button
-              onClick={() => setShowColumnSelector(!showColumnSelector)}
-              className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-            >
-              <Settings size={14} />
-              Columns
-            </button>
-          )}
           <div className="relative">
             <button
               className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
@@ -718,6 +709,17 @@ const MeetingsEnhanced = () => {
           <RotateCcw size={14} />
           Reset
         </button>
+
+        {/* Columns Button (table view only) */}
+        {viewMode === 'table' && (
+          <button
+            onClick={() => setShowColumnSelector(!showColumnSelector)}
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+          >
+            <Settings size={14} />
+            Columns
+          </button>
+        )}
       </div>
 
       {/* Table View */}
