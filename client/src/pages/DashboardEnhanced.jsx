@@ -160,71 +160,71 @@ const DashboardEnhanced = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">SAFMC FMP Tracker Overview</h2>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-2 sm:mt-0">
           <button
             onClick={triggerScrape}
             disabled={scraping}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 h-8 px-2.5 text-xs font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${scraping ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${scraping ? 'animate-spin' : ''}`} />
             {scraping ? 'Updating...' : 'Update Data'}
           </button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/actions" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <Link to="/actions" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Actions</p>
-              <p className="text-3xl font-bold text-brand-blue dark:text-blue-400">{loading ? '-' : stats.totalActions}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Total Actions</p>
+              <p className="text-2xl font-bold text-brand-blue dark:text-blue-400">{loading ? '-' : stats.totalActions}</p>
             </div>
-            <FileText className="w-10 h-10 text-blue-200 dark:text-blue-800" />
+            <FileText className="w-8 h-8 text-blue-200 dark:text-blue-800" />
           </div>
         </Link>
 
-        <Link to="/meetings" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+        <Link to="/meetings" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming Meetings</p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">{loading ? '-' : stats.upcomingMeetings}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Upcoming Meetings</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{loading ? '-' : stats.upcomingMeetings}</p>
             </div>
-            <Calendar className="w-10 h-10 text-green-200 dark:text-green-800" />
+            <Calendar className="w-8 h-8 text-green-200 dark:text-green-800" />
           </div>
         </Link>
 
-        <Link to="/comments" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+        <Link to="/comments" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Recent Comments</p>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{loading ? '-' : stats.recentComments}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Recent Comments</p>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{loading ? '-' : stats.recentComments}</p>
             </div>
-            <MessageSquare className="w-10 h-10 text-purple-200 dark:text-purple-800" />
+            <MessageSquare className="w-8 h-8 text-purple-200 dark:text-purple-800" />
           </div>
         </Link>
 
-        <Link to="/stocks" className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+        <Link to="/stocks" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Species & Stocks</p>
-              <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Species & Stocks</p>
+              <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
             </div>
-            <Fish className="w-10 h-10 text-cyan-200 dark:text-cyan-800" />
+            <Fish className="w-8 h-8 text-cyan-200 dark:text-cyan-800" />
           </div>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* FMP Progress */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+          <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               Progress by FMP
@@ -285,45 +285,40 @@ const DashboardEnhanced = () => {
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2 text-sm">
+            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             Recent Activity
           </h2>
 
           {loading ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">Loading...</div>
           ) : recentActivity.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">No recent activity</div>
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">No recent activity</div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               {recentActivity.map((item, idx) => {
                 const Icon = item.icon;
                 return (
                   <Link
                     key={idx}
                     to={item.link}
-                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="flex items-start gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <div className={`p-2 rounded-lg ${
+                    <div className={`p-1 rounded ${
                       item.type === 'action' ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-green-100 dark:bg-green-900/50'
                     }`}>
-                      <Icon className={`w-4 h-4 ${
+                      <Icon className={`w-3 h-3 ${
                         item.type === 'action' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                         {item.title}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
-                      {item.date && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                          {new Date(item.date).toLocaleDateString()}
-                        </p>
-                      )}
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                    <ChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   </Link>
                 );
               })}
@@ -333,60 +328,60 @@ const DashboardEnhanced = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <Link
           to="/stocks"
-          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
-          <Fish className="w-8 h-8 text-cyan-500" />
+          <Fish className="w-6 h-6 text-cyan-500" />
           <div>
-            <p className="font-medium text-gray-900 dark:text-gray-100">Species & Stock Status</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">View species and assessments</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Species & Stock Status</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">View species and assessments</p>
           </div>
         </Link>
 
         <Link
           to="/compare"
-          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
-          <TrendingUp className="w-8 h-8 text-purple-500" />
+          <TrendingUp className="w-6 h-6 text-purple-500" />
           <div>
-            <p className="font-medium text-gray-900 dark:text-gray-100">Compare Actions</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Side-by-side analysis</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Compare Actions</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">Side-by-side analysis</p>
           </div>
         </Link>
 
         <Link
           to="/workplan"
-          className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
-          <FileText className="w-8 h-8 text-orange-500" />
+          <FileText className="w-6 h-6 text-orange-500" />
           <div>
-            <p className="font-medium text-gray-900 dark:text-gray-100">Workplan</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Amendment schedule</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Workplan</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">Amendment schedule</p>
           </div>
         </Link>
       </div>
 
       {/* Top Species */}
       {speciesStats && speciesStats.topSpecies && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Fish className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 text-sm">
+              <Fish className="w-4 h-4 text-gray-400 dark:text-gray-500" />
               Most Active Species
             </h2>
-            <Link to="/stocks" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
+            <Link to="/stocks" className="text-xs text-brand-blue dark:text-blue-400 hover:underline">
               View all
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {speciesStats.topSpecies.slice(0, 5).map((sp, idx) => (
               <Link
                 key={idx}
                 to={`/species/${sp.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-center"
+                className="p-2 bg-gray-50 dark:bg-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-center"
               >
                 <p className="font-medium text-gray-900 dark:text-gray-100">{sp.name}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{sp.actionCount} actions</p>

@@ -23,7 +23,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-24-v12-compact-dashboard-ai-assistant';
+const BUILD_VERSION = '2025-11-24-v13-compact-layout-site-wide';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

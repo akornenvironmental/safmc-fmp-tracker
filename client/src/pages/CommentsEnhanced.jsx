@@ -662,41 +662,41 @@ const CommentsEnhanced = () => {
 
       {/* Dashboard Section */}
       {dashboardStats && (
-        <div className="mt-4">
+        <div className="mt-2">
           <button
             onClick={() => setShowDashboard(!showDashboard)}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors mb-3"
+            className="inline-flex items-center gap-2 h-8 px-2.5 text-xs font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors mb-2"
           >
-            <BarChart3 size={14} />
+            <BarChart3 size={12} />
             {showDashboard ? 'Hide' : 'Show'} Analytics Dashboard
-            {showDashboard ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {showDashboard ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
 
           {showDashboard && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
               {/* Total Comments Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                    <FileText className="text-blue-600 dark:text-blue-400" size={16} />
+                  <div className="p-1 bg-blue-100 dark:bg-blue-900/50 rounded">
+                    <FileText className="text-blue-600 dark:text-blue-400" size={14} />
                   </div>
                   <div>
-                    <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{dashboardStats.total}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Total Comments</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{dashboardStats.total}</p>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400">Total Comments</p>
                   </div>
                 </div>
-                <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                <div className="mt-1 text-[10px] text-gray-600 dark:text-gray-400">
                   {dashboardStats.recentComments} in last 30 days
                 </div>
               </div>
 
               {/* Position Breakdown Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                    <BarChart3 className="text-green-600 dark:text-green-400" size={16} />
+              <div className="bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="p-1 bg-green-100 dark:bg-green-900/50 rounded">
+                    <BarChart3 className="text-green-600 dark:text-green-400" size={14} />
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">By Position</p>
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100">By Position</p>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(dashboardStats.byPosition)
@@ -722,12 +722,12 @@ const CommentsEnhanced = () => {
               </div>
 
               {/* Commenter Type Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                    <Users className="text-purple-600 dark:text-purple-400" size={16} />
+              <div className="bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="p-1 bg-purple-100 dark:bg-purple-900/50 rounded">
+                    <Users className="text-purple-600 dark:text-purple-400" size={14} />
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">By Sector</p>
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100">By Sector</p>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(dashboardStats.byCommenterType)
@@ -747,12 +747,12 @@ const CommentsEnhanced = () => {
               </div>
 
               {/* Top States Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
-                    <MapPin className="text-amber-600 dark:text-amber-400" size={16} />
+              <div className="bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="p-1 bg-amber-100 dark:bg-amber-900/50 rounded">
+                    <MapPin className="text-amber-600 dark:text-amber-400" size={14} />
                   </div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Top States</p>
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Top States</p>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(dashboardStats.byState)
@@ -773,8 +773,8 @@ const CommentsEnhanced = () => {
 
               {/* FMP Breakdown - Full Width */}
               {Object.keys(dashboardStats.byFmp).length > 0 && (
-                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Comments by FMP <span className="text-xs font-normal text-gray-500">(click to filter)</span></p>
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1.5">Comments by FMP <span className="text-[10px] font-normal text-gray-500">(click to filter)</span></p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(dashboardStats.byFmp)
                       .sort((a, b) => b[1] - a[1])
@@ -794,8 +794,8 @@ const CommentsEnhanced = () => {
 
               {/* Top Organizations */}
               {dashboardStats.topOrganizations.length > 0 && (
-                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Top Commenting Organizations</p>
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1.5">Top Commenting Organizations</p>
                   <div className="space-y-2">
                     {dashboardStats.topOrganizations.map(({ name, count }, idx) => (
                       <div key={name} className="flex justify-between items-center">
@@ -813,8 +813,8 @@ const CommentsEnhanced = () => {
 
               {/* Species Mentioned - Click to filter */}
               {speciesStats && speciesStats.top_species && speciesStats.top_species.length > 0 && (
-                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <Fish className="text-teal-600 dark:text-teal-400" size={18} />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -844,8 +844,8 @@ const CommentsEnhanced = () => {
 
               {/* Timeline Chart - Full Width */}
               {timelineData.length > 1 && (
-                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={18} />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -1052,7 +1052,7 @@ const CommentsEnhanced = () => {
         <table className="min-w-full">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th scope="col" className="px-2 py-2 text-left align-middle">
+              <th scope="col" className="px-1.5 py-1 text-left align-middle">
                 <input
                   type="checkbox"
                   checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
@@ -1065,7 +1065,7 @@ const CommentsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none align-middle"
+                  className="px-1.5 py-1 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none align-middle"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -1098,7 +1098,7 @@ const CommentsEnhanced = () => {
                 const commenterCount = getCommenterCount(comment.name);
                 return (
                 <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
-                  <td className="px-2 py-1.5 text-left align-top">
+                  <td className="px-1.5 py-1 text-left align-top">
                     <input
                       type="checkbox"
                       checked={selectedComments.has(comment.id)}
@@ -1108,7 +1108,7 @@ const CommentsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-2 py-1.5 text-left align-top">
+                    <td key={col.key} className="px-1.5 py-1 text-left align-top">
                       {col.key === 'name' ? (
                         <div className="flex flex-col gap-0.5">
                           <button

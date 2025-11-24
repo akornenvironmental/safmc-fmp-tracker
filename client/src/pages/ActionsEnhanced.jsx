@@ -713,7 +713,7 @@ const ActionsEnhanced = () => {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none align-middle ${col.minWidth || ''} ${
+                  className={`px-1.5 py-1 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none align-middle ${col.minWidth || ''} ${
                     !col.locked ? 'cursor-grab hover:bg-gray-200 dark:hover:bg-gray-700' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                   } ${draggedColumn === index ? 'opacity-50 bg-gray-200 dark:bg-gray-700' : ''}`}
                   onClick={() => handleSort(col.key)}
@@ -745,8 +745,8 @@ const ActionsEnhanced = () => {
               </tr>
             ) : (
               paginatedActions.map((action, index) => (
-                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors`}>
-                  <td className="px-2 py-0.5">
+                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
+                  <td className="px-1.5 py-0.5">
                     <input
                       type="checkbox"
                       checked={selectedActions.has(action.id)}
@@ -756,7 +756,7 @@ const ActionsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className={`px-2 py-0.5 ${col.minWidth || ''}`}>
+                    <td key={col.key} className={`px-1.5 py-0.5 ${col.minWidth || ''}`}>
                       {col.key === 'title' ? (
                         <>
                           {action.source_url ? (
