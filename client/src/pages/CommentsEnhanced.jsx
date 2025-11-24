@@ -534,7 +534,7 @@ const CommentsEnhanced = () => {
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             Comments synced weekly from SAFMC public hearings and comment periods.
           </p>
         </div>
@@ -1013,9 +1013,9 @@ const CommentsEnhanced = () => {
       {/* Comments Table */}
       <div className="bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
         <table className="min-w-full">
-          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th scope="col" className="px-2 py-1.5 text-left">
+              <th scope="col" className="px-2 py-2 text-left align-middle">
                 <input
                   type="checkbox"
                   checked={selectedComments.size === paginatedComments.length && paginatedComments.length > 0}
@@ -1028,7 +1028,7 @@ const CommentsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none"
+                  className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none align-middle"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">

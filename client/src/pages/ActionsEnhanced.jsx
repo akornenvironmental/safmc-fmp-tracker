@@ -448,7 +448,7 @@ const ActionsEnhanced = () => {
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             Actions and amendments are automatically synced weekly from SAFMC.
           </p>
         </div>
@@ -691,9 +691,9 @@ const ActionsEnhanced = () => {
           <caption className="sr-only">
             Actions tracker with {filteredAndSortedActions.length} actions. Table includes columns for selection, title, FMP, progress stage, progress percentage, and last updated date. Click column headers to sort.
           </caption>
-          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th scope="col" className="px-2 py-1.5 text-left">
+              <th scope="col" className="px-2 py-2 text-left align-middle">
                 <input
                   type="checkbox"
                   checked={selectedActions.size === paginatedActions.length && paginatedActions.length > 0}
@@ -711,7 +711,7 @@ const ActionsEnhanced = () => {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none ${col.minWidth || ''} ${
+                  className={`px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none align-middle ${col.minWidth || ''} ${
                     !col.locked ? 'cursor-grab hover:bg-gray-200 dark:hover:bg-gray-700' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                   } ${draggedColumn === index ? 'opacity-50 bg-gray-200 dark:bg-gray-700' : ''}`}
                   onClick={() => handleSort(col.key)}

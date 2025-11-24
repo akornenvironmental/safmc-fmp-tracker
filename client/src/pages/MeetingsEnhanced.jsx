@@ -422,7 +422,7 @@ const MeetingsEnhanced = () => {
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             Meetings synced from SAFMC and 16 other fishery management organizations.
           </p>
         </div>
@@ -735,14 +735,14 @@ const MeetingsEnhanced = () => {
           <caption className="sr-only">
             Meeting calendar with {filteredAndSortedMeetings.length} meetings. Table includes columns for selection, title, council, date, location, and type. Click column headers to sort.
           </caption>
-          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th scope="col" className="px-2 py-1.5 text-left">
+              <th scope="col" className="px-2 py-2 text-left align-middle">
                 <input
                   type="checkbox"
                   checked={selectedMeetings.size === paginatedMeetings.length && paginatedMeetings.length > 0}
                   onChange={toggleSelectAll}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                   aria-label={`Select all ${paginatedMeetings.length} meetings on this page`}
                 />
               </th>
@@ -750,7 +750,7 @@ const MeetingsEnhanced = () => {
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                  className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none align-middle"
                   onClick={() => handleSort(col.key)}
                 >
                   <div className="flex items-center gap-1">
