@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag, TrendingUp } from 'lucide-react';
+import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag, TrendingUp, ExternalLink, MessageSquare, Clock, Expand } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CommentsEnhanced = () => {
@@ -36,6 +37,15 @@ const CommentsEnhanced = () => {
 
   // Dashboard filter state (click-to-filter)
   const [activeFilters, setActiveFilters] = useState({ fmp: '', position: '', state: '', commenterType: '', species: '' });
+
+  // Comment detail modal state
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [selectedComment, setSelectedComment] = useState(null);
+
+  // Commenter history modal state
+  const [showCommenterHistory, setShowCommenterHistory] = useState(false);
+  const [commenterHistoryData, setCommenterHistoryData] = useState([]);
+  const [commenterName, setCommenterName] = useState('');
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -523,11 +533,36 @@ const CommentsEnhanced = () => {
       if (e.key === 'Escape') {
         if (showAnalysisModal) closeAnalysisModal();
         else if (showProfileModal) closeProfileModal();
+        else if (showCommentModal) setShowCommentModal(false);
+        else if (showCommenterHistory) setShowCommenterHistory(false);
       }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [showProfileModal, showAnalysisModal]);
+  }, [showProfileModal, showAnalysisModal, showCommentModal, showCommenterHistory]);
+
+  // Open comment detail modal
+  const openCommentDetail = (comment) => {
+    setSelectedComment(comment);
+    setShowCommentModal(true);
+  };
+
+  // Get all comments by the same commenter
+  const openCommenterHistory = (name) => {
+    if (!name) return;
+    const commenterComments = comments.filter(c =>
+      c.name && c.name.toLowerCase() === name.toLowerCase()
+    ).sort((a, b) => new Date(b.commentDate || 0) - new Date(a.commentDate || 0));
+    setCommenterName(name);
+    setCommenterHistoryData(commenterComments);
+    setShowCommenterHistory(true);
+  };
+
+  // Count comments by commenter name
+  const getCommenterCount = (name) => {
+    if (!name) return 0;
+    return comments.filter(c => c.name && c.name.toLowerCase() === name.toLowerCase()).length;
+  };
 
   return (
     <div>
@@ -1059,9 +1094,11 @@ const CommentsEnhanced = () => {
                 </td>
               </tr>
             ) : (
-              paginatedComments.map((comment, index) => (
-                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors`}>
-                  <td className="px-2 py-0.5">
+              paginatedComments.map((comment, index) => {
+                const commenterCount = getCommenterCount(comment.name);
+                return (
+                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
+                  <td className="px-2 py-1.5 text-left align-top">
                     <input
                       type="checkbox"
                       checked={selectedComments.has(comment.id)}
@@ -1071,37 +1108,61 @@ const CommentsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className="px-2 py-0.5">
+                    <td key={col.key} className="px-2 py-1.5 text-left align-top">
                       {col.key === 'name' ? (
-                        comment.contactId ? (
+                        <div className="flex flex-col gap-0.5">
                           <button
-                            onClick={() => fetchContactProfile(comment.contactId)}
-                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
+                            onClick={() => comment.contactId ? fetchContactProfile(comment.contactId) : openCommenterHistory(comment.name)}
+                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer text-left"
                           >
                             {comment.name || 'Anonymous'}
                           </button>
-                        ) : (
-                          <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{comment.name || 'Anonymous'}</div>
-                        )
-                      ) : col.key === 'actionFmp' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300 font-medium">{comment.actionFmp || '—'}</div>
-                      ) : col.key === 'actionTitle' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300 max-w-xs truncate" title={comment.actionTitle || 'No action specified'}>
-                          {comment.actionTitle || '—'}
+                          {commenterCount > 1 && (
+                            <button
+                              onClick={() => openCommenterHistory(comment.name)}
+                              className="inline-flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 hover:text-brand-blue"
+                            >
+                              <MessageSquare size={10} />
+                              {commenterCount} comments
+                            </button>
+                          )}
                         </div>
+                      ) : col.key === 'actionFmp' ? (
+                        comment.actionFmp ? (
+                          <Link
+                            to={`/actions?fmp=${encodeURIComponent(comment.actionFmp)}`}
+                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                          >
+                            {comment.actionFmp}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )
+                      ) : col.key === 'actionTitle' ? (
+                        comment.actionTitle ? (
+                          <Link
+                            to={`/actions?search=${encodeURIComponent(comment.actionTitle)}`}
+                            className="text-xs text-brand-blue hover:text-brand-green hover:underline line-clamp-3"
+                            title={comment.actionTitle}
+                          >
+                            {comment.actionTitle}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )
                       ) : col.key === 'organization' ? (
                         comment.organizationId ? (
                           <button
                             onClick={() => fetchOrganizationProfile(comment.organizationId)}
-                            className="text-xs text-brand-blue hover:text-brand-green hover:underline cursor-pointer"
+                            className="text-xs text-brand-blue hover:text-brand-green hover:underline cursor-pointer text-left"
                           >
                             {comment.organization || '—'}
                           </button>
                         ) : (
-                          <div className="text-xs text-gray-900 dark:text-gray-100 max-w-[150px] truncate" title={comment.organization}>{comment.organization || '—'}</div>
+                          <div className="text-xs text-gray-900 dark:text-gray-100 line-clamp-2" title={comment.organization}>{comment.organization || '—'}</div>
                         )
                       ) : col.key === 'state' ? (
-                        <div className="text-xs text-gray-900 dark:text-gray-100">{comment.state || '—'}</div>
+                        <div className="text-xs text-gray-900 dark:text-gray-100 text-left">{comment.state || '—'}</div>
                       ) : col.key === 'position' ? (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           comment.position?.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' :
@@ -1131,14 +1192,27 @@ const CommentsEnhanced = () => {
                           )}
                         </div>
                       ) : col.key === 'commentDate' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300">{formatDate(comment.commentDate)}</div>
+                        <div className="text-xs text-gray-700 dark:text-gray-300 text-left">{formatDate(comment.commentDate)}</div>
                       ) : col.key === 'commentText' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300 max-w-md truncate" title={comment.commentText}>{comment.commentText || '—'}</div>
+                        <div className="max-w-md">
+                          <div className="text-xs text-gray-700 dark:text-gray-300 line-clamp-3 text-left">
+                            {comment.commentText || '—'}
+                          </div>
+                          {comment.commentText && comment.commentText.length > 150 && (
+                            <button
+                              onClick={() => openCommentDetail(comment)}
+                              className="inline-flex items-center gap-1 text-[10px] text-brand-blue hover:text-brand-green mt-1"
+                            >
+                              <Expand size={10} />
+                              Read full comment
+                            </button>
+                          )}
+                        </div>
                       ) : null}
                     </td>
                   ))}
                 </tr>
-              ))
+              )}))
             )}
           </tbody>
         </table>
@@ -1462,6 +1536,243 @@ const CommentsEnhanced = () => {
               <button
                 onClick={closeAnalysisModal}
                 className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comment Detail Modal */}
+      {showCommentModal && selectedComment && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowCommentModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="comment-modal-title"
+          >
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <h2 id="comment-modal-title" className="font-heading text-xl font-bold text-gray-900 dark:text-gray-100">
+                Full Comment
+              </h2>
+              <button
+                onClick={() => setShowCommentModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close comment modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              {/* Comment metadata */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Commenter:</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{selectedComment.name || 'Anonymous'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Date:</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDate(selectedComment.commentDate)}</p>
+                </div>
+                {selectedComment.organization && (
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Organization:</span>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{selectedComment.organization}</p>
+                  </div>
+                )}
+                {selectedComment.state && (
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">State:</span>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{selectedComment.state}</p>
+                  </div>
+                )}
+                {selectedComment.actionFmp && (
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">FMP:</span>
+                    <Link to={`/actions?fmp=${encodeURIComponent(selectedComment.actionFmp)}`} className="block font-medium text-brand-blue hover:text-brand-green hover:underline">
+                      {selectedComment.actionFmp}
+                    </Link>
+                  </div>
+                )}
+                {selectedComment.actionTitle && (
+                  <div className="col-span-2">
+                    <span className="text-gray-500 dark:text-gray-400">Action/Amendment:</span>
+                    <Link to={`/actions?search=${encodeURIComponent(selectedComment.actionTitle)}`} className="block font-medium text-brand-blue hover:text-brand-green hover:underline">
+                      {selectedComment.actionTitle}
+                    </Link>
+                  </div>
+                )}
+                {selectedComment.position && (
+                  <div>
+                    <span className="text-gray-500 dark:text-gray-400">Position:</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ml-2 ${
+                      selectedComment.position?.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' :
+                      selectedComment.position?.toLowerCase().includes('oppose') ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200' :
+                      'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                    }`}>
+                      {selectedComment.position}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Full comment text */}
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Comment Text</h3>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
+                  {selectedComment.commentText || 'No comment text available'}
+                </div>
+              </div>
+
+              {/* Species mentioned */}
+              {selectedComment.speciesMentioned && selectedComment.speciesMentioned.length > 0 && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Species Mentioned</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedComment.speciesMentioned.map((sp, idx) => (
+                      <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 rounded text-xs">
+                        <Fish size={12} />
+                        {sp}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex gap-3">
+              {getCommenterCount(selectedComment.name) > 1 && (
+                <button
+                  onClick={() => {
+                    setShowCommentModal(false);
+                    openCommenterHistory(selectedComment.name);
+                  }}
+                  className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors inline-flex items-center justify-center gap-2"
+                >
+                  <MessageSquare size={16} />
+                  View All {getCommenterCount(selectedComment.name)} Comments by {selectedComment.name}
+                </button>
+              )}
+              <button
+                onClick={() => setShowCommentModal(false)}
+                className={`${getCommenterCount(selectedComment.name) > 1 ? 'flex-1' : 'w-full'} px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-blue-700 transition-colors`}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Commenter History Modal */}
+      {showCommenterHistory && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowCommenterHistory(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="history-modal-title"
+          >
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 id="history-modal-title" className="font-heading text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Comment History
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  All {commenterHistoryData.length} comments from {commenterName}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCommenterHistory(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close history modal"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="px-6 py-4">
+              <div className="space-y-4">
+                {commenterHistoryData.map((comment, idx) => (
+                  <div key={comment.id || idx} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        {comment.actionFmp && (
+                          <Link
+                            to={`/actions?fmp=${encodeURIComponent(comment.actionFmp)}`}
+                            className="text-sm font-semibold text-brand-blue hover:text-brand-green hover:underline"
+                          >
+                            {comment.actionFmp}
+                          </Link>
+                        )}
+                        {comment.position && (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            comment.position?.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' :
+                            comment.position?.toLowerCase().includes('oppose') ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200' :
+                            'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                          }`}>
+                            {comment.position}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        <Clock size={12} />
+                        {formatDate(comment.commentDate)}
+                      </div>
+                    </div>
+                    {comment.actionTitle && (
+                      <Link
+                        to={`/actions?search=${encodeURIComponent(comment.actionTitle)}`}
+                        className="block text-sm text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-2"
+                      >
+                        {comment.actionTitle}
+                      </Link>
+                    )}
+                    <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap line-clamp-4">
+                      {comment.commentText || 'No comment text'}
+                    </div>
+                    {comment.commentText && comment.commentText.length > 300 && (
+                      <button
+                        onClick={() => {
+                          setShowCommenterHistory(false);
+                          openCommentDetail(comment);
+                        }}
+                        className="inline-flex items-center gap-1 text-xs text-brand-blue hover:text-brand-green mt-2"
+                      >
+                        <Expand size={12} />
+                        Read full comment
+                      </button>
+                    )}
+                    {comment.speciesMentioned && comment.speciesMentioned.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        {comment.speciesMentioned.map((sp, spIdx) => (
+                          <span key={spIdx} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 rounded text-[10px]">
+                            <Fish size={8} />
+                            {sp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+              <button
+                onClick={() => setShowCommenterHistory(false)}
+                className="w-full px-4 py-2 bg-brand-blue text-white rounded-md hover:bg-blue-700 transition-colors"
               >
                 Close
               </button>
