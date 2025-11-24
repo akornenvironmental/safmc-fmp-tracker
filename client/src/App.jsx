@@ -23,7 +23,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-24-v6-ui-standardization';
+const BUILD_VERSION = '2025-11-24-v7-remove-duplicate-titles';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

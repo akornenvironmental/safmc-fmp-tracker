@@ -162,21 +162,20 @@ const DashboardEnhanced = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between">
+      <div className="sm:flex sm:items-start sm:justify-between">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            SAFMC FMP Tracker Overview
-          </p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">SAFMC FMP Tracker Overview</h2>
         </div>
-        <button
-          onClick={triggerScrape}
-          disabled={scraping}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-md text-sm font-medium hover:bg-brand-blue-light disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${scraping ? 'animate-spin' : ''}`} />
-          {scraping ? 'Updating...' : 'Update Data'}
-        </button>
+        <div className="mt-4 sm:mt-0">
+          <button
+            onClick={triggerScrape}
+            disabled={scraping}
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${scraping ? 'animate-spin' : ''}`} />
+            {scraping ? 'Updating...' : 'Update Data'}
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}

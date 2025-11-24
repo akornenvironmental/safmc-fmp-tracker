@@ -448,12 +448,11 @@ const ActionsEnhanced = () => {
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-gray-100">Actions & Amendments</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Actions and amendments are automatically synced weekly from SAFMC.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 items-center">
+        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 items-center">
           <button
             onClick={() => setShowColumnSelector(!showColumnSelector)}
             className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
