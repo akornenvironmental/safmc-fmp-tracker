@@ -1,11 +1,11 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import Sidebar from './Sidebar';
 import AIAssistant from './AIAssistant';
 import FeedbackButton from './FeedbackButton';
-import { Sun, Moon, Type } from 'lucide-react';
+import { Sun, Moon, Type, Fish, ChevronRight } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
@@ -21,7 +21,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
       {/* Skip Navigation Links for 508 Compliance */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -39,14 +39,36 @@ const Layout = () => {
           effectiveCollapsed ? 'left-14' : 'left-48'
         }`}
       >
-        <div className="h-full px-4 flex items-center justify-between">
-          {/* Page Title */}
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {getPageTitle(location.pathname)}
-          </h1>
+        <div className="h-full px-4 flex items-center justify-between overflow-hidden">
+          {/* Breadcrumb Navigation */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* Logo/Home Link */}
+            <Link
+              to="/"
+              className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity"
+              title="SAFMC FMP Tracker Home"
+            >
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center">
+                <Fish className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white hidden sm:block">
+                SAFMC FMP
+              </span>
+            </Link>
+
+            {/* Separator & Page Title */}
+            {location.pathname !== '/' && (
+              <>
+                <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <h1 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {getPageTitle(location.pathname)}
+                </h1>
+              </>
+            )}
+          </div>
 
           {/* Theme Controls */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {/* Text Size Toggle */}
             <button
               onClick={cycleTextSize}
@@ -75,11 +97,11 @@ const Layout = () => {
         id="main-content"
         role="main"
         aria-label="Main content"
-        className={`pt-14 min-h-screen transition-all duration-300 ${
+        className={`pt-14 min-h-screen transition-all duration-300 overflow-x-hidden ${
           effectiveCollapsed ? 'pl-14' : 'pl-48'
         }`}
       >
-        <div className="p-6">
+        <div className="p-6 max-w-full">
           <Outlet />
         </div>
 
