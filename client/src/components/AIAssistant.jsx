@@ -29,9 +29,15 @@ const AIAssistant = () => {
 
     setLoading(true);
     try {
+      // Get auth token from localStorage
+      const authToken = localStorage.getItem('authToken');
+
       const res = await fetch(`${API_BASE_URL}/api/ai/query`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
         body: JSON.stringify({ question: query })
       });
 
