@@ -5,8 +5,11 @@
  * Organizes navigation into logical sections.
  */
 
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from '../contexts/SidebarContext';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
   FileText,
@@ -19,6 +22,14 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  Sun,
+  Moon,
+  Type,
+  ChevronDown,
+  User,
+  Settings,
+  Shield,
+  LogOut,
 } from 'lucide-react';
 
 // Navigation item component
@@ -86,6 +97,7 @@ const NavSection = ({ section, currentPath, effectiveCollapsed }) => {
 
 const Sidebar = ({ user }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     effectiveCollapsed,
     toggleSidebar,
@@ -93,9 +105,37 @@ const Sidebar = ({ user }) => {
     handleMouseLeave,
     isCollapsed,
   } = useSidebar();
+  const { theme, toggleTheme, textSize, setTextSize } = useTheme();
+  const { logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef(null);
 
   const isSuperAdmin = user?.role === 'super_admin';
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  const handleLogout = async () => {
+    setShowProfileMenu(false);
+    await logout();
+    navigate('/login');
+  };
+
+  const cycleTextSize = () => {
+    const sizes = ['small', 'medium', 'large'];
+    const currentIndex = sizes.indexOf(textSize);
+    const nextIndex = (currentIndex + 1) % sizes.length;
+    setTextSize(sizes[nextIndex]);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Main navigation items
   const mainNav = {
@@ -129,32 +169,46 @@ const Sidebar = ({ user }) => {
   return (
     <aside
       className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-40 flex flex-col ${
-        effectiveCollapsed ? 'w-16' : 'w-64'
+        effectiveCollapsed ? 'w-14' : 'w-48'
       }`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Logo Section */}
-      <div className="h-16 flex items-center border-b border-gray-200 dark:border-gray-700 px-3 flex-shrink-0">
-        <Link to="/" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center flex-shrink-0">
-            <Fish className="w-6 h-6 text-white" />
+      {/* Logo Section with Theme Toggles */}
+      <div className="h-14 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-2 flex-shrink-0">
+        <Link to="/" className="flex items-center gap-2 overflow-hidden">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center flex-shrink-0">
+            <Fish className="w-5 h-5 text-white" />
           </div>
           {!effectiveCollapsed && (
-            <div className="min-w-0">
-              <h1 className="text-sm font-bold text-brand-blue dark:text-white truncate">
-                SAFMC FMP
-              </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                Tracker
-              </p>
-            </div>
+            <h1 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+              SAFMC
+            </h1>
           )}
         </Link>
+        {/* Theme/Text Toggles - only when expanded */}
+        {!effectiveCollapsed && (
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={cycleTextSize}
+              className="flex items-center justify-center w-7 h-7 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title={`Text size: ${textSize}`}
+            >
+              <Type className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-7 h-7 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+            >
+              {theme === 'light' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex-1 overflow-y-auto py-4 px-2">
+      <div className="flex-1 overflow-y-auto py-3 px-1.5">
         <NavSection section={mainNav} currentPath={location.pathname} effectiveCollapsed={effectiveCollapsed} />
         <NavSection section={dataNav} currentPath={location.pathname} effectiveCollapsed={effectiveCollapsed} />
         {adminNav && adminNav.items.length > 0 && (
@@ -162,21 +216,114 @@ const Sidebar = ({ user }) => {
         )}
       </div>
 
+      {/* User Profile Section */}
+      {user && (
+        <div className="border-t border-gray-200 dark:border-gray-700 p-1.5 flex-shrink-0" ref={profileMenuRef}>
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className={`flex items-center w-full px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+              effectiveCollapsed ? 'justify-center' : 'gap-2'
+            }`}
+          >
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+              {(user.name || user.email || '?').charAt(0).toUpperCase()}
+            </div>
+            {!effectiveCollapsed && (
+              <>
+                <span className="text-xs font-medium text-gray-900 dark:text-white truncate flex-1 text-left">
+                  {user.name || user.email}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform flex-shrink-0 ${showProfileMenu ? 'rotate-180' : ''}`} />
+              </>
+            )}
+          </button>
+
+          {/* Profile Dropdown Menu */}
+          {showProfileMenu && (
+            <div className={`absolute ${effectiveCollapsed ? 'left-14' : 'left-1.5 right-1.5'} bottom-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50`}>
+              {/* User info header */}
+              <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-medium text-gray-900 dark:text-white">{user.name || 'User'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                {user.role && (
+                  <span className="inline-block mt-1 px-1.5 py-0.5 text-xs font-medium bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300 rounded">
+                    {user.role.replace('_', ' ')}
+                  </span>
+                )}
+              </div>
+
+              {/* Menu items */}
+              <div className="py-1">
+                <Link
+                  to="/profile"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  My Profile
+                </Link>
+                <Link
+                  to="/preferences"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  Preferences
+                </Link>
+                <Link
+                  to="/security"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  Security
+                </Link>
+              </div>
+
+              {/* Admin section */}
+              {isSuperAdmin && (
+                <div className="border-t border-gray-200 dark:border-gray-700 py-1">
+                  <Link
+                    to="/admin/users"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    User Management
+                  </Link>
+                </div>
+              )}
+
+              {/* Sign out */}
+              <div className="border-t border-gray-200 dark:border-gray-700 py-1">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Collapse Toggle */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-2 flex-shrink-0">
+      <div className="border-t border-gray-200 dark:border-gray-700 p-1.5 flex-shrink-0">
         <button
           onClick={toggleSidebar}
-          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+          className={`flex items-center w-full px-2 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
             effectiveCollapsed ? 'justify-center' : ''
           }`}
-          title={isCollapsed ? 'Expand sidebar ([ or Cmd+\\)' : 'Collapse sidebar ([ or Cmd+\\)'}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {effectiveCollapsed ? (
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           ) : (
             <>
-              <ChevronLeft className="w-5 h-5" />
-              <span className="ml-2 text-xs">Collapse</span>
+              <ChevronLeft className="w-4 h-4" />
+              <span className="ml-1.5 text-xs">Collapse</span>
             </>
           )}
         </button>

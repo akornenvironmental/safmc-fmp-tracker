@@ -1,46 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
-import { Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
 import Sidebar from './Sidebar';
 import AIAssistant from './AIAssistant';
-import { Sun, Moon, Type, ChevronDown, User, Settings, Shield, LogOut, Users } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { theme, toggleTheme, textSize, setTextSize } = useTheme();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { effectiveCollapsed } = useSidebar();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const profileMenuRef = useRef(null);
-
-  const isSuperAdmin = user?.role === 'super_admin';
-
-  const handleLogout = async () => {
-    setShowProfileMenu(false);
-    await logout();
-    navigate('/login');
-  };
-
-  const cycleTextSize = () => {
-    const sizes = ['small', 'medium', 'large'];
-    const currentIndex = sizes.indexOf(textSize);
-    const nextIndex = (currentIndex + 1) % sizes.length;
-    setTextSize(sizes[nextIndex]);
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
-        setShowProfileMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -55,129 +22,16 @@ const Layout = () => {
       {/* Sidebar Navigation */}
       <Sidebar user={user} />
 
-      {/* Top Header Bar - for controls only */}
+      {/* Top Header Bar - page title only */}
       <header
         className={`fixed top-0 right-0 h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30 transition-all duration-300 ${
-          effectiveCollapsed ? 'left-16' : 'left-64'
+          effectiveCollapsed ? 'left-14' : 'left-48'
         }`}
       >
-        <div className="h-full px-4 flex items-center justify-between">
-          {/* Page Title */}
-          <div className="flex items-center">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {getPageTitle(location.pathname)}
-            </h1>
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center space-x-2">
-            {/* Text Size Toggle */}
-            <button
-              onClick={cycleTextSize}
-              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title={`Text size: ${textSize} (click to cycle)`}
-              aria-label={`Text size: ${textSize}. Click to cycle through sizes.`}
-            >
-              <Type className="w-4 h-4" />
-            </button>
-
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            >
-              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </button>
-
-            {/* Profile Dropdown */}
-            {user && (
-              <div className="relative ml-2 pl-2 border-l border-gray-200 dark:border-gray-700" ref={profileMenuRef}>
-                <button
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-sm font-medium">
-                    {(user.name || user.email || '?').charAt(0).toUpperCase()}
-                  </div>
-                  <span className="hidden sm:block text-sm font-medium text-gray-900 dark:text-white">
-                    {user.name || user.email}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown Menu */}
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                    {/* User info header */}
-                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name || 'User'}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
-                      {user.role && (
-                        <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300 rounded">
-                          {user.role.replace('_', ' ')}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Menu items */}
-                    <div className="py-1">
-                      <Link
-                        to="/profile"
-                        onClick={() => setShowProfileMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        <User className="w-4 h-4" />
-                        My Profile
-                      </Link>
-                      <Link
-                        to="/preferences"
-                        onClick={() => setShowProfileMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        <Settings className="w-4 h-4" />
-                        Preferences
-                      </Link>
-                      <Link
-                        to="/security"
-                        onClick={() => setShowProfileMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        <Shield className="w-4 h-4" />
-                        Security
-                      </Link>
-                    </div>
-
-                    {/* Admin section */}
-                    {isSuperAdmin && (
-                      <div className="border-t border-gray-200 dark:border-gray-700 py-1">
-                        <Link
-                          to="/admin/users"
-                          onClick={() => setShowProfileMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          <Users className="w-4 h-4" />
-                          User Management
-                        </Link>
-                      </div>
-                    )}
-
-                    {/* Sign out */}
-                    <div className="border-t border-gray-200 dark:border-gray-700 py-1">
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="h-full px-4 flex items-center">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {getPageTitle(location.pathname)}
+          </h1>
         </div>
       </header>
 
@@ -187,7 +41,7 @@ const Layout = () => {
         role="main"
         aria-label="Main content"
         className={`pt-14 min-h-screen transition-all duration-300 ${
-          effectiveCollapsed ? 'pl-16' : 'pl-64'
+          effectiveCollapsed ? 'pl-14' : 'pl-48'
         }`}
       >
         <div className="p-6">
