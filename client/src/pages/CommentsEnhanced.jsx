@@ -662,39 +662,39 @@ const CommentsEnhanced = () => {
 
       {/* Dashboard Section */}
       {dashboardStats && (
-        <div className="mt-6">
+        <div className="mt-4">
           <button
             onClick={() => setShowDashboard(!showDashboard)}
-            className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-blue dark:hover:text-brand-blue-light transition-colors mb-3"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors mb-3"
           >
-            <BarChart3 size={18} />
-            Comment Analytics Dashboard
-            {showDashboard ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            <BarChart3 size={14} />
+            {showDashboard ? 'Hide' : 'Show'} Analytics Dashboard
+            {showDashboard ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {showDashboard && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Total Comments Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                    <FileText className="text-blue-600 dark:text-blue-400" size={20} />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                    <FileText className="text-blue-600 dark:text-blue-400" size={16} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{dashboardStats.total}</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{dashboardStats.total}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Total Comments</p>
                   </div>
                 </div>
-                <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
+                <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                   {dashboardStats.recentComments} in last 30 days
                 </div>
               </div>
 
               {/* Position Breakdown Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-                    <BarChart3 className="text-green-600 dark:text-green-400" size={20} />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-lg">
+                    <BarChart3 className="text-green-600 dark:text-green-400" size={16} />
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">By Position</p>
                 </div>
@@ -722,10 +722,10 @@ const CommentsEnhanced = () => {
               </div>
 
               {/* Commenter Type Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                    <Users className="text-purple-600 dark:text-purple-400" size={20} />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+                    <Users className="text-purple-600 dark:text-purple-400" size={16} />
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">By Sector</p>
                 </div>
@@ -747,10 +747,10 @@ const CommentsEnhanced = () => {
               </div>
 
               {/* Top States Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
-                    <MapPin className="text-amber-600 dark:text-amber-400" size={20} />
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+                    <MapPin className="text-amber-600 dark:text-amber-400" size={16} />
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Top States</p>
                 </div>
@@ -773,8 +773,8 @@ const CommentsEnhanced = () => {
 
               {/* FMP Breakdown - Full Width */}
               {Object.keys(dashboardStats.byFmp).length > 0 && (
-                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Comments by FMP <span className="text-xs font-normal text-gray-500">(click to filter)</span></p>
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Comments by FMP <span className="text-xs font-normal text-gray-500">(click to filter)</span></p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(dashboardStats.byFmp)
                       .sort((a, b) => b[1] - a[1])
@@ -794,8 +794,8 @@ const CommentsEnhanced = () => {
 
               {/* Top Organizations */}
               {dashboardStats.topOrganizations.length > 0 && (
-                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Top Commenting Organizations</p>
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Top Commenting Organizations</p>
                   <div className="space-y-2">
                     {dashboardStats.topOrganizations.map(({ name, count }, idx) => (
                       <div key={name} className="flex justify-between items-center">
@@ -813,8 +813,8 @@ const CommentsEnhanced = () => {
 
               {/* Species Mentioned - Click to filter */}
               {speciesStats && speciesStats.top_species && speciesStats.top_species.length > 0 && (
-                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Fish className="text-teal-600 dark:text-teal-400" size={18} />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -844,8 +844,8 @@ const CommentsEnhanced = () => {
 
               {/* Timeline Chart - Full Width */}
               {timelineData.length > 1 && (
-                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={18} />
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">

@@ -181,15 +181,12 @@ const AIAssistant = () => {
           style={{
             writingMode: 'vertical-rl',
             textOrientation: 'mixed',
-            padding: '20px 12px',
-            borderTopLeftRadius: '8px',
-            borderBottomLeftRadius: '8px',
+            padding: '12px 8px',
+            borderTopLeftRadius: '6px',
+            borderBottomLeftRadius: '6px',
           }}
         >
-          <div className="flex flex-col items-center justify-center gap-2">
-            <MessageSquare className="w-5 h-5" style={{ transform: 'rotate(-90deg)' }} />
-            <span className="font-medium whitespace-nowrap">AI Assistant</span>
-          </div>
+          <span className="text-xs font-medium whitespace-nowrap">AI Assistant</span>
         </button>
       )}
     </div>
