@@ -1246,11 +1246,11 @@ const CommentsEnhanced = () => {
       {/* Profile Modal */}
       {showProfileModal && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={closeProfileModal}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -1385,11 +1385,11 @@ const CommentsEnhanced = () => {
       {/* AI Analysis Modal */}
       {showAnalysisModal && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={closeAnalysisModal}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -1547,11 +1547,11 @@ const CommentsEnhanced = () => {
       {/* Comment Detail Modal */}
       {showCommentModal && selectedComment && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowCommentModal(false)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -1674,11 +1674,11 @@ const CommentsEnhanced = () => {
       {/* Commenter History Modal */}
       {showCommenterHistory && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowCommenterHistory(false)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -1689,13 +1689,13 @@ const CommentsEnhanced = () => {
                 <h2 id="history-modal-title" className="font-heading text-xl font-bold text-gray-900 dark:text-gray-100">
                   Comment History
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   All {commenterHistoryData.length} comments from {commenterName}
                 </p>
               </div>
               <button
                 onClick={() => setShowCommenterHistory(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 aria-label="Close history modal"
               >
                 <X size={24} />
@@ -1726,7 +1726,7 @@ const CommentsEnhanced = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                         <Clock size={12} />
                         {formatDate(comment.commentDate)}
                       </div>
@@ -1734,12 +1734,12 @@ const CommentsEnhanced = () => {
                     {comment.actionTitle && (
                       <Link
                         to={`/actions?search=${encodeURIComponent(comment.actionTitle)}`}
-                        className="block text-sm text-gray-600 dark:text-gray-400 hover:text-brand-blue mb-2"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-blue mb-2"
                       >
                         {comment.actionTitle}
                       </Link>
                     )}
-                    <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap line-clamp-4">
+                    <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap line-clamp-4">
                       {comment.commentText || 'No comment text'}
                     </div>
                     {comment.commentText && comment.commentText.length > 300 && (

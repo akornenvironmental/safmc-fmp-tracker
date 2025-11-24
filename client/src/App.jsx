@@ -23,7 +23,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-24-v10-comments-page-enhancements';
+const BUILD_VERSION = '2025-11-24-v11-modal-backdrop-blur-readability';
 
 function App() {
   // Log build version on mount (forces this code into bundle)
