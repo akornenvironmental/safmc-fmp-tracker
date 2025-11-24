@@ -23,7 +23,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-23-v4-comments-ui-fix';
+const BUILD_VERSION = '2025-11-23-v5-profile-dropdown';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

@@ -17,10 +17,8 @@ import {
   ClipboardList,
   Activity,
   Users,
-  Settings,
   ChevronLeft,
   ChevronRight,
-  LogOut,
 } from 'lucide-react';
 
 // Navigation item component
@@ -86,7 +84,7 @@ const NavSection = ({ section, currentPath, effectiveCollapsed }) => {
   );
 };
 
-const Sidebar = ({ user, onLogout }) => {
+const Sidebar = ({ user }) => {
   const location = useLocation();
   const {
     effectiveCollapsed,
@@ -164,41 +162,16 @@ const Sidebar = ({ user, onLogout }) => {
         )}
       </div>
 
-      {/* User Section & Toggle */}
+      {/* Collapse Toggle */}
       <div className="border-t border-gray-200 dark:border-gray-700 p-2 flex-shrink-0">
-        {/* User info */}
-        {user && !effectiveCollapsed && (
-          <div className="px-3 py-2 mb-2">
-            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-              {user.name || user.email}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {user.email}
-            </div>
-          </div>
-        )}
-
-        {/* Logout button */}
-        {onLogout && (
-          <button
-            onClick={onLogout}
-            className={`flex items-center w-full px-3 py-2.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ${
-              effectiveCollapsed ? 'justify-center' : ''
-            }`}
-            title={effectiveCollapsed ? 'Sign Out' : undefined}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!effectiveCollapsed && <span className="ml-3 text-sm font-medium">Sign Out</span>}
-          </button>
-        )}
-
-        {/* Collapse toggle */}
         <button
           onClick={toggleSidebar}
-          className="flex items-center justify-center w-full mt-2 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+            effectiveCollapsed ? 'justify-center' : ''
+          }`}
           title={isCollapsed ? 'Expand sidebar ([ or Cmd+\\)' : 'Collapse sidebar ([ or Cmd+\\)'}
         >
-          {isCollapsed ? (
+          {effectiveCollapsed ? (
             <ChevronRight className="w-5 h-5" />
           ) : (
             <>
