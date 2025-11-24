@@ -531,20 +531,18 @@ const CommentsEnhanced = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
+      {/* Page Header */}
+      <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Public Comments</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Showing {filteredAndSortedComments.length} of {comments.length} comments
-          </p>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Comments are automatically synced weekly from SAFMC public hearings and comment periods.
+          <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-gray-100">Public Comments</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Comments synced weekly from SAFMC public hearings and comment periods.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
+        <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 items-center">
           <button
             onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             <Settings size={14} />
             Columns
@@ -552,7 +550,7 @@ const CommentsEnhanced = () => {
           <button
             onClick={syncComments}
             disabled={syncing}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-brand-blue-light disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
             {syncing ? 'Syncing...' : 'Sync Comments'}
@@ -560,7 +558,7 @@ const CommentsEnhanced = () => {
           <button
             onClick={() => setShowAnalysisModal(true)}
             disabled={comments.length === 0}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Sparkles size={14} />
             AI Analysis
@@ -568,7 +566,7 @@ const CommentsEnhanced = () => {
           <button
             onClick={detectSpecies}
             disabled={detectingSpecies || comments.length === 0}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Fish size={14} className={detectingSpecies ? 'animate-pulse' : ''} />
             {detectingSpecies ? 'Detecting...' : 'Detect Species'}
@@ -650,28 +648,28 @@ const CommentsEnhanced = () => {
           {showDashboard && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Total Comments Card */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-                    <FileText className="text-blue-600 dark:text-blue-300" size={20} />
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                    <FileText className="text-blue-600 dark:text-blue-400" size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{dashboardStats.total}</p>
-                    <p className="text-xs text-blue-600 dark:text-blue-400">Total Comments</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{dashboardStats.total}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Total Comments</p>
                   </div>
                 </div>
-                <div className="mt-3 text-xs text-blue-700 dark:text-blue-300">
+                <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
                   {dashboardStats.recentComments} in last 30 days
                 </div>
               </div>
 
               {/* Position Breakdown Card */}
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-lg">
-                    <BarChart3 className="text-emerald-600 dark:text-emerald-300" size={20} />
+                  <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
+                    <BarChart3 className="text-green-600 dark:text-green-400" size={20} />
                   </div>
-                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">By Position</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">By Position</p>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(dashboardStats.byPosition)
@@ -681,7 +679,7 @@ const CommentsEnhanced = () => {
                       <button
                         key={position}
                         onClick={() => toggleFilter('position', position)}
-                        className={`w-full flex justify-between items-center hover:opacity-80 transition-opacity ${activeFilters.position === position ? 'ring-2 ring-emerald-500 rounded' : ''}`}
+                        className={`w-full flex justify-between items-center px-1 py-0.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${activeFilters.position === position ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-500' : ''}`}
                       >
                         <span className={`text-xs px-2 py-0.5 rounded ${
                           position.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' :
@@ -690,19 +688,19 @@ const CommentsEnhanced = () => {
                         }`}>
                           {position}
                         </span>
-                        <span className="text-xs font-medium text-emerald-800 dark:text-emerald-200">{count}</span>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{count}</span>
                       </button>
                     ))}
                 </div>
               </div>
 
               {/* Commenter Type Card */}
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
-                    <Users className="text-purple-600 dark:text-purple-300" size={20} />
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
+                    <Users className="text-purple-600 dark:text-purple-400" size={20} />
                   </div>
-                  <p className="text-sm font-medium text-purple-900 dark:text-purple-100">By Sector</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">By Sector</p>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(dashboardStats.byCommenterType)
@@ -712,22 +710,22 @@ const CommentsEnhanced = () => {
                       <button
                         key={type}
                         onClick={() => toggleFilter('commenterType', type)}
-                        className={`w-full flex justify-between items-center hover:opacity-80 transition-opacity ${activeFilters.commenterType === type ? 'ring-2 ring-purple-500 rounded' : ''}`}
+                        className={`w-full flex justify-between items-center px-1 py-0.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${activeFilters.commenterType === type ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-500' : ''}`}
                       >
-                        <span className="text-xs text-purple-700 dark:text-purple-300 truncate max-w-[120px]">{type}</span>
-                        <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{count}</span>
+                        <span className="text-xs text-gray-700 dark:text-gray-300 truncate max-w-[120px]">{type}</span>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{count}</span>
                       </button>
                     ))}
                 </div>
               </div>
 
               {/* Top States Card */}
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-amber-100 dark:bg-amber-800 rounded-lg">
-                    <MapPin className="text-amber-600 dark:text-amber-300" size={20} />
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+                    <MapPin className="text-amber-600 dark:text-amber-400" size={20} />
                   </div>
-                  <p className="text-sm font-medium text-amber-900 dark:text-amber-100">Top States</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Top States</p>
                 </div>
                 <div className="space-y-1.5">
                   {Object.entries(dashboardStats.byState)
@@ -737,10 +735,10 @@ const CommentsEnhanced = () => {
                       <button
                         key={state}
                         onClick={() => toggleFilter('state', state)}
-                        className={`w-full flex justify-between items-center hover:opacity-80 transition-opacity ${activeFilters.state === state ? 'ring-2 ring-amber-500 rounded' : ''}`}
+                        className={`w-full flex justify-between items-center px-1 py-0.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${activeFilters.state === state ? 'bg-blue-50 dark:bg-blue-900/30 ring-1 ring-blue-500' : ''}`}
                       >
-                        <span className="text-xs text-amber-700 dark:text-amber-300">{state}</span>
-                        <span className="text-xs font-medium text-amber-800 dark:text-amber-200">{count}</span>
+                        <span className="text-xs text-gray-700 dark:text-gray-300">{state}</span>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{count}</span>
                       </button>
                     ))}
                 </div>
@@ -748,8 +746,8 @@ const CommentsEnhanced = () => {
 
               {/* FMP Breakdown - Full Width */}
               {Object.keys(dashboardStats.byFmp).length > 0 && (
-                <div className="md:col-span-2 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Comments by FMP <span className="text-xs font-normal text-slate-500">(click to filter)</span></p>
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Comments by FMP <span className="text-xs font-normal text-gray-500">(click to filter)</span></p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(dashboardStats.byFmp)
                       .sort((a, b) => b[1] - a[1])
@@ -757,10 +755,10 @@ const CommentsEnhanced = () => {
                         <button
                           key={fmp}
                           onClick={() => toggleFilter('fmp', fmp)}
-                          className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors ${activeFilters.fmp === fmp ? 'border-blue-500 ring-2 ring-blue-500' : 'border-slate-200 dark:border-slate-600'}`}
+                          className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors ${activeFilters.fmp === fmp ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'border-gray-200 dark:border-gray-600'}`}
                         >
                           {fmp}
-                          <span className="font-medium text-slate-900 dark:text-slate-100">{count}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{count}</span>
                         </button>
                       ))}
                   </div>
@@ -769,15 +767,15 @@ const CommentsEnhanced = () => {
 
               {/* Top Organizations */}
               {dashboardStats.topOrganizations.length > 0 && (
-                <div className="md:col-span-2 bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/30 rounded-lg p-4 border border-cyan-200 dark:border-cyan-800">
-                  <p className="text-sm font-medium text-cyan-900 dark:text-cyan-100 mb-3">Top Commenting Organizations</p>
+                <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Top Commenting Organizations</p>
                   <div className="space-y-2">
                     {dashboardStats.topOrganizations.map(({ name, count }, idx) => (
                       <div key={name} className="flex justify-between items-center">
-                        <span className="text-xs text-cyan-700 dark:text-cyan-300 truncate max-w-[300px]">
+                        <span className="text-xs text-gray-700 dark:text-gray-300 truncate max-w-[300px]">
                           {idx + 1}. {name}
                         </span>
-                        <span className="text-xs font-medium bg-cyan-100 dark:bg-cyan-800 text-cyan-800 dark:text-cyan-200 px-2 py-0.5 rounded">
+                        <span className="text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded">
                           {count} comments
                         </span>
                       </div>
@@ -788,25 +786,25 @@ const CommentsEnhanced = () => {
 
               {/* Species Mentioned - Click to filter */}
               {speciesStats && speciesStats.top_species && speciesStats.top_species.length > 0 && (
-                <div className="md:col-span-2 lg:col-span-4 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 rounded-lg p-4 border border-teal-200 dark:border-teal-800">
+                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Fish className="text-teal-600 dark:text-teal-300" size={18} />
-                      <p className="text-sm font-medium text-teal-900 dark:text-teal-100">
+                      <Fish className="text-teal-600 dark:text-teal-400" size={18} />
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         Species Mentioned in Comments
-                        <span className="text-xs font-normal text-teal-600 dark:text-teal-400 ml-2">
+                        <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">
                           ({speciesStats.comments_with_species} of {speciesStats.total_comments} comments)
                         </span>
                       </p>
                     </div>
-                    <span className="text-xs text-teal-600 dark:text-teal-400">(click to filter)</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">(click to filter)</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {speciesStats.top_species.slice(0, 15).map(({ species, count }) => (
                       <button
                         key={species}
                         onClick={() => toggleFilter('species', species)}
-                        className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-800 text-teal-700 dark:text-teal-300 border hover:bg-teal-200 dark:hover:bg-teal-700 transition-colors ${activeFilters.species === species ? 'border-teal-500 ring-2 ring-teal-500' : 'border-teal-200 dark:border-teal-600'}`}
+                        className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border hover:bg-teal-100 dark:hover:bg-teal-800/50 transition-colors ${activeFilters.species === species ? 'border-teal-500 ring-1 ring-teal-500' : 'border-teal-200 dark:border-teal-700'}`}
                       >
                         <Tag size={10} />
                         {species}
@@ -819,20 +817,20 @@ const CommentsEnhanced = () => {
 
               {/* Timeline Chart - Full Width */}
               {timelineData.length > 1 && (
-                <div className="md:col-span-2 lg:col-span-4 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/30 dark:to-violet-900/30 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
+                <div className="md:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="text-indigo-600 dark:text-indigo-300" size={18} />
-                      <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
+                      <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={18} />
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         Comment Timeline
-                        <span className="text-xs font-normal text-indigo-600 dark:text-indigo-400 ml-2">
+                        <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">
                           (Monthly)
                         </span>
                       </p>
                     </div>
                     <button
                       onClick={() => setShowTimeline(!showTimeline)}
-                      className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:underline transition-colors"
                     >
                       {showTimeline ? 'Hide' : 'Show'}
                     </button>
@@ -923,7 +921,7 @@ const CommentsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[150px] bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search comments by name, organization, position, or comment text"
         />
 
@@ -932,7 +930,7 @@ const CommentsEnhanced = () => {
           <select
             value={activeFilters.fmp}
             onChange={(e) => setActiveFilters(prev => ({ ...prev, fmp: e.target.value }))}
-            className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+            className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           >
             <option value="">All FMPs</option>
             {uniqueFmps.map(fmp => (
@@ -946,7 +944,7 @@ const CommentsEnhanced = () => {
           <select
             value={activeFilters.position}
             onChange={(e) => setActiveFilters(prev => ({ ...prev, position: e.target.value }))}
-            className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+            className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           >
             <option value="">All Positions</option>
             {uniquePositions.map(pos => (
@@ -960,7 +958,7 @@ const CommentsEnhanced = () => {
           <select
             value={activeFilters.state}
             onChange={(e) => setActiveFilters(prev => ({ ...prev, state: e.target.value }))}
-            className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+            className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           >
             <option value="">All States</option>
             {uniqueStates.map(state => (
@@ -973,7 +971,7 @@ const CommentsEnhanced = () => {
         <button
           onClick={exportToCSV}
           disabled={filteredAndSortedComments.length === 0}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <Download size={14} />
           Export
@@ -986,7 +984,7 @@ const CommentsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+          className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           aria-label="Number of comments to display per page"
         >
           <option value={20}>Show 20</option>
@@ -998,7 +996,7 @@ const CommentsEnhanced = () => {
         {/* Reset Button */}
         <button
           onClick={handleReset}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           title="Reset filters, sorting, and selection"
         >
           <RotateCcw size={14} />
@@ -1006,10 +1004,17 @@ const CommentsEnhanced = () => {
         </button>
       </div>
 
+      {/* Table Count */}
+      <div className="mt-6 mb-2 flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing <span className="font-medium text-gray-900 dark:text-gray-100">{filteredAndSortedComments.length}</span> of <span className="font-medium text-gray-900 dark:text-gray-100">{comments.length}</span> comments
+        </p>
+      </div>
+
       {/* Comments Table */}
-      <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
+        <table className="min-w-full">
+          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
                 <input
@@ -1039,7 +1044,7 @@ const CommentsEnhanced = () => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white dark:bg-gray-800">
             {loading ? (
               <tr>
                 <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -1054,7 +1059,7 @@ const CommentsEnhanced = () => {
               </tr>
             ) : (
               paginatedComments.map((comment, index) => (
-                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150`}>
+                <tr key={comment.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
@@ -1140,22 +1145,22 @@ const CommentsEnhanced = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            Page {currentPage} of {totalPages}
-          </div>
-          <div className="flex gap-2">
+        <div className="mt-4 flex items-center justify-end">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
+            <span className="px-3 text-sm text-gray-600 dark:text-gray-400">
+              Page {currentPage} of {totalPages}
+            </span>
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>

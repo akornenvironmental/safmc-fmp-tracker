@@ -419,45 +419,43 @@ const MeetingsEnhanced = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
+      {/* Page Header */}
+      <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Meeting Calendar</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Showing {filteredAndSortedMeetings.length} of {meetings.length} meetings
-          </p>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Meetings are automatically synced from SAFMC and 16 other fishery management organizations.
+          <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-gray-100">Meeting Calendar</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Meetings synced from SAFMC and 16 other fishery management organizations.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
+        <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 items-center">
           {/* View Toggle */}
           <div className="inline-flex rounded-md shadow-sm" role="group">
             <button
               onClick={() => setViewMode('table')}
-              className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-l-md border ${
+              className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-l-md border transition-colors ${
                 viewMode === 'table'
                   ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
               }`}
             >
               <Table size={14} /> Table
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border-t border-b ${
+              className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium border-t border-b transition-colors ${
                 viewMode === 'calendar'
                   ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
               }`}
             >
               <LayoutGrid size={14} /> Calendar
             </button>
             <button
               onClick={() => setViewMode('agenda')}
-              className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-r-md border ${
+              className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-r-md border transition-colors ${
                 viewMode === 'agenda'
                   ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
               }`}
             >
               <List size={14} /> Agenda
@@ -466,7 +464,7 @@ const MeetingsEnhanced = () => {
           {viewMode === 'table' && (
             <button
               onClick={() => setShowColumnSelector(!showColumnSelector)}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
             >
               <Settings size={14} />
               Columns
@@ -474,7 +472,7 @@ const MeetingsEnhanced = () => {
           )}
           <div className="relative">
             <button
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
               onClick={(e) => {
                 const menu = e.currentTarget.nextElementSibling;
                 menu.classList.toggle('hidden');
@@ -512,7 +510,7 @@ const MeetingsEnhanced = () => {
           <button
             onClick={syncMeetings}
             disabled={syncing}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-brand-blue-light disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync SAFMC'}
@@ -520,17 +518,12 @@ const MeetingsEnhanced = () => {
           <button
             onClick={syncFisheryPulse}
             disabled={syncingFisheryPulse}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-brand-green text-white border border-brand-green hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-green text-white border border-brand-green hover:bg-green-600 hover:border-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${syncingFisheryPulse ? 'animate-spin' : ''}`} />
             {syncingFisheryPulse ? 'Syncing...' : 'Sync All'}
           </button>
         </div>
-      </div>
-
-      {/* Meeting data sources description */}
-      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-        Meeting data aggregated from: Federal Register API, NOAA Events, 8 regional fishery management councils, 3 interstate marine fisheries commissions, and 4 state agencies (NC, SC, GA, FL)
       </div>
 
       {/* Column selector */}
@@ -567,7 +560,7 @@ const MeetingsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[150px] bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search meetings by title, council, location, or type"
         />
 
@@ -578,7 +571,7 @@ const MeetingsEnhanced = () => {
               setShowOrgDropdown(!showOrgDropdown);
               setShowRegionDropdown(false);
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             Organization
             {organizationFilter.length > 0 && (
@@ -654,7 +647,7 @@ const MeetingsEnhanced = () => {
               setShowRegionDropdown(!showRegionDropdown);
               setShowOrgDropdown(false);
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             Region
             {regionFilter.length > 0 && (
@@ -688,7 +681,7 @@ const MeetingsEnhanced = () => {
         </div>
 
         {/* Upcoming only filter */}
-        <label className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+        <label className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
           <input
             type="checkbox"
             checked={upcomingOnly}
@@ -708,7 +701,7 @@ const MeetingsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+          className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           aria-label="Number of meetings to display per page"
         >
           <option value={20}>Show 20</option>
@@ -720,7 +713,7 @@ const MeetingsEnhanced = () => {
         {/* Reset Button */}
         <button
           onClick={handleReset}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           title="Reset filters, sorting, and selection"
         >
           <RotateCcw size={14} />
@@ -731,12 +724,19 @@ const MeetingsEnhanced = () => {
       {/* Table View */}
       {viewMode === 'table' && (
         <>
-      <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
+      {/* Table Count */}
+      <div className="mt-6 mb-2 flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing <span className="font-medium text-gray-900 dark:text-gray-100">{filteredAndSortedMeetings.length}</span> of <span className="font-medium text-gray-900 dark:text-gray-100">{meetings.length}</span> meetings
+        </p>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
+        <table className="min-w-full">
           <caption className="sr-only">
             Meeting calendar with {filteredAndSortedMeetings.length} meetings. Table includes columns for selection, title, council, date, location, and type. Click column headers to sort.
           </caption>
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
                 <input
@@ -766,22 +766,22 @@ const MeetingsEnhanced = () => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800">
             {loading ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   Loading meetings...
                 </td>
               </tr>
             ) : paginatedMeetings.length === 0 ? (
               <tr>
-                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500">
+                <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                   No meetings found
                 </td>
               </tr>
             ) : (
               paginatedMeetings.map((meeting, index) => (
-                <tr key={meeting.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
+                <tr key={meeting.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
@@ -854,26 +854,23 @@ const MeetingsEnhanced = () => {
 
       {/* Pagination - Table View Only */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            Showing {filteredAndSortedMeetings.length} of {meetings.length} meetings
-          </div>
-          <div className="flex gap-2">
+        <div className="mt-4 flex items-center justify-end">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Go to previous page"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300" aria-current="page" aria-label={`Page ${currentPage} of ${totalPages}`}>
+            <span className="px-3 text-sm text-gray-600 dark:text-gray-400" aria-current="page" aria-label={`Page ${currentPage} of ${totalPages}`}>
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Go to next page"
             >
               Next

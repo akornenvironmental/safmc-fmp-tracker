@@ -445,27 +445,25 @@ const ActionsEnhanced = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
+      {/* Page Header */}
+      <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100">Actions & Amendments</h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Showing {filteredAndSortedActions.length} of {actions.length} actions
-          </p>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Actions and amendments are automatically synced weekly
+          <h1 className="font-heading text-2xl font-bold text-gray-900 dark:text-gray-100">Actions & Amendments</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Actions and amendments are automatically synced weekly from SAFMC.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
+        <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 items-center">
           <button
             onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             <Settings size={14} />
             Columns
           </button>
           <div className="relative">
             <button
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
               onClick={(e) => {
                 const menu = e.currentTarget.nextElementSibling;
                 menu.classList.toggle('hidden');
@@ -503,7 +501,7 @@ const ActionsEnhanced = () => {
           <button
             onClick={syncActions}
             disabled={syncing}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-brand-blue-light disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing...' : 'Sync Actions'}
@@ -545,7 +543,7 @@ const ActionsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[150px] bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search actions by title, FMP, progress stage, or description"
         />
 
@@ -553,7 +551,7 @@ const ActionsEnhanced = () => {
         <div className="relative" ref={stageDropdownRef}>
           <button
             onClick={() => setShowStageDropdown(!showStageDropdown)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             Progress Stage
             {filterStage.length > 0 && (
@@ -588,7 +586,7 @@ const ActionsEnhanced = () => {
         <div className="relative" ref={fmpDropdownRef}>
           <button
             onClick={() => setShowFMPDropdown(!showFMPDropdown)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             FMP
             {filterFMP.length > 0 && (
@@ -623,7 +621,7 @@ const ActionsEnhanced = () => {
         <div className="relative" ref={typeDropdownRef}>
           <button
             onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             Type
             {filterType.length > 0 && (
@@ -661,7 +659,7 @@ const ActionsEnhanced = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+          className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           aria-label="Number of actions to display per page"
         >
           <option value={20}>Show 20</option>
@@ -673,7 +671,7 @@ const ActionsEnhanced = () => {
         {/* Reset Button */}
         <button
           onClick={handleReset}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           title="Reset filters, sorting, and selection"
         >
           <RotateCcw size={14} />
@@ -681,13 +679,20 @@ const ActionsEnhanced = () => {
         </button>
       </div>
 
+      {/* Table Count */}
+      <div className="mt-6 mb-2 flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing <span className="font-medium text-gray-900 dark:text-gray-100">{filteredAndSortedActions.length}</span> of <span className="font-medium text-gray-900 dark:text-gray-100">{actions.length}</span> actions
+        </p>
+      </div>
+
       {/* Actions Table */}
-      <div className="mt-6 bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="bg-white dark:bg-gray-800 shadow overflow-x-auto sm:rounded-lg">
+        <table className="min-w-full">
           <caption className="sr-only">
             Actions tracker with {filteredAndSortedActions.length} actions. Table includes columns for selection, title, FMP, progress stage, progress percentage, and last updated date. Click column headers to sort.
           </caption>
-          <thead className="bg-gray-50 dark:bg-gray-900">
+          <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th scope="col" className="px-2 py-1.5 text-left">
                 <input
@@ -724,7 +729,7 @@ const ActionsEnhanced = () => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white dark:bg-gray-800">
             {loading ? (
               <tr>
                 <td colSpan={getDisplayColumns().length + 1} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -739,7 +744,7 @@ const ActionsEnhanced = () => {
               </tr>
             ) : (
               paginatedActions.map((action, index) => (
-                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150`}>
+                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors`}>
                   <td className="px-2 py-0.5">
                     <input
                       type="checkbox"
@@ -834,25 +839,22 @@ const ActionsEnhanced = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            Showing {filteredAndSortedActions.length} of {actions.length} actions
-          </div>
-          <div className="flex gap-2">
+        <div className="mt-4 flex items-center justify-end">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+            <span className="px-3 text-sm text-gray-600 dark:text-gray-400">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
