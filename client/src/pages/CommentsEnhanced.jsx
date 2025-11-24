@@ -543,16 +543,8 @@ const CommentsEnhanced = () => {
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
           <button
-            onClick={handleReset}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 dark:border-slate-600 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800 dark:to-gray-800 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:from-slate-100 hover:to-gray-100 dark:hover:from-slate-700 dark:hover:to-gray-700 hover:border-slate-400 transition-all"
-            title="Reset filters, sorting, and selection"
-          >
-            <RotateCcw size={14} />
-            Reset
-          </button>
-          <button
             onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 dark:border-indigo-600 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 shadow-sm hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-900/50 dark:hover:to-purple-900/50 hover:border-indigo-400 transition-all"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <Settings size={14} />
             Columns
@@ -560,11 +552,7 @@ const CommentsEnhanced = () => {
           <button
             onClick={syncComments}
             disabled={syncing}
-            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
-              syncing
-                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 hover:from-emerald-100 hover:to-teal-100 hover:border-emerald-400'
-            }`}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-brand-blue-light disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
             {syncing ? 'Syncing...' : 'Sync Comments'}
@@ -572,11 +560,7 @@ const CommentsEnhanced = () => {
           <button
             onClick={() => setShowAnalysisModal(true)}
             disabled={comments.length === 0}
-            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
-              comments.length === 0
-                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'border-violet-300 dark:border-violet-600 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-900/30 dark:to-fuchsia-900/30 text-violet-700 dark:text-violet-300 hover:from-violet-100 hover:to-fuchsia-100 dark:hover:from-violet-900/50 dark:hover:to-fuchsia-900/50 hover:border-violet-400'
-            }`}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Sparkles size={14} />
             AI Analysis
@@ -584,26 +568,10 @@ const CommentsEnhanced = () => {
           <button
             onClick={detectSpecies}
             disabled={detectingSpecies || comments.length === 0}
-            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
-              detectingSpecies || comments.length === 0
-                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'border-teal-300 dark:border-teal-600 bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 text-teal-700 dark:text-teal-300 hover:from-teal-100 hover:to-emerald-100 dark:hover:from-teal-900/50 dark:hover:to-emerald-900/50 hover:border-teal-400'
-            }`}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Fish size={14} className={detectingSpecies ? 'animate-pulse' : ''} />
             {detectingSpecies ? 'Detecting...' : 'Detect Species'}
-          </button>
-          <button
-            onClick={exportToCSV}
-            disabled={filteredAndSortedComments.length === 0}
-            className={`inline-flex items-center gap-1.5 justify-center rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm transition-all ${
-              filteredAndSortedComments.length === 0
-                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'border-sky-300 dark:border-sky-600 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30 text-sky-700 dark:text-sky-300 hover:from-sky-100 hover:to-cyan-100 dark:hover:from-sky-900/50 dark:hover:to-cyan-900/50 hover:border-sky-400'
-            }`}
-          >
-            <Download size={14} />
-            Export CSV
           </button>
         </div>
       </div>
@@ -944,8 +912,9 @@ const CommentsEnhanced = () => {
         </div>
       )}
 
-      {/* Search and page size */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
+      {/* Single row: Search → Filters → Export → Show → Reset */}
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        {/* Search input */}
         <input
           type="text"
           placeholder="Search comments..."
@@ -954,16 +923,70 @@ const CommentsEnhanced = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          className="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
+          className="flex-1 min-w-[150px] bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           aria-label="Search comments by name, organization, position, or comment text"
         />
+
+        {/* FMP Filter */}
+        {uniqueFmps.length > 0 && (
+          <select
+            value={activeFilters.fmp}
+            onChange={(e) => setActiveFilters(prev => ({ ...prev, fmp: e.target.value }))}
+            className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+          >
+            <option value="">All FMPs</option>
+            {uniqueFmps.map(fmp => (
+              <option key={fmp} value={fmp}>{fmp}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Position Filter */}
+        {uniquePositions.length > 0 && (
+          <select
+            value={activeFilters.position}
+            onChange={(e) => setActiveFilters(prev => ({ ...prev, position: e.target.value }))}
+            className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+          >
+            <option value="">All Positions</option>
+            {uniquePositions.map(pos => (
+              <option key={pos} value={pos}>{pos}</option>
+            ))}
+          </select>
+        )}
+
+        {/* State Filter */}
+        {uniqueStates.length > 0 && (
+          <select
+            value={activeFilters.state}
+            onChange={(e) => setActiveFilters(prev => ({ ...prev, state: e.target.value }))}
+            className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
+          >
+            <option value="">All States</option>
+            {uniqueStates.map(state => (
+              <option key={state} value={state}>{state}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Export Button */}
+        <button
+          onClick={exportToCSV}
+          disabled={filteredAndSortedComments.length === 0}
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download size={14} />
+          Export
+        </button>
+
+        {/* Page Size */}
         <select
           value={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white dark:bg-gray-800 dark:text-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2 border text-gray-900 dark:text-gray-100"
           aria-label="Number of comments to display per page"
         >
           <option value={20}>Show 20</option>
@@ -971,6 +994,16 @@ const CommentsEnhanced = () => {
           <option value={100}>Show 100</option>
           <option value={999999}>Show ALL</option>
         </select>
+
+        {/* Reset Button */}
+        <button
+          onClick={handleReset}
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+          title="Reset filters, sorting, and selection"
+        >
+          <RotateCcw size={14} />
+          Reset
+        </button>
       </div>
 
       {/* Comments Table */}

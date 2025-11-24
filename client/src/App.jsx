@@ -23,7 +23,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-23-v3-flex-search';
+const BUILD_VERSION = '2025-11-23-v4-comments-ui-fix';
 
 function App() {
   // Log build version on mount (forces this code into bundle)
