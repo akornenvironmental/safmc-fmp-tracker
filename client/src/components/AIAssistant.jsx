@@ -73,42 +73,43 @@ const AIAssistant = () => {
   };
 
   return (
-    <div className="fixed top-0 right-0 bottom-0 z-50">
+    <div className="fixed top-0 right-0 bottom-0 z-40">
       {isExpanded && (
-        <div ref={panelRef} className="bg-white dark:bg-gray-800 border-l-2 border-brand-blue shadow-2xl h-full" style={{ width: '450px' }}>
+        <div ref={panelRef} className="bg-white dark:bg-gray-800 border-l-4 border-brand-green shadow-2xl h-full" style={{ width: '450px' }}>
           <div className="h-full flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between px-6 py-4 border-b-2 border-brand-green dark:border-brand-green">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-brand-blue to-brand-green rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-blue to-blue-600 rounded-lg flex items-center justify-center shadow-md">
                   <MessageSquare className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">AI Assistant</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Ask questions about FMP development</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Powered by Claude AI</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsExpanded(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close AI Assistant"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 dark:bg-gray-900/50">
               {!response && !loading && (
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Try asking:</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Try asking:</p>
                   <div className="space-y-2">
                     {exampleQueries.map((example, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleExampleClick(example)}
-                        className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-brand-blue/10 dark:hover:bg-brand-blue/20 rounded-lg text-sm text-gray-700 dark:text-gray-300 transition-colors border border-gray-200 dark:border-gray-600"
+                        className="w-full text-left px-4 py-3 bg-white dark:bg-gray-800 hover:bg-brand-green/10 dark:hover:bg-brand-green/20 hover:border-brand-green rounded-lg text-sm text-gray-700 dark:text-gray-300 transition-all border-2 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md"
                       >
-                        <span className="text-brand-blue mr-2">→</span>
+                        <span className="text-brand-green font-bold mr-2">→</span>
                         {example}
                       </button>
                     ))}
@@ -119,8 +120,8 @@ const AIAssistant = () => {
               {loading && (
                 <div className="flex items-center justify-center py-12">
                   <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Analyzing...</p>
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-brand-green mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">Analyzing with Claude AI...</p>
                   </div>
                 </div>
               )}
@@ -134,27 +135,28 @@ const AIAssistant = () => {
                         setResponse(null);
                         setQuery('');
                       }}
-                      className="text-sm text-brand-blue hover:text-brand-blue-dark"
+                      className="text-sm text-brand-green hover:text-green-700 dark:hover:text-green-400 font-medium transition-colors"
                     >
                       New Query
                     </button>
                   </div>
 
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  <div className="p-5 bg-white dark:bg-gray-800 rounded-lg border-2 border-brand-green/30 dark:border-brand-green/50 shadow-sm">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                       {response.message}
                     </p>
                   </div>
 
-                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                    Powered by Claude • All information should be verified with official SAFMC sources
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 italic border-t border-gray-200 dark:border-gray-700 pt-3">
+                    <div className="w-5 h-5 bg-gradient-to-br from-brand-blue to-blue-600 rounded flex-shrink-0"></div>
+                    <span>Powered by Claude AI • All information should be verified with official SAFMC sources</span>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Input */}
-            <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+            <div className="border-t-2 border-brand-green/30 dark:border-brand-green/50 p-4 bg-white dark:bg-gray-800">
               <form onSubmit={handleSubmit}>
                 <div className="flex gap-2">
                   <input
@@ -163,12 +165,13 @@ const AIAssistant = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Ask about FMP development..."
-                    className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-brand-green focus:border-brand-green transition-all"
                   />
                   <button
                     type="submit"
                     disabled={loading || !query.trim()}
-                    className="px-6 py-3 bg-brand-blue text-white rounded-lg hover:bg-brand-blue-dark disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed font-medium transition-colors"
+                    className="px-6 py-3 bg-brand-green text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed font-medium transition-all shadow-sm hover:shadow-md disabled:shadow-none flex items-center justify-center"
+                    aria-label="Send question"
                   >
                     <Send className="w-5 h-5" />
                   </button>
@@ -183,16 +186,19 @@ const AIAssistant = () => {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-b from-brand-blue to-brand-green text-white shadow-lg hover:from-brand-blue-dark hover:to-brand-green-dark transition-all flex items-center justify-center"
+          className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-b from-brand-green to-green-600 text-white shadow-xl hover:from-green-600 hover:to-green-700 transition-all flex items-center justify-center border-l-4 border-brand-blue"
           style={{
             writingMode: 'vertical-rl',
             textOrientation: 'mixed',
-            padding: '12px 8px',
-            borderTopLeftRadius: '6px',
-            borderBottomLeftRadius: '6px',
+            padding: '16px 10px',
+            borderTopLeftRadius: '8px',
+            borderBottomLeftRadius: '8px',
           }}
+          aria-label="Open AI Assistant"
+          title="Open AI Assistant"
         >
-          <span className="text-xs font-medium whitespace-nowrap">AI Assistant</span>
+          <MessageSquare className="w-5 h-5 mb-2" />
+          <span className="text-sm font-bold whitespace-nowrap tracking-wide">AI ASSISTANT</span>
         </button>
       )}
     </div>
