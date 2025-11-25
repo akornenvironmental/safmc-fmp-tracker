@@ -64,7 +64,7 @@ const FeedbackButton = ({ component = 'General' }) => {
       {/* Floating Feedback Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-brand-blue hover:bg-blue-700 text-white rounded-full p-3 shadow-lg transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 z-40"
+        className="fixed bottom-6 right-6 bg-brand-green hover:bg-green-600 text-white rounded-full p-3 shadow-lg transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-green-300 dark:focus:ring-green-800 z-40"
         title="Send Feedback"
         aria-label="Send Feedback"
       >

@@ -1,50 +1,97 @@
 import { Link } from 'react-router-dom';
-import safmcLogo from '../assets/safmc-logo.jpg';
+import { Shield, CheckCircle } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-r from-brand-blue to-brand-blue-dark border-t-4 border-brand-green mt-auto">
-      <div className="max-w-[1600px] mx-auto py-5 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-3">
-          {/* Top Row: Logo, Title and Version */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-2 border-b border-blue-300/30">
-            <div className="flex items-center gap-3">
-              <img src={safmcLogo} alt="SAFMC Logo" className="h-12 w-auto rounded" />
-              <h3 className="text-lg font-bold text-white">SAFMC FMP Tracker</h3>
+    <footer id="footer" className="bg-gradient-to-r from-brand-blue to-blue-700 text-white mt-auto border-t-4 border-brand-green">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column - Notices */}
+          <div className="space-y-4">
+            {/* Privacy Notice */}
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Public Data System</h3>
+                <p className="text-xs text-blue-100 leading-relaxed">
+                  This system contains publicly available data from SAFMC.net, including fishery management plan amendments,
+                  council meetings, public comments, and stock assessments. All data is sourced from official SAFMC publications.
+                </p>
+              </div>
             </div>
 
-            {/* Version and Public Data Badge */}
-            <div className="flex items-center gap-3 text-base text-blue-100">
-              <span>v1.0.0</span>
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4 text-brand-green" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Public Data
-              </span>
+            {/* AI Notice */}
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-brand-green flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-sm mb-1">AI-Powered Analysis</h3>
+                <p className="text-xs text-blue-100 leading-relaxed">
+                  This system uses AI-powered tools to assist with data analysis and organization.
+                  All AI-generated information should be independently verified for accuracy.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Data Source Notice */}
-          <div className="pb-2 border-b border-blue-300/30">
-            <p className="text-sm text-blue-100">
-              Tracking system for South Atlantic FMP amendments, meetings, and public comments. Data sourced from <a href="https://safmc.net" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">SAFMC.net</a>.
-            </p>
-          </div>
-
-          {/* Bottom Row: Copyright, Contact & Links */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-base">
-              <p className="text-white">
-                © {currentYear} <a href="https://akornenvironmental.com/" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-brand-green transition-colors">akorn environmental consulting, LLC</a>
+          {/* Right Column - System Info */}
+          <div className="space-y-4">
+            {/* System Info */}
+            <div>
+              <h3 className="font-semibold text-lg mb-2">SAFMC FMP Tracker</h3>
+              <p className="text-sm text-blue-100 mb-3">
+                Fishery Management Plan Amendment Tracking System
               </p>
-              <span className="hidden sm:inline text-blue-300">•</span>
-              <p className="text-blue-200 italic">Desktop optimized</p>
-              <span className="hidden sm:inline text-blue-300">•</span>
-              <p className="text-blue-100">
-                Issues? Suggestions? <a href="mailto:aaron.kornbluth@gmail.com?subject=SAFMC%20FMP%20Tracker%20Feedback" className="hover:text-brand-green transition-colors underline">Contact Aaron</a>
+              <div className="flex items-center gap-3 text-xs text-blue-200">
+                <span className="flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  v1.0.0
+                </span>
+                <span>•</span>
+                <span>Desktop Optimized</span>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <Link to="/privacy" className="text-blue-200 hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-blue-200 hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+              <a
+                href="https://safmc.net"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-200 hover:text-white transition-colors"
+              >
+                SAFMC.net
+              </a>
+            </div>
+
+            {/* Copyright */}
+            <div className="pt-4 border-t border-blue-400/30">
+              <p className="text-xs text-blue-200">
+                © {currentYear}{' '}
+                <a
+                  href="https://akornenvironmental.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-brand-green font-medium transition-colors"
+                >
+                  akorn environmental consulting, LLC
+                </a>
+              </p>
+              <p className="text-xs text-blue-200 mt-2">
+                Questions? Issues? Contact{' '}
+                <a
+                  href="mailto:aaron.kornbluth@gmail.com?subject=SAFMC%20FMP%20Tracker%20Feedback"
+                  className="text-white hover:text-brand-green transition-colors underline"
+                >
+                  Aaron Kornbluth
+                </a>
               </p>
             </div>
           </div>
