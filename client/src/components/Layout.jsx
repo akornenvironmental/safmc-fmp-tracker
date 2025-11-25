@@ -5,6 +5,7 @@ import { useSidebar } from '../contexts/SidebarContext';
 import Sidebar from './Sidebar';
 import AIAssistant from './AIAssistant';
 import FeedbackButton from './FeedbackButton';
+import Footer from './Footer';
 import { Sun, Moon, Type, Fish, ChevronRight } from 'lucide-react';
 
 const Layout = () => {
@@ -104,28 +105,10 @@ const Layout = () => {
         <div className="p-6 max-w-full">
           <Outlet />
         </div>
-
-        {/* Footer */}
-        <footer id="footer" className="bg-brand-blue text-white mt-auto">
-          <div className="p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold">SAFMC FMP Tracker</p>
-                <p className="text-xs text-blue-200 mt-1">
-                  Fishery Management Plan Tracking System
-                </p>
-              </div>
-              <div className="text-xs text-blue-200">
-                <p>v1.0.0 | Built by <a href="https://akornenvironmental.com" className="underline hover:text-white">akorn environmental</a></p>
-                <p className="mt-1">Data from SAFMC.net, SEDAR, and NOAA</p>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-blue-400/30 text-xs text-blue-200">
-              <p>This system uses AI-powered tools. All AI-generated information should be reviewed for accuracy.</p>
-            </div>
-          </div>
-        </footer>
       </main>
+
+      {/* Footer */}
+      <Footer />
 
       {/* AI Assistant - Available on all pages */}
       <AIAssistant />
