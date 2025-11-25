@@ -230,6 +230,40 @@ def find_or_create_organization(
     return org
 
 
+def _extract_fmp_from_title(title: str) -> Optional[str]:
+    """
+    Extract FMP from amendment title
+
+    Examples:
+        "Snapper Grouper Amendment 56" -> "Snapper Grouper"
+        "Coral Amendment 11 / Shrimp Amendment 12" -> "Coral"
+        "Dolphin Wahoo Regulatory Amendment 3" -> "Dolphin Wahoo"
+    """
+    if not title:
+        return None
+
+    title_lower = title.lower()
+
+    # FMP keywords (ordered by specificity to avoid false matches)
+    fmp_patterns = [
+        ('Snapper Grouper', ['snapper-grouper', 'snapper grouper']),
+        ('Dolphin Wahoo', ['dolphin-wahoo', 'dolphin wahoo', 'dolphin/wahoo']),
+        ('Coastal Migratory Pelagics', ['coastal migratory pelagic', 'cmp', 'mackerel', 'cobia']),
+        ('Golden Crab', ['golden crab']),
+        ('Shrimp', ['shrimp']),
+        ('Spiny Lobster', ['spiny lobster', 'lobster']),
+        ('Coral', ['coral']),
+        ('Sargassum', ['sargassum'])
+    ]
+
+    for fmp_name, keywords in fmp_patterns:
+        for keyword in keywords:
+            if keyword in title_lower:
+                return fmp_name
+
+    return None
+
+
 def find_or_create_action(
     amendment_title: str,
     description: str = None,
@@ -277,16 +311,21 @@ def find_or_create_action(
         action_id_base = action_id_base.replace(f'-{word}', '')
     action_id_base = action_id_base.strip('-')[:50]  # Limit length
 
+    # Extract FMP from title
+    fmp = _extract_fmp_from_title(amendment_title)
+    logger.info(f"Extracted FMP '{fmp}' from title: {amendment_title}")
+
     action = Action(
         action_id=action_id_base,
         title=amendment_title,
         description=description,
+        fmp=fmp,  # Add FMP field
         status=phase or 'Public Comment',
         type='Amendment',
         start_date=datetime.utcnow()
     )
 
     db.session.add(action)
-    logger.info(f"Created new action: {action_id_base} - {amendment_title}")
+    logger.info(f"Created new action: {action_id_base} - {amendment_title} (FMP: {fmp})")
 
     return action
