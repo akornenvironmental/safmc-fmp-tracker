@@ -186,19 +186,20 @@ const AIAssistant = () => {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-b from-brand-green to-green-600 text-white shadow-xl hover:from-green-600 hover:to-green-700 transition-all flex items-center justify-center border-l-4 border-brand-blue"
+          className="absolute top-1/2 right-0 -translate-y-1/2 bg-brand-green text-white shadow-lg hover:bg-green-600 transition-all flex flex-col items-center justify-center gap-2"
           style={{
             writingMode: 'vertical-rl',
             textOrientation: 'mixed',
-            padding: '16px 10px',
+            padding: '20px 12px',
             borderTopLeftRadius: '8px',
             borderBottomLeftRadius: '8px',
+            minHeight: '140px',
           }}
           aria-label="Open AI Assistant"
           title="Open AI Assistant"
         >
-          <MessageSquare className="w-5 h-5 mb-2" />
-          <span className="text-sm font-bold whitespace-nowrap tracking-wide">AI ASSISTANT</span>
+          <MessageSquare className="w-5 h-5" />
+          <span className="text-xs font-semibold whitespace-nowrap tracking-wider">AI ASSISTANT</span>
         </button>
       )}
     </div>
