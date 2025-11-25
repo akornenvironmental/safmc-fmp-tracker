@@ -921,3 +921,70 @@ def merge_duplicate_contacts():
     except Exception as e:
         logger.error(f"Error merging contacts: {e}")
         return jsonify({'error': 'Failed to merge contacts'}), 500
+
+
+# ==================== DATABASE MIGRATIONS ====================
+
+@bp.route('/run-migration', methods=['POST'])
+@admin_rate_limit("5 per hour")  # Strict limit on migrations
+@require_super_admin
+def run_migration():
+    """Run a database migration (super_admin only)"""
+    try:
+        data = request.get_json()
+        migration_name = data.get('migration')
+
+        if not migration_name:
+            return jsonify({'error': 'migration name is required'}), 400
+
+        # Whitelist of allowed migrations
+        allowed_migrations = [
+            'add_invitation_tracking_to_users',
+            'add_organization_to_users',
+            'add_refresh_token_to_users'
+        ]
+
+        if migration_name not in allowed_migrations:
+            return jsonify({'error': f'Migration {migration_name} not allowed'}), 400
+
+        # Import and run the migration
+        import sys
+        import importlib.util
+
+        migration_path = f'migrations/{migration_name}.py'
+        spec = importlib.util.spec_from_file_location(migration_name, migration_path)
+
+        if not spec or not spec.loader:
+            return jsonify({'error': f'Migration file not found: {migration_path}'}), 404
+
+        migration_module = importlib.util.module_from_spec(spec)
+        sys.modules[migration_name] = migration_module
+        spec.loader.exec_module(migration_module)
+
+        # Run the migration
+        success = migration_module.run_migration()
+
+        if success:
+            current_user = get_current_user()
+            log_activity(
+                activity_type='admin.migration_executed',
+                description=f'Executed migration: {migration_name}',
+                category='admin',
+                changes_made={'migration': migration_name}
+            )
+
+            logger.info(f"Migration {migration_name} executed by {current_user.email}")
+
+            return jsonify({
+                'success': True,
+                'message': f'Migration {migration_name} completed successfully'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Migration failed - check logs for details'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error running migration: {e}")
+        return jsonify({'error': f'Failed to run migration: {str(e)}'}), 500
