@@ -25,6 +25,10 @@ class User(db.Model):
     notify_new_comments = db.Column(db.Boolean, default=True, nullable=False)
     notify_weekly_digest = db.Column(db.Boolean, default=True, nullable=False)
 
+    # Invitation tracking
+    invitation_status = db.Column(db.Enum('pending', 'accepted', name='invitation_status'), nullable=True, default='pending')
+    invitation_accepted_at = db.Column(db.DateTime, nullable=True)
+
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -41,7 +45,9 @@ class User(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'email_notifications': self.email_notifications,
             'notify_new_comments': self.notify_new_comments,
-            'notify_weekly_digest': self.notify_weekly_digest
+            'notify_weekly_digest': self.notify_weekly_digest,
+            'invitation_status': self.invitation_status,
+            'invitation_accepted_at': self.invitation_accepted_at.isoformat() if self.invitation_accepted_at else None
         }
 
     def __repr__(self):

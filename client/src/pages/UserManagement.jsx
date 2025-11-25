@@ -383,6 +383,9 @@ const UserManagement = () => {
                 Role
               </th>
               <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Invitation
+              </th>
+              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Created
               </th>
               <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -393,7 +396,7 @@ const UserManagement = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                   <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p>No users found</p>
                   {searchQuery && (
@@ -426,6 +429,24 @@ const UserManagement = () => {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(user.role)}`}>
                       {getRoleDisplayName(user.role)}
                     </span>
+                  </td>
+                  <td className="px-2 py-0.5 whitespace-nowrap">
+                    {user.invitation_status === 'accepted' ? (
+                      <div className="flex flex-col">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          Accepted
+                        </span>
+                        {user.invitation_accepted_at && (
+                          <span className="text-xs text-gray-500 mt-0.5">
+                            {new Date(user.invitation_accepted_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        Pending
+                      </span>
+                    )}
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap text-xs text-gray-500">
                     {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
