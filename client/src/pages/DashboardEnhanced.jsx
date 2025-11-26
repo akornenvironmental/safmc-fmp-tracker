@@ -120,16 +120,17 @@ const DashboardEnhanced = () => {
 
       const progress = action.progress || 0;
       const phase = action.phase || '';
-      console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress} | Phase: ${phase}`);
+      const isUnderDev = action.is_under_development || false;
+      console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress} | Phase: ${phase} | Under Dev: ${isUnderDev}`);
 
-      // Classify actions by phase and progress:
-      // - Completed: Implementation phase (95%+) - these are live and implemented
-      // - In Progress: Any action with progress > 0 (Development, Review, Federal Review)
-      // - Pending: No progress and no phase - truly not started
-      if (progress >= 95 || phase === 'Implementation') {
-        fmpMap[action.fmp].completed++;
-      } else if (progress > 0 || (phase && phase !== 'None')) {
+      // Classify actions using is_under_development field:
+      // - In Progress: Actions actively under development (from "Amendments Under Development" page)
+      // - Completed: Historical/implemented amendments (not actively under development)
+      // - Pending: New actions with no progress and no classification yet
+      if (isUnderDev) {
         fmpMap[action.fmp].inProgress++;
+      } else if (progress > 0 || phase) {
+        fmpMap[action.fmp].completed++;
       } else {
         fmpMap[action.fmp].pending++;
       }

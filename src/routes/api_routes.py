@@ -470,6 +470,7 @@ def scrape_amendments():
                     description=amendment_data['description'],
                     lead_staff=amendment_data['lead_staff'],
                     source_url=amendment_data['source_url'],
+                    is_under_development=amendment_data.get('is_under_development', False),
                     last_scraped=datetime.utcnow()
                 )
                 db.session.add(action)

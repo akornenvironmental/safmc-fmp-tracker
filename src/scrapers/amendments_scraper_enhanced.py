@@ -99,9 +99,15 @@ class EnhancedAmendmentsScraper:
         try:
             # 1. Scrape main amendments page (under development)
             logger.info("Scraping main amendments page...")
-            amendments = self.scrape_amendments_page()
-            results['amendments'].extend(amendments)
+            amendments_under_dev = self.scrape_amendments_page()
+            # Mark these as under development
+            for amend in amendments_under_dev:
+                amend['is_under_development'] = True
+            results['amendments'].extend(amendments_under_dev)
             results['metadata']['sources_scraped'].append('amendments-under-development')
+
+            # Track titles of amendments under development for matching
+            under_dev_titles = {self._normalize_title(a.get('title', '')) for a in amendments_under_dev if a.get('title')}
 
             # 2. Scrape each FMP page for current and completed amendments
             for fmp_name, url in self.FMP_PAGES.items():
@@ -109,6 +115,10 @@ class EnhancedAmendmentsScraper:
                     logger.info(f"Scraping {fmp_name} FMP page...")
                     self._rate_limit_wait()
                     fmp_data = self.scrape_fmp_page_comprehensive(fmp_name, url)
+                    # Mark amendments from FMP pages - check if they match under-development
+                    for amend in fmp_data['amendments']:
+                        normalized_title = self._normalize_title(amend.get('title', ''))
+                        amend['is_under_development'] = normalized_title in under_dev_titles
                     results['amendments'].extend(fmp_data['amendments'])
                     results['documents'].extend(fmp_data['documents'])
                     results['metadata']['sources_scraped'].append(fmp_name)
@@ -590,6 +600,13 @@ class EnhancedAmendmentsScraper:
                 seen[action_id] = amendment
 
         return list(seen.values())
+
+    def _normalize_title(self, title: str) -> str:
+        """Normalize title for matching (remove extra whitespace, lowercase, etc.)"""
+        if not title:
+            return ""
+        # Remove extra whitespace and convert to lowercase for comparison
+        return ' '.join(title.lower().split())
 
     def _generate_action_id(self, title: str) -> str:
         """Generate action ID from title"""
