@@ -139,38 +139,50 @@ const DashboardEnhanced = () => {
     return result;
   }, [actions]);
 
-  // Get recent activity
+  // Get recent activity - focus on active amendments and upcoming meetings
   const recentActivity = useMemo(() => {
     const activity = [];
 
-    // Add recent actions
-    actions.slice(0, 5).forEach(action => {
-      activity.push({
-        type: 'action',
-        title: action.title,
-        subtitle: action.fmp,
-        date: action.last_updated,
-        link: `/actions`,
-        icon: FileText
-      });
-    });
+    // Add active/planned amendments (UNDERWAY, PLANNED, Public Comment)
+    const activeActions = actions.filter(a =>
+      a.status === 'UNDERWAY' || a.status === 'PLANNED' || a.status === 'Public Comment'
+    );
 
-    // Add upcoming meetings
-    meetings.slice(0, 3).forEach(meeting => {
-      activity.push({
-        type: 'meeting',
-        title: meeting.title,
-        subtitle: meeting.location,
-        date: meeting.start_date,
-        link: `/meetings`,
-        icon: Calendar
+    // Sort by last_updated and take top 5
+    activeActions
+      .sort((a, b) => new Date(b.last_updated || 0) - new Date(a.last_updated || 0))
+      .slice(0, 5)
+      .forEach(action => {
+        activity.push({
+          type: 'action',
+          title: action.title,
+          subtitle: `${action.status} - ${action.fmp}`,
+          date: action.last_updated,
+          link: `/actions`,
+          icon: FileText
+        });
       });
-    });
+
+    // Add upcoming meetings (future dates only)
+    const now = new Date();
+    meetings
+      .filter(m => m.start_date && new Date(m.start_date) >= now)
+      .slice(0, 5)
+      .forEach(meeting => {
+        activity.push({
+          type: 'meeting',
+          title: meeting.title,
+          subtitle: meeting.location || 'TBD',
+          date: meeting.start_date,
+          link: `/meetings`,
+          icon: Calendar
+        });
+      });
 
     return activity.sort((a, b) => {
       if (!a.date) return 1;
       if (!b.date) return -1;
-      return new Date(b.date) - new Date(a.date);
+      return new Date(a.date) - new Date(b.date); // Sort chronologically (upcoming first)
     }).slice(0, 8);
   }, [actions, meetings]);
 
@@ -268,50 +280,69 @@ const DashboardEnhanced = () => {
           ) : fmpStats.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">No FMP data available</div>
           ) : (
-            <div className="space-y-4">
-              {fmpStats.slice(0, 6).map(fmp => {
-                // Find max value for scaling
-                const maxCount = Math.max(fmp.completed, fmp.inProgress, fmp.planned);
-                return (
-                  <div key={fmp.fmp}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {fmp.total} total
+            <div className="space-y-6">
+              {fmpStats.slice(0, 6).map(fmp => (
+                <div key={fmp.fmp} className="space-y-2">
+                  {/* FMP Header */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{fmp.total} total</span>
+                  </div>
+
+                  {/* Stacked Bar Chart */}
+                  <div className="relative w-full h-8 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex">
+                    {fmp.completed > 0 && (
+                      <div
+                        className="bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-xs font-medium text-white"
+                        style={{ width: `${(fmp.completed / fmp.total) * 100}%` }}
+                        title={`${fmp.completed} completed`}
+                      >
+                        {fmp.completed > 5 && fmp.completed}
+                      </div>
+                    )}
+                    {fmp.inProgress > 0 && (
+                      <div
+                        className="bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-xs font-medium text-white"
+                        style={{ width: `${(fmp.inProgress / fmp.total) * 100}%` }}
+                        title={`${fmp.inProgress} in progress`}
+                      >
+                        {fmp.inProgress > 2 && fmp.inProgress}
+                      </div>
+                    )}
+                    {fmp.planned > 0 && (
+                      <div
+                        className="bg-yellow-500 dark:bg-yellow-600 flex items-center justify-center text-xs font-medium text-white"
+                        style={{ width: `${(fmp.planned / fmp.total) * 100}%` }}
+                        title={`${fmp.planned} planned`}
+                      >
+                        {fmp.planned > 2 && fmp.planned}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Legend */}
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 bg-gray-400 dark:bg-gray-600 rounded"></div>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        <span className="font-semibold">{fmp.completed}</span> Done
                       </span>
                     </div>
-                    <div className="flex items-end gap-2 h-16">
-                      {/* Completed bar */}
-                      <div className="flex-1 flex flex-col items-center gap-1">
-                        <div
-                          className="w-full bg-green-500 dark:bg-green-600 rounded-t transition-all"
-                          style={{ height: `${maxCount > 0 ? (fmp.completed / maxCount) * 100 : 0}%` }}
-                        ></div>
-                        <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{fmp.completed}</span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400">Done</span>
-                      </div>
-                      {/* In Progress bar */}
-                      <div className="flex-1 flex flex-col items-center gap-1">
-                        <div
-                          className="w-full bg-blue-500 dark:bg-blue-600 rounded-t transition-all"
-                          style={{ height: `${maxCount > 0 ? (fmp.inProgress / maxCount) * 100 : 0}%` }}
-                        ></div>
-                        <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{fmp.inProgress}</span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400">Active</span>
-                      </div>
-                      {/* Planned bar */}
-                      <div className="flex-1 flex flex-col items-center gap-1">
-                        <div
-                          className="w-full bg-yellow-500 dark:bg-yellow-600 rounded-t transition-all"
-                          style={{ height: `${maxCount > 0 ? (fmp.planned / maxCount) * 100 : 0}%` }}
-                        ></div>
-                        <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{fmp.planned}</span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400">Planned</span>
-                      </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 bg-blue-500 dark:bg-blue-600 rounded"></div>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        <span className="font-semibold">{fmp.inProgress}</span> Active
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 bg-yellow-500 dark:bg-yellow-600 rounded"></div>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        <span className="font-semibold">{fmp.planned}</span> Planned
+                      </span>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           )}
         </div>
