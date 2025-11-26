@@ -206,14 +206,10 @@ def verify_login():
             )
             return jsonify({'error': 'Login link has expired. Please request a new one.'}), 401
 
-        # Mark invitation as accepted on first login (if column exists)
-        try:
-            if user.invitation_status == 'pending':
-                user.invitation_status = 'accepted'
-                user.invitation_accepted_at = datetime.utcnow()
-        except Exception:
-            # Column doesn't exist yet - migration not run
-            pass
+        # Mark invitation as accepted on first login
+        if user.invitation_status == 'pending':
+            user.invitation_status = 'accepted'
+            user.invitation_accepted_at = datetime.utcnow()
 
         # Update last login and clear token
         user.last_login = datetime.utcnow()
