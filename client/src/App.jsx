@@ -6,7 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import AIAssistant from './components/AIAssistant';
+import AIQueryBar from './components/AIQueryBar';
 import Dashboard from './pages/DashboardEnhanced';
 import ActionsEnhanced from './pages/ActionsEnhanced';
 import ActionsNew from './pages/ActionsNew';
@@ -24,7 +24,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-24-v18-ai-assistant-auth-fix';
+const BUILD_VERSION = '2025-11-26-v19-ai-query-bar';
 
 function App() {
   // Log build version on mount (forces this code into bundle)
@@ -69,7 +69,7 @@ function App() {
               <Route path="admin/feedback" element={<FeedbackManagement />} />
             </Route>
           </Routes>
-            <AIAssistant />
+            <AIQueryBar />
             <ToastContainer position="top-right" autoClose={3000} />
           </Router>
         </SidebarProvider>
