@@ -119,9 +119,11 @@ const DashboardEnhanced = () => {
       fmpMap[action.fmp].total++;
 
       const progress = action.progress || 0;
-      console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress}`);
+      const phase = action.phase || '';
+      console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress} | Phase: ${phase}`);
 
-      if (progress >= 100) fmpMap[action.fmp].completed++;
+      // Treat Implementation phase (95%+) as completed since these are live
+      if (progress >= 95 || phase === 'Implementation') fmpMap[action.fmp].completed++;
       else if (progress > 0) fmpMap[action.fmp].inProgress++;
       else fmpMap[action.fmp].pending++;
     });
