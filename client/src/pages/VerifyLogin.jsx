@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -8,9 +8,15 @@ const VerifyLogin = () => {
   const { verifyLogin } = useAuth();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [error, setError] = useState('');
+  const verifyingRef = useRef(false); // Prevent multiple verification attempts
 
   useEffect(() => {
     const verify = async () => {
+      // Prevent multiple simultaneous verifications
+      if (verifyingRef.current) {
+        return;
+      }
+
       const token = searchParams.get('token');
       const email = searchParams.get('email');
 
@@ -20,6 +26,7 @@ const VerifyLogin = () => {
         return;
       }
 
+      verifyingRef.current = true;
       const result = await verifyLogin(token, email);
 
       if (result.success) {
@@ -35,7 +42,7 @@ const VerifyLogin = () => {
     };
 
     verify();
-  }, [searchParams, verifyLogin, navigate]);
+  }, [searchParams, navigate]); // Removed verifyLogin from dependencies
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">

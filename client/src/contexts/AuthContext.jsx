@@ -154,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const requestLogin = async (email) => {
+  const requestLogin = useCallback(async (email) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/request-login`, {
         method: 'POST',
@@ -174,9 +174,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: error.message };
     }
-  };
+  }, []);
 
-  const verifyLogin = async (token, email) => {
+  const verifyLogin = useCallback(async (token, email) => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/auth/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
@@ -206,9 +206,9 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { success: false, error: error.message };
     }
-  };
+  }, [scheduleRefresh]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       // Clear refresh timeout
       if (refreshTimeoutRef.current) {
@@ -243,7 +243,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setAuthenticated(false);
     }
-  };
+  }, []);
 
   const isSuperAdmin = () => {
     return user?.role === 'super_admin';
