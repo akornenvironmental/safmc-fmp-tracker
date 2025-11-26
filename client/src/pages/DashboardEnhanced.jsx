@@ -122,10 +122,17 @@ const DashboardEnhanced = () => {
       const phase = action.phase || '';
       console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress} | Phase: ${phase}`);
 
-      // Treat Implementation phase (95%+) as completed since these are live
-      if (progress >= 95 || phase === 'Implementation') fmpMap[action.fmp].completed++;
-      else if (progress > 0) fmpMap[action.fmp].inProgress++;
-      else fmpMap[action.fmp].pending++;
+      // Classify actions by phase and progress:
+      // - Completed: Implementation phase (95%+) - these are live and implemented
+      // - Pending: Development phase or no phase - early planning stages (Pre-Scoping, Scoping)
+      // - In Progress: Review/Federal Review phases - actively being worked on
+      if (progress >= 95 || phase === 'Implementation') {
+        fmpMap[action.fmp].completed++;
+      } else if (phase === 'Development' || !phase || phase === 'None' || progress <= 25) {
+        fmpMap[action.fmp].pending++;
+      } else {
+        fmpMap[action.fmp].inProgress++;
+      }
     });
 
     const result = Object.entries(fmpMap)
