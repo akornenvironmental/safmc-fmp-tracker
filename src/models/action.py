@@ -34,6 +34,9 @@ class Action(db.Model):
     source_url = db.Column(db.String(500))
     documents_found = db.Column(db.Integer, default=0)
 
+    # Development status - True if amendment appears on "Amendments Under Development" page
+    is_under_development = db.Column(db.Boolean, default=False, nullable=False)
+
     # Tracking
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -64,6 +67,7 @@ class Action(db.Model):
             'committee': self.committee,
             'source_url': self.source_url,
             'documents_found': self.documents_found,
+            'is_under_development': self.is_under_development,
             'last_scraped': self.last_scraped.isoformat() if self.last_scraped else None,
             'last_updated': self.updated_at.isoformat() if self.updated_at else None
         }
