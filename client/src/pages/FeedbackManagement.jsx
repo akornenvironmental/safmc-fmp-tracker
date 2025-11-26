@@ -141,18 +141,19 @@ const FeedbackManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
-            <MessageSquare size={32} className="text-brand-blue" />
+    <div>
+      {/* Header */}
+      <div className="sm:flex sm:items-center sm:justify-between mb-6">
+        <div className="sm:flex-auto">
+          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+            <MessageSquare className="w-8 h-8 text-brand-blue" />
             Feedback Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Review and manage user feedback submissions
           </p>
         </div>
+      </div>
 
         {/* Stats Cards */}
         {stats && (
@@ -236,7 +237,6 @@ const FeedbackManagement = () => {
             </div>
           )}
         </div>
-      </div>
 
       {/* Feedback Detail Modal */}
       {selectedFeedback && (
