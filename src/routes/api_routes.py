@@ -1835,9 +1835,8 @@ def fix_comment_links():
 # ==================== FEEDBACK ENDPOINT ====================
 
 @bp.route('/feedback', methods=['POST'])
-@require_auth
 def submit_feedback():
-    """Submit user feedback - stores in database and logs for review"""
+    """Submit user feedback - stores in database and logs for review (anonymous allowed)"""
     try:
         data = request.get_json()
 

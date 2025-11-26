@@ -125,7 +125,7 @@ const FeedbackButton = ({ component = 'General' }) => {
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="Share your thoughts, report a bug, or suggest an improvement..."
                     rows={5}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue dark:bg-gray-700 dark:text-white text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 text-sm"
                     disabled={submitting}
                     autoFocus
                   />
