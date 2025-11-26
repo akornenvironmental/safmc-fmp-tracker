@@ -150,6 +150,7 @@ const Sidebar = ({ user }) => {
     title: 'Admin',
     items: [
       ...(isAdmin ? [{ to: '/admin/logs', label: 'Activity Logs', icon: Activity }] : []),
+      ...(isAdmin ? [{ to: '/admin/feedback', label: 'Feedback', icon: MessageSquare }] : []),
       ...(isSuperAdmin ? [{ to: '/admin/users', label: 'User Management', icon: Users }] : []),
     ],
   } : null;

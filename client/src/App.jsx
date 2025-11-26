@@ -19,6 +19,7 @@ import SpeciesProfile from './pages/SpeciesProfile';
 import Compare from './pages/Compare';
 import UserManagement from './pages/UserManagement';
 import ActivityLogs from './pages/ActivityLogs';
+import FeedbackManagement from './pages/FeedbackManagement';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
@@ -65,6 +66,7 @@ function App() {
               <Route path="compare" element={<Compare />} />
               <Route path="admin/users" element={<UserManagement />} />
               <Route path="admin/logs" element={<ActivityLogs />} />
+              <Route path="admin/feedback" element={<FeedbackManagement />} />
             </Route>
           </Routes>
             <AIAssistant />

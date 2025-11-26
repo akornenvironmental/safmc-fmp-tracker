@@ -1882,3 +1882,189 @@ def submit_feedback():
         db.session.rollback()
         logger.error(f"Error submitting feedback: {e}")
         return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/feedback/all', methods=['GET'])
+@require_auth
+def get_all_feedback():
+    """Get all feedback submissions - admin only"""
+    try:
+        # Check if user is admin
+        if session.get('role') not in ['admin', 'super_admin']:
+            return jsonify({'error': 'Unauthorized - admin access required'}), 403
+
+        # Get query parameters
+        status_filter = request.args.get('status', 'all')
+        limit = request.args.get('limit', 100, type=int)
+        offset = request.args.get('offset', 0, type=int)
+
+        # Build query
+        query = """
+            SELECT id, user_email, user_name, component, url, feedback,
+                   status, admin_notes, created_at, reviewed_at, reviewed_by
+            FROM user_feedback
+        """
+
+        params = {}
+        if status_filter != 'all':
+            query += " WHERE status = :status"
+            params['status'] = status_filter
+
+        query += " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+        params['limit'] = limit
+        params['offset'] = offset
+
+        result = db.session.execute(text(query), params)
+        feedback_items = []
+
+        for row in result:
+            feedback_items.append({
+                'id': row[0],
+                'user_email': row[1],
+                'user_name': row[2],
+                'component': row[3],
+                'url': row[4],
+                'feedback': row[5],
+                'status': row[6],
+                'admin_notes': row[7],
+                'created_at': row[8].isoformat() if row[8] else None,
+                'reviewed_at': row[9].isoformat() if row[9] else None,
+                'reviewed_by': row[10]
+            })
+
+        # Get total count
+        count_query = "SELECT COUNT(*) FROM user_feedback"
+        if status_filter != 'all':
+            count_query += " WHERE status = :status"
+        count_result = db.session.execute(text(count_query), {'status': status_filter} if status_filter != 'all' else {})
+        total_count = count_result.scalar()
+
+        return jsonify({
+            'success': True,
+            'feedback': feedback_items,
+            'total': total_count,
+            'limit': limit,
+            'offset': offset
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching feedback: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/feedback/<int:feedback_id>', methods=['PATCH'])
+@require_auth
+def update_feedback_status(feedback_id):
+    """Update feedback status and add admin notes - admin only"""
+    try:
+        # Check if user is admin
+        if session.get('role') not in ['admin', 'super_admin']:
+            return jsonify({'error': 'Unauthorized - admin access required'}), 403
+
+        data = request.get_json()
+        new_status = data.get('status')
+        admin_notes = data.get('admin_notes')
+
+        if not new_status:
+            return jsonify({'error': 'Status is required'}), 400
+
+        # Valid statuses
+        valid_statuses = ['new', 'in_review', 'resolved', 'archived']
+        if new_status not in valid_statuses:
+            return jsonify({'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'}), 400
+
+        # Update feedback
+        update_query = """
+            UPDATE user_feedback
+            SET status = :status,
+                admin_notes = :admin_notes,
+                reviewed_at = :reviewed_at,
+                reviewed_by = :reviewed_by
+            WHERE id = :id
+            RETURNING id, status
+        """
+
+        result = db.session.execute(text(update_query), {
+            'status': new_status,
+            'admin_notes': admin_notes,
+            'reviewed_at': datetime.utcnow(),
+            'reviewed_by': session.get('email'),
+            'id': feedback_id
+        })
+
+        updated = result.fetchone()
+        if not updated:
+            return jsonify({'error': 'Feedback not found'}), 404
+
+        db.session.commit()
+
+        logger.info(f"Feedback {feedback_id} updated to {new_status} by {session.get('email')}")
+
+        return jsonify({
+            'success': True,
+            'message': 'Feedback updated successfully',
+            'feedback_id': updated[0],
+            'status': updated[1]
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating feedback: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/feedback/stats', methods=['GET'])
+@require_auth
+def get_feedback_stats():
+    """Get feedback statistics - admin only"""
+    try:
+        # Check if user is admin
+        if session.get('role') not in ['admin', 'super_admin']:
+            return jsonify({'error': 'Unauthorized - admin access required'}), 403
+
+        # Get status counts
+        status_query = """
+            SELECT status, COUNT(*) as count
+            FROM user_feedback
+            GROUP BY status
+        """
+        status_result = db.session.execute(text(status_query))
+        status_counts = {row[0]: row[1] for row in status_result}
+
+        # Get component counts
+        component_query = """
+            SELECT component, COUNT(*) as count
+            FROM user_feedback
+            GROUP BY component
+            ORDER BY count DESC
+            LIMIT 10
+        """
+        component_result = db.session.execute(text(component_query))
+        component_counts = {row[0]: row[1] for row in component_result}
+
+        # Get recent feedback count (last 7 days)
+        recent_query = """
+            SELECT COUNT(*) FROM user_feedback
+            WHERE created_at >= NOW() - INTERVAL '7 days'
+        """
+        recent_result = db.session.execute(text(recent_query))
+        recent_count = recent_result.scalar()
+
+        # Get total count
+        total_query = "SELECT COUNT(*) FROM user_feedback"
+        total_result = db.session.execute(text(total_query))
+        total_count = total_result.scalar()
+
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total': total_count,
+                'recent': recent_count,
+                'by_status': status_counts,
+                'by_component': component_counts
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching feedback stats: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
