@@ -72,17 +72,33 @@ const DashboardEnhanced = () => {
   const triggerScrape = async () => {
     try {
       setScraping(true);
+      const token = localStorage.getItem('authToken');
+
+      if (!token) {
+        alert('Please log in to update data.');
+        setScraping(false);
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/scrape/all`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+
       const data = await response.json();
 
-      if (data.success) {
-        alert('Scraping started! Data will be updated shortly.');
+      if (response.ok && data.success) {
+        alert('Data update started! The dashboard will refresh in a few seconds.');
         setTimeout(() => fetchDashboardData(), 3000);
+      } else {
+        alert(data.error || 'Failed to update data. Please try again.');
       }
     } catch (error) {
       console.error('Error triggering scrape:', error);
+      alert('Failed to update data. Please check your connection and try again.');
     } finally {
       setScraping(false);
     }
