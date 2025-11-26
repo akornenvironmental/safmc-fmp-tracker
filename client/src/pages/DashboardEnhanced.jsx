@@ -106,6 +106,10 @@ const DashboardEnhanced = () => {
 
   // Calculate FMP statistics
   const fmpStats = useMemo(() => {
+    console.log('=== CALCULATING FMP STATS ===');
+    console.log('Total actions:', actions.length);
+    console.log('Sample action (first):', actions[0]);
+
     const fmpMap = {};
     actions.forEach(action => {
       if (!action.fmp) return;
@@ -115,18 +119,24 @@ const DashboardEnhanced = () => {
       fmpMap[action.fmp].total++;
 
       const progress = action.progress || 0;
+      console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress}`);
+
       if (progress >= 100) fmpMap[action.fmp].completed++;
       else if (progress > 0) fmpMap[action.fmp].inProgress++;
       else fmpMap[action.fmp].pending++;
     });
 
-    return Object.entries(fmpMap)
+    const result = Object.entries(fmpMap)
       .map(([fmp, stats]) => ({
         fmp,
         ...stats,
         completionRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
       }))
       .sort((a, b) => b.total - a.total);
+
+    console.log('FMP Stats Result:', result);
+    console.log('=== END FMP STATS ===');
+    return result;
   }, [actions]);
 
   // Get recent activity
