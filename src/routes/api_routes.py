@@ -455,6 +455,7 @@ def scrape_amendments():
                 action.description = amendment_data['description']
                 action.lead_staff = amendment_data['lead_staff']
                 action.source_url = amendment_data.get('source_url', action.source_url)
+                action.status = amendment_data.get('status')
                 action.last_scraped = datetime.utcnow()
                 action.updated_at = datetime.utcnow()
                 items_updated += 1
@@ -471,7 +472,7 @@ def scrape_amendments():
                     description=amendment_data['description'],
                     lead_staff=amendment_data['lead_staff'],
                     source_url=amendment_data['source_url'],
-                    is_under_development=amendment_data.get('is_under_development', False),
+                    status=amendment_data.get('status'),
                     last_scraped=datetime.utcnow()
                 )
                 db.session.add(action)
@@ -543,6 +544,7 @@ def _run_comprehensive_scrape_background():
                     action.description = amendment_data['description']
                     action.lead_staff = amendment_data['lead_staff']
                     action.source_url = amendment_data.get('source_url', action.source_url)
+                    action.status = amendment_data.get('status')
 
                     # Enhanced fields
                     if amendment_data.get('detail_url'):
@@ -570,6 +572,7 @@ def _run_comprehensive_scrape_background():
                         description=amendment_data.get('detailed_description') or amendment_data['description'],
                         lead_staff=amendment_data['lead_staff'],
                         source_url=amendment_data.get('detail_url') or amendment_data.get('source_url'),
+                        status=amendment_data.get('status'),
                         last_scraped=datetime.utcnow()
                     )
 

@@ -100,9 +100,9 @@ class EnhancedAmendmentsScraper:
             # 1. Scrape main amendments page (under development)
             logger.info("Scraping main amendments page...")
             amendments_under_dev = self.scrape_amendments_page()
-            # Mark these as under development
+            # Mark these with appropriate status based on their stage
             for amend in amendments_under_dev:
-                amend['is_under_development'] = True
+                amend['status'] = self._determine_status(amend.get('progress_stage', ''))
             results['amendments'].extend(amendments_under_dev)
             results['metadata']['sources_scraped'].append('amendments-under-development')
 
@@ -115,10 +115,13 @@ class EnhancedAmendmentsScraper:
                     logger.info(f"Scraping {fmp_name} FMP page...")
                     self._rate_limit_wait()
                     fmp_data = self.scrape_fmp_page_comprehensive(fmp_name, url)
-                    # Mark amendments from FMP pages - check if they match under-development
+                    # Mark amendments from FMP pages with appropriate status
                     for amend in fmp_data['amendments']:
                         normalized_title = self._normalize_title(amend.get('title', ''))
-                        amend['is_under_development'] = normalized_title in under_dev_titles
+                        if normalized_title in under_dev_titles:
+                            amend['status'] = self._determine_status(amend.get('progress_stage', ''))
+                        else:
+                            amend['status'] = None  # Completed/historical amendments
                     results['amendments'].extend(fmp_data['amendments'])
                     results['documents'].extend(fmp_data['documents'])
                     results['metadata']['sources_scraped'].append(fmp_name)
@@ -607,6 +610,43 @@ class EnhancedAmendmentsScraper:
             return ""
         # Remove extra whitespace and convert to lowercase for comparison
         return ' '.join(title.lower().split())
+
+    def _determine_status(self, progress_stage: str) -> Optional[str]:
+        """
+        Determine amendment status based on progress stage.
+
+        Returns:
+            'PLANNED' - Pre-scoping or Scoping stage
+            'UNDERWAY' - Public Hearing, Secretarial Review, Final Approval, or Public Comment stages
+            'Public Comment' - If explicitly in public comment/hearing
+            None - Completed/Implemented amendments
+        """
+        if not progress_stage:
+            return None
+
+        stage_lower = progress_stage.lower()
+
+        # Pre-development stages
+        if any(x in stage_lower for x in ['pre-scoping', 'prescoping']):
+            return 'PLANNED'
+
+        # Scoping phase
+        if 'scoping' in stage_lower and 'pre' not in stage_lower:
+            return 'PLANNED'
+
+        # Active development/review stages
+        if any(x in stage_lower for x in ['public hearing', 'public comment', 'hearing']):
+            return 'Public Comment'
+
+        if any(x in stage_lower for x in ['secretarial review', 'final approval', 'council review', 'rule making', 'federal register']):
+            return 'UNDERWAY'
+
+        # Completed
+        if any(x in stage_lower for x in ['implement', 'complete']):
+            return None
+
+        # Default for amendments under development but unclear stage
+        return 'UNDERWAY'
 
     def _generate_action_id(self, title: str) -> str:
         """Generate action ID from title"""
