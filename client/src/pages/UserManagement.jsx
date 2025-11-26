@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 
 const UserManagement = () => {
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, user: currentUser } = useAuth();
   const navigate = useNavigate();
 
   // State
@@ -294,6 +294,35 @@ const UserManagement = () => {
     }
   };
 
+  // Handle role change
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update role');
+      }
+
+      // Update local state
+      setUsers(users.map(u => u.id === userId ? data.user : u));
+
+    } catch (err) {
+      console.error('Error updating role:', err);
+      alert(`Error: ${err.message}`);
+    }
+  };
+
   // Get role display name
   const getRoleDisplayName = (role) => {
     switch (role) {
@@ -397,19 +426,19 @@ const UserManagement = () => {
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 User
               </th>
-              <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="hidden md:table-cell px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Organization
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Role
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Invitation
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Actions
               </th>
             </tr>
@@ -427,35 +456,40 @@ const UserManagement = () => {
               </tr>
             ) : (
               filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                   {/* User Info */}
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-                          {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
-                        </div>
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                        {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                       </div>
-                      <div className="ml-3">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name || 'No name'}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name || 'No name'}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</div>
                       </div>
                     </div>
                   </td>
 
                   {/* Organization - Hidden on mobile */}
-                  <td className="hidden md:table-cell px-4 py-4 whitespace-nowrap">
+                  <td className="hidden md:table-cell px-2 py-2 whitespace-nowrap">
                     <span className="text-sm text-gray-700 dark:text-gray-300">
                       {user.organization || '-'}
                     </span>
                   </td>
 
-                  {/* Role - Plain Text */}
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <span className="text-sm text-gray-900 dark:text-white font-medium">
-                        {getRoleDisplayName(user.role)}
-                      </span>
+                  {/* Role - Dropdown */}
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <div className="flex flex-col gap-1">
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        disabled={user.id === currentUser?.id}
+                        className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed focus:ring-brand-blue focus:border-brand-blue"
+                      >
+                        <option value="editor">Editor</option>
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                      </select>
                       {!user.is_active && (
                         <span className="text-xs text-red-600 dark:text-red-400">Suspended</span>
                       )}
@@ -463,40 +497,41 @@ const UserManagement = () => {
                   </td>
 
                   {/* Invitation Status */}
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-2 py-2 whitespace-nowrap">
                     {user.invitation_status === 'accepted' ? (
                       <div className="flex flex-col">
-                        <span className="inline-flex items-center text-sm text-green-700 dark:text-green-400 font-medium">
-                          <Check className="w-4 h-4 mr-1" />
+                        <span className="inline-flex items-center text-xs text-green-700 dark:text-green-400 font-medium">
+                          <Check className="w-3 h-3 mr-1" />
                           Accepted
                         </span>
                         {user.invitation_accepted_at && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(user.invitation_accepted_at).toLocaleDateString()}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <span className="inline-flex items-center text-sm text-yellow-700 dark:text-yellow-400 font-medium">
+                      <span className="inline-flex items-center text-xs text-yellow-700 dark:text-yellow-400 font-medium">
                         Pending
                       </span>
                     )}
                   </td>
 
                   {/* Action Buttons */}
-                  <td className="px-4 py-4 whitespace-nowrap text-right">
-                    <div className="inline-flex items-center gap-2">
+                  <td className="px-2 py-2 whitespace-nowrap text-right">
+                    <div className="inline-flex items-center">
                       <button
                         onClick={() => handleResendInvite(user.id, user.email)}
-                        className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title="Send invite email"
+                        disabled={user.id === currentUser?.id}
+                        className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={user.id === currentUser?.id ? "Cannot send invite to yourself" : "Send invite email"}
                       >
                         <Send className="w-4 h-4" />
                       </button>
 
                       <button
                         onClick={() => handleEdit(user)}
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                         title="Edit user"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -504,20 +539,22 @@ const UserManagement = () => {
 
                       <button
                         onClick={() => handleToggleSuspend(user.id, user.is_active, user.email)}
+                        disabled={user.id === currentUser?.id}
                         className={`${
                           user.is_active
                             ? 'text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300'
                             : 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300'
-                        } p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
-                        title={user.is_active ? 'Suspend user' : 'Activate user'}
+                        } disabled:opacity-30 disabled:cursor-not-allowed`}
+                        title={user.id === currentUser?.id ? "Cannot suspend yourself" : (user.is_active ? 'Suspend user' : 'Activate user')}
                       >
                         {user.is_active ? <UserX className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
                       </button>
 
                       <button
                         onClick={() => handleDelete(user.id, user.email)}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title="Delete user"
+                        disabled={user.id === currentUser?.id}
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={user.id === currentUser?.id ? "Cannot delete yourself" : "Delete user"}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

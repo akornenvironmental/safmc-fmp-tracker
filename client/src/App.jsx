@@ -24,7 +24,7 @@ import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
-const BUILD_VERSION = '2025-11-26-v19-ai-query-bar';
+const BUILD_VERSION = '2025-11-26-v20-dashboard-status-fix';
 
 function App() {
   // Log build version on mount (forces this code into bundle)

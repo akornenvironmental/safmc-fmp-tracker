@@ -114,17 +114,32 @@ const DashboardEnhanced = () => {
       }
       fmpMap[action.fmp].total++;
 
-      const status = action.status || '';
+      const status = (action.status || '').toLowerCase();
+      const stage = (action.progress_stage || '').toLowerCase();
 
-      // Classify actions using status field:
-      // - In Progress: Status is "UNDERWAY" or "Public Comment" (actively being worked on)
-      // - Planned: Status is "PLANNED" (scheduled for development)
-      // - Completed: Everything else (historical/implemented amendments)
-      if (status === 'UNDERWAY' || status === 'Public Comment') {
+      // Classify actions using status field (primary) or progress_stage (fallback):
+      // - In Progress: Status is "UNDERWAY" or "Public Comment" OR stage contains "hearing", "review", "approval"
+      // - Planned: Status is "PLANNED" OR stage contains "scoping"
+      // - Completed: Everything else (implemented or null)
+
+      // Check for "Implemented" first - these are explicitly done
+      if (stage.includes('implement') || stage.includes('complete')) {
+        fmpMap[action.fmp].completed++;
+      }
+      // Check for active work stages
+      else if (status === 'underway' || status === 'public comment' ||
+               stage.includes('public hearing') || stage.includes('public comment') ||
+               stage.includes('secretarial review') || stage.includes('final approval') ||
+               stage.includes('council review') || stage.includes('rule making') ||
+               stage.includes('federal register')) {
         fmpMap[action.fmp].inProgress++;
-      } else if (status === 'PLANNED') {
+      }
+      // Check for planning stages
+      else if (status === 'planned' || stage.includes('scoping') || stage.includes('pre-scoping')) {
         fmpMap[action.fmp].planned++;
-      } else {
+      }
+      // Default to completed if no active indicators
+      else {
         fmpMap[action.fmp].completed++;
       }
     });
@@ -143,10 +158,27 @@ const DashboardEnhanced = () => {
   const recentActivity = useMemo(() => {
     const activity = [];
 
-    // Add active/planned amendments (UNDERWAY, PLANNED, Public Comment)
-    const activeActions = actions.filter(a =>
-      a.status === 'UNDERWAY' || a.status === 'PLANNED' || a.status === 'Public Comment'
-    );
+    // Helper function to check if an action is active/planned
+    const isActiveOrPlanned = (action) => {
+      const status = (action.status || '').toLowerCase();
+      const stage = (action.progress_stage || '').toLowerCase();
+
+      // Not active if explicitly implemented/completed
+      if (stage.includes('implement') || stage.includes('complete')) {
+        return false;
+      }
+
+      // Active if status or stage indicates ongoing work
+      return status === 'underway' || status === 'public comment' || status === 'planned' ||
+             stage.includes('public hearing') || stage.includes('public comment') ||
+             stage.includes('secretarial review') || stage.includes('final approval') ||
+             stage.includes('council review') || stage.includes('rule making') ||
+             stage.includes('federal register') || stage.includes('scoping') ||
+             stage.includes('pre-scoping');
+    };
+
+    // Add active/planned amendments
+    const activeActions = actions.filter(isActiveOrPlanned);
 
     // Sort by last_updated and take top 5
     activeActions
