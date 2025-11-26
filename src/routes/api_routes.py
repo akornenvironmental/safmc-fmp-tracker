@@ -29,6 +29,7 @@ from src.scrapers.comments_scraper import CommentsScraper
 from src.scrapers.briefing_books_scraper import BriefingBooksScraper
 from src.services.ai_service import AIService
 from src.middleware.auth_middleware import require_auth, require_admin
+from src.middleware.auth import require_role
 from src.utils.security import validate_pagination_params, validate_string_length, safe_error_response
 
 bp = Blueprint('api', __name__)
@@ -1885,13 +1886,10 @@ def submit_feedback():
 
 
 @bp.route('/feedback/all', methods=['GET'])
-@require_auth
+@require_role('admin', 'super_admin')
 def get_all_feedback():
     """Get all feedback submissions - admin only"""
     try:
-        # Check if user is admin
-        if session.get('role') not in ['admin', 'super_admin']:
-            return jsonify({'error': 'Unauthorized - admin access required'}), 403
 
         # Get query parameters
         status_filter = request.args.get('status', 'all')
@@ -1953,13 +1951,10 @@ def get_all_feedback():
 
 
 @bp.route('/feedback/<int:feedback_id>', methods=['PATCH'])
-@require_auth
+@require_role('admin', 'super_admin')
 def update_feedback_status(feedback_id):
     """Update feedback status and add admin notes - admin only"""
     try:
-        # Check if user is admin
-        if session.get('role') not in ['admin', 'super_admin']:
-            return jsonify({'error': 'Unauthorized - admin access required'}), 403
 
         data = request.get_json()
         new_status = data.get('status')
@@ -2014,13 +2009,10 @@ def update_feedback_status(feedback_id):
 
 
 @bp.route('/feedback/stats', methods=['GET'])
-@require_auth
+@require_role('admin', 'super_admin')
 def get_feedback_stats():
     """Get feedback statistics - admin only"""
     try:
-        # Check if user is admin
-        if session.get('role') not in ['admin', 'super_admin']:
-            return jsonify({'error': 'Unauthorized - admin access required'}), 403
 
         # Get status counts
         status_query = """
