@@ -124,14 +124,14 @@ const DashboardEnhanced = () => {
 
       // Classify actions by phase and progress:
       // - Completed: Implementation phase (95%+) - these are live and implemented
-      // - Pending: Development phase or no phase - early planning stages (Pre-Scoping, Scoping)
-      // - In Progress: Review/Federal Review phases - actively being worked on
+      // - In Progress: Any action with progress > 0 (Development, Review, Federal Review)
+      // - Pending: No progress and no phase - truly not started
       if (progress >= 95 || phase === 'Implementation') {
         fmpMap[action.fmp].completed++;
-      } else if (phase === 'Development' || !phase || phase === 'None' || progress <= 25) {
-        fmpMap[action.fmp].pending++;
-      } else {
+      } else if (progress > 0 || (phase && phase !== 'None')) {
         fmpMap[action.fmp].inProgress++;
+      } else {
+        fmpMap[action.fmp].pending++;
       }
     });
 
