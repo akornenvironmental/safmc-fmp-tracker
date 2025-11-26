@@ -91,7 +91,7 @@ const DashboardEnhanced = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert('Data update started! The dashboard will refresh in a few seconds.');
+        // Refresh dashboard data after scrape completes
         setTimeout(() => fetchDashboardData(), 3000);
       } else {
         alert(data.error || 'Failed to update data. Please try again.');
@@ -106,46 +106,36 @@ const DashboardEnhanced = () => {
 
   // Calculate FMP statistics
   const fmpStats = useMemo(() => {
-    console.log('=== CALCULATING FMP STATS ===');
-    console.log('Total actions:', actions.length);
-    console.log('Sample action (first):', actions[0]);
-
     const fmpMap = {};
     actions.forEach(action => {
       if (!action.fmp) return;
       if (!fmpMap[action.fmp]) {
-        fmpMap[action.fmp] = { total: 0, completed: 0, inProgress: 0, pending: 0 };
+        fmpMap[action.fmp] = { total: 0, completed: 0, inProgress: 0, planned: 0 };
       }
       fmpMap[action.fmp].total++;
 
-      const progress = action.progress || 0;
-      const phase = action.phase || '';
-      const isUnderDev = action.is_under_development || false;
-      console.log(`Action: ${action.title?.substring(0, 30)}... | FMP: ${action.fmp} | Progress: ${progress} | Phase: ${phase} | Under Dev: ${isUnderDev}`);
+      const status = action.status || '';
 
-      // Classify actions using is_under_development field:
-      // - In Progress: Actions actively under development (from "Amendments Under Development" page)
-      // - Completed: Historical/implemented amendments (not actively under development)
-      // - Pending: New actions with no progress and no classification yet
-      if (isUnderDev) {
+      // Classify actions using status field:
+      // - In Progress: Status is "UNDERWAY" or "Public Comment" (actively being worked on)
+      // - Planned: Status is "PLANNED" (scheduled for development)
+      // - Completed: Everything else (historical/implemented amendments)
+      if (status === 'UNDERWAY' || status === 'Public Comment') {
         fmpMap[action.fmp].inProgress++;
-      } else if (progress > 0 || phase) {
-        fmpMap[action.fmp].completed++;
+      } else if (status === 'PLANNED') {
+        fmpMap[action.fmp].planned++;
       } else {
-        fmpMap[action.fmp].pending++;
+        fmpMap[action.fmp].completed++;
       }
     });
 
     const result = Object.entries(fmpMap)
       .map(([fmp, stats]) => ({
         fmp,
-        ...stats,
-        completionRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
+        ...stats
       }))
       .sort((a, b) => b.total - a.total);
 
-    console.log('FMP Stats Result:', result);
-    console.log('=== END FMP STATS ===');
     return result;
   }, [actions]);
 
@@ -206,10 +196,13 @@ const DashboardEnhanced = () => {
           <button
             onClick={triggerScrape}
             disabled={scraping}
-            className="inline-flex items-center gap-2 h-8 px-2.5 text-xs font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="relative inline-flex items-center gap-2 h-8 px-2.5 text-xs font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:cursor-not-allowed transition-colors overflow-hidden"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${scraping ? 'animate-spin' : ''}`} />
-            {scraping ? 'Updating...' : 'Update Data'}
+            {scraping && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-slide-progress"></div>
+            )}
+            <RefreshCw className={`w-3.5 h-3.5 ${scraping ? 'animate-spin' : ''} relative z-10`} />
+            <span className="relative z-10">{scraping ? 'Updating...' : 'Update Data'}</span>
           </button>
         </div>
       </div>
@@ -276,46 +269,49 @@ const DashboardEnhanced = () => {
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">No FMP data available</div>
           ) : (
             <div className="space-y-4">
-              {fmpStats.slice(0, 6).map(fmp => (
-                <div key={fmp.fmp}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {fmp.completed}/{fmp.total} completed
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                    <div className="flex h-2.5 rounded-full overflow-hidden">
-                      <div
-                        className="bg-green-500"
-                        style={{ width: `${(fmp.completed / fmp.total) * 100}%` }}
-                      ></div>
-                      <div
-                        className="bg-blue-500"
-                        style={{ width: `${(fmp.inProgress / fmp.total) * 100}%` }}
-                      ></div>
-                      <div
-                        className="bg-gray-300 dark:bg-gray-600"
-                        style={{ width: `${(fmp.pending / fmp.total) * 100}%` }}
-                      ></div>
+              {fmpStats.slice(0, 6).map(fmp => {
+                // Find max value for scaling
+                const maxCount = Math.max(fmp.completed, fmp.inProgress, fmp.planned);
+                return (
+                  <div key={fmp.fmp}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {fmp.total} total
+                      </span>
+                    </div>
+                    <div className="flex items-end gap-2 h-16">
+                      {/* Completed bar */}
+                      <div className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className="w-full bg-green-500 dark:bg-green-600 rounded-t transition-all"
+                          style={{ height: `${maxCount > 0 ? (fmp.completed / maxCount) * 100 : 0}%` }}
+                        ></div>
+                        <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{fmp.completed}</span>
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">Done</span>
+                      </div>
+                      {/* In Progress bar */}
+                      <div className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className="w-full bg-blue-500 dark:bg-blue-600 rounded-t transition-all"
+                          style={{ height: `${maxCount > 0 ? (fmp.inProgress / maxCount) * 100 : 0}%` }}
+                        ></div>
+                        <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{fmp.inProgress}</span>
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">Active</span>
+                      </div>
+                      {/* Planned bar */}
+                      <div className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className="w-full bg-yellow-500 dark:bg-yellow-600 rounded-t transition-all"
+                          style={{ height: `${maxCount > 0 ? (fmp.planned / maxCount) * 100 : 0}%` }}
+                        ></div>
+                        <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{fmp.planned}</span>
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">Planned</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      {fmp.completed} done
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      {fmp.inProgress} active
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full"></span>
-                      {fmp.pending} pending
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
