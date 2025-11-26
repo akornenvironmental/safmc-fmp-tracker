@@ -2,10 +2,10 @@
  * UserManagement Page
  *
  * Comprehensive user management interface for super admins.
- * Provides CRUD operations for user accounts with role management.
+ * Features inline editing for roles, invitation status management, and action menu.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
@@ -21,7 +21,11 @@ import {
   UserCheck,
   AlertCircle,
   Building2,
-  Send
+  Send,
+  MoreVertical,
+  UserX,
+  UserPlus,
+  Check
 } from 'lucide-react';
 
 const UserManagement = () => {
@@ -37,7 +41,15 @@ const UserManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create'); // 'create' or 'edit'
   const [selectedUser, setSelectedUser] = useState(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
+  // Inline editing state
+  const [editingRole, setEditingRole] = useState(null);
+  const [editingInvitation, setEditingInvitation] = useState(null);
+  const [savingField, setSavingField] = useState(null);
+
+  // Action menu state
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const actionMenuRef = useRef(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -59,6 +71,18 @@ const UserManagement = () => {
   // Fetch users
   useEffect(() => {
     fetchUsers();
+  }, []);
+
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setOpenActionMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchUsers = async () => {
@@ -122,6 +146,7 @@ const UserManagement = () => {
     setFormErrors({});
     setSelectedUser(user);
     setShowModal(true);
+    setOpenActionMenu(null);
   };
 
   // Close modal
@@ -199,8 +224,47 @@ const UserManagement = () => {
     }
   };
 
+  // Inline update role
+  const handleUpdateRole = async (userId, newRole) => {
+    if (!newRole || savingField) return;
+
+    try {
+      setSavingField(`role-${userId}`);
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update role');
+      }
+
+      // Update local state
+      setUsers(users.map(u => u.id === userId ? data.user : u));
+      setEditingRole(null);
+
+    } catch (err) {
+      console.error('Error updating role:', err);
+      alert(`Error: ${err.message}`);
+    } finally {
+      setSavingField(null);
+    }
+  };
+
   // Delete user
-  const handleDelete = async (userId) => {
+  const handleDelete = async (userId, userEmail) => {
+    if (!confirm(`Are you sure you want to permanently delete ${userEmail}? This cannot be undone.`)) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem('authToken');
 
@@ -219,10 +283,47 @@ const UserManagement = () => {
 
       // Success
       await fetchUsers();
-      setDeleteConfirmId(null);
+      setOpenActionMenu(null);
 
     } catch (err) {
       console.error('Error deleting user:', err);
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  // Suspend/Activate user
+  const handleToggleSuspend = async (userId, currentStatus, userEmail) => {
+    const newStatus = !currentStatus;
+    const action = newStatus ? 'activate' : 'suspend';
+
+    if (!confirm(`Are you sure you want to ${action} ${userEmail}?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/suspend`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_active: newStatus })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `Failed to ${action} user`);
+      }
+
+      // Update local state
+      setUsers(users.map(u => u.id === userId ? data.user : u));
+      setOpenActionMenu(null);
+
+    } catch (err) {
+      console.error(`Error ${action}ing user:`, err);
       alert(`Error: ${err.message}`);
     }
   };
@@ -246,6 +347,7 @@ const UserManagement = () => {
       }
 
       alert(`Invite email sent to ${userEmail}`);
+      setOpenActionMenu(null);
 
     } catch (err) {
       console.error('Error sending invite:', err);
@@ -253,7 +355,7 @@ const UserManagement = () => {
     }
   };
 
-  // Get role badge color - high contrast for accessibility
+  // Get role badge color
   const getRoleBadgeClass = (role) => {
     switch (role) {
       case 'super_admin':
@@ -286,7 +388,7 @@ const UserManagement = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading users...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading users...</p>
         </div>
       </div>
     );
@@ -300,12 +402,9 @@ const UserManagement = () => {
           <div className="flex items-center gap-3">
             <Users className="w-8 h-8 text-brand-blue" />
             <div>
-              <h1 className="font-heading text-3xl font-bold text-gray-900">User Management</h1>
-              <p className="mt-2 text-sm text-gray-700">
+              <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
+              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                 Manage user accounts and permissions
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                User accounts are managed manually by super admins.
               </p>
             </div>
           </div>
@@ -323,7 +422,7 @@ const UserManagement = () => {
 
       {/* Error Alert */}
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-3">
+        <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg flex items-start gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium">Error loading users</p>
@@ -333,7 +432,7 @@ const UserManagement = () => {
       )}
 
       {/* Filters */}
-      <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+      <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
@@ -343,7 +442,7 @@ const UserManagement = () => {
               placeholder="Search by email or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
 
@@ -352,7 +451,7 @@ const UserManagement = () => {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="all">All Roles</option>
               <option value="super_admin">Super Admin</option>
@@ -363,41 +462,41 @@ const UserManagement = () => {
         </div>
 
         {/* Results count */}
-        <div className="mt-3 text-sm text-gray-600">
+        <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
           Showing {filteredUsers.length} of {users.length} users
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 User
               </th>
-              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Organization
               </th>
-              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Role
               </th>
-              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Invitation
               </th>
-              <th className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Created
-              </th>
-              <th className="px-2 py-1.5 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <td colSpan="6" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                  <Users className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                   <p>No users found</p>
                   {searchQuery && (
                     <p className="text-sm mt-1">Try adjusting your search or filters</p>
@@ -405,9 +504,10 @@ const UserManagement = () => {
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user, index) => (
-                <tr key={user.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
-                  <td className="px-2 py-0.5 whitespace-nowrap">
+              filteredUsers.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                  {/* User Info */}
+                  <td className="px-3 py-3 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white font-semibold">
@@ -415,29 +515,72 @@ const UserManagement = () => {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <div className="text-xs font-medium text-gray-900">{user.name || 'No name'}</div>
-                        <div className="text-xs text-gray-500">{user.email}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name || 'No name'}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-2 py-0.5 whitespace-nowrap">
-                    <span className="text-xs text-gray-700">
+
+                  {/* Organization */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
                       {user.organization || '-'}
                     </span>
                   </td>
-                  <td className="px-2 py-0.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(user.role)}`}>
-                      {getRoleDisplayName(user.role)}
+
+                  {/* Role - Inline Editable */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    {editingRole === user.id ? (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                          disabled={savingField === `role-${user.id}`}
+                          className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                          <option value="editor">Editor</option>
+                          <option value="admin">Admin</option>
+                          <option value="super_admin">Super Admin</option>
+                        </select>
+                        <button
+                          onClick={() => setEditingRole(null)}
+                          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setEditingRole(user.id)}
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(user.role)} hover:opacity-80 transition-opacity`}
+                      >
+                        {getRoleDisplayName(user.role)}
+                        <Edit2 className="w-3 h-3 ml-1 opacity-60" />
+                      </button>
+                    )}
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-3 py-3 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      user.is_active
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    }`}>
+                      {user.is_active ? 'Active' : 'Suspended'}
                     </span>
                   </td>
-                  <td className="px-2 py-0.5 whitespace-nowrap">
+
+                  {/* Invitation Status */}
+                  <td className="px-3 py-3 whitespace-nowrap">
                     {user.invitation_status === 'accepted' ? (
                       <div className="flex flex-col">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          <Check className="w-3 h-3 mr-1" />
                           Accepted
                         </span>
                         {user.invitation_accepted_at && (
-                          <span className="text-xs text-gray-500 mt-0.5">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {new Date(user.invitation_accepted_at).toLocaleDateString()}
                           </span>
                         )}
@@ -448,51 +591,66 @@ const UserManagement = () => {
                       </span>
                     )}
                   </td>
-                  <td className="px-2 py-0.5 whitespace-nowrap text-xs text-gray-500">
-                    {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="px-2 py-0.5 whitespace-nowrap text-right text-xs font-medium">
-                    {deleteConfirmId === user.id ? (
-                      <div className="inline-flex items-center gap-2">
-                        <span className="text-xs text-gray-600">Confirm delete?</span>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className="text-red-600 hover:text-red-800 font-medium"
-                        >
-                          Yes
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmId(null)}
-                          className="text-gray-600 hover:text-gray-800"
-                        >
-                          No
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          onClick={() => handleResendInvite(user.id, user.email)}
-                          className="text-green-600 hover:text-green-800 inline-flex items-center gap-1"
-                          title="Send login invite"
-                        >
-                          <Send className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="text-brand-blue hover:text-brand-blue-light inline-flex items-center gap-1"
-                          title="Edit user"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirmId(user.id)}
-                          className="text-red-600 hover:text-red-800 inline-flex items-center gap-1"
-                          title="Delete user"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
+
+                  {/* Actions Menu */}
+                  <td className="px-3 py-3 whitespace-nowrap text-center">
+                    <div className="relative inline-block" ref={openActionMenu === user.id ? actionMenuRef : null}>
+                      <button
+                        onClick={() => setOpenActionMenu(openActionMenu === user.id ? null : user.id)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+
+                      {openActionMenu === user.id && (
+                        <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10">
+                          <div className="py-1">
+                            <button
+                              onClick={() => handleResendInvite(user.id, user.email)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Send className="w-4 h-4 mr-3 text-green-600 dark:text-green-400" />
+                              Send Invite Email
+                            </button>
+
+                            <button
+                              onClick={() => handleEdit(user)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Edit2 className="w-4 h-4 mr-3 text-blue-600 dark:text-blue-400" />
+                              Edit User Details
+                            </button>
+
+                            <button
+                              onClick={() => handleToggleSuspend(user.id, user.is_active, user.email)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              {user.is_active ? (
+                                <>
+                                  <UserX className="w-4 h-4 mr-3 text-orange-600 dark:text-orange-400" />
+                                  Suspend User
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus className="w-4 h-4 mr-3 text-green-600 dark:text-green-400" />
+                                  Activate User
+                                </>
+                              )}
+                            </button>
+
+                            <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
+                            <button
+                              onClick={() => handleDelete(user.id, user.email)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                              <Trash2 className="w-4 h-4 mr-3" />
+                              Delete User
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -504,15 +662,15 @@ const UserManagement = () => {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {modalMode === 'create' ? 'Add New User' : 'Edit User'}
               </h3>
               <button
                 onClick={handleCloseModal}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -522,7 +680,7 @@ const UserManagement = () => {
             <form onSubmit={handleSubmit} className="px-6 py-4">
               {/* Email */}
               <div className="mb-4">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -533,20 +691,20 @@ const UserManagement = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     disabled={modalMode === 'edit'}
-                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue ${
-                      formErrors.email ? 'border-red-300' : 'border-gray-300'
-                    } ${modalMode === 'edit' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.email ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                    } ${modalMode === 'edit' ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed' : ''}`}
                     placeholder="user@example.com"
                   />
                 </div>
                 {formErrors.email && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.email}</p>
                 )}
               </div>
 
               {/* Name */}
               <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -556,20 +714,20 @@ const UserManagement = () => {
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue ${
-                      formErrors.name ? 'border-red-300' : 'border-gray-300'
+                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.name ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                     }`}
                     placeholder="Full name"
                   />
                 </div>
                 {formErrors.name && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.name}</p>
                 )}
               </div>
 
               {/* Organization */}
               <div className="mb-4">
-                <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="organization" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Organization
                 </label>
                 <div className="relative">
@@ -579,7 +737,7 @@ const UserManagement = () => {
                     id="organization"
                     value={formData.organization}
                     onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Company or organization"
                   />
                 </div>
@@ -587,7 +745,7 @@ const UserManagement = () => {
 
               {/* Role */}
               <div className="mb-4">
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Role <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -596,8 +754,8 @@ const UserManagement = () => {
                     id="role"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue ${
-                      formErrors.role ? 'border-red-300' : 'border-gray-300'
+                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                      formErrors.role ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                     }`}
                   >
                     <option value="editor">Editor</option>
@@ -606,9 +764,9 @@ const UserManagement = () => {
                   </select>
                 </div>
                 {formErrors.role && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.role}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.role}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {formData.role === 'super_admin' && 'Full system access including user management'}
                   {formData.role === 'admin' && 'Can view activity logs and manage content'}
                   {formData.role === 'editor' && 'Can view and manage FMP tracking data'}
@@ -617,7 +775,7 @@ const UserManagement = () => {
 
               {/* Submit Error */}
               {formErrors.submit && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
+                <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-3 py-2 rounded-md text-sm">
                   {formErrors.submit}
                 </div>
               )}
@@ -627,7 +785,7 @@ const UserManagement = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue"
                 >
                   Cancel
                 </button>

@@ -440,6 +440,58 @@ def update_user(user_id):
         return jsonify({'error': 'Failed to update user'}), 500
 
 
+@bp.route('/users/<user_id>/suspend', methods=['POST'])
+@admin_rate_limit("10 per hour")
+@require_super_admin
+def suspend_user(user_id):
+    """Suspend or activate user (super_admin only)"""
+    try:
+        user = User.query.filter_by(id=user_id).first()
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Don't allow suspending yourself
+        current_user = get_current_user()
+        if user.id == current_user.id:
+            return jsonify({'error': 'Cannot suspend your own account'}), 400
+
+        data = request.get_json() or {}
+        is_active = data.get('is_active', not user.is_active)  # Toggle if not specified
+
+        old_status = user.is_active
+        user.is_active = is_active
+        user.updated_at = datetime.utcnow()
+
+        db.session.commit()
+
+        # Log activity
+        log_activity(
+            activity_type='user.suspended' if not is_active else 'user.activated',
+            description=f'{"Suspended" if not is_active else "Activated"} user {user.email}',
+            category='admin',
+            resource_type='user',
+            resource_id=user_id,
+            resource_name=user.email,
+            changes_made={'is_active': is_active},
+            old_values={'is_active': old_status},
+            new_values={'is_active': is_active}
+        )
+
+        logger.info(f"User {user.email} {'suspended' if not is_active else 'activated'} by {current_user.email}")
+
+        return jsonify({
+            'success': True,
+            'user': user.to_dict(),
+            'message': f'User {"suspended" if not is_active else "activated"} successfully'
+        })
+
+    except Exception as e:
+        logger.error(f"Error suspending user: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to suspend user'}), 500
+
+
 @bp.route('/users/<user_id>', methods=['DELETE'])
 @admin_rate_limit("5 per hour")  # Very strict limit on user deletion
 @require_super_admin
