@@ -26,6 +26,7 @@ import {
   Settings,
   Shield,
   LogOut,
+  FlaskConical,
 } from 'lucide-react';
 
 // Navigation item component
@@ -140,6 +141,7 @@ const Sidebar = ({ user }) => {
     title: 'Data & Analysis',
     items: [
       { to: '/stocks', label: 'Stock Assessments', icon: Fish },
+      { to: '/ssc', label: 'SSC', icon: FlaskConical },
       { to: '/compare', label: 'Compare Actions', icon: GitCompare },
       { to: '/workplan', label: 'Workplan', icon: ClipboardList },
     ],
