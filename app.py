@@ -785,6 +785,7 @@ from src.routes.sedar_routes import bp as sedar_bp
 from src.routes.safe_report_routes import bp as safe_reports_bp
 from src.routes.comparison_routes import bp as comparison_bp
 from src.routes.export_routes import bp as export_bp
+from src.routes.ssc_routes import bp as ssc_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
@@ -796,6 +797,7 @@ app.register_blueprint(sedar_bp)
 app.register_blueprint(safe_reports_bp)
 app.register_blueprint(comparison_bp)
 app.register_blueprint(export_bp)
+app.register_blueprint(ssc_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler
