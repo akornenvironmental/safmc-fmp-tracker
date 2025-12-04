@@ -471,3 +471,41 @@ def create_ssc_recommendation():
         logger.error(f"Error creating SSC recommendation: {e}")
         db.session.rollback()
         return jsonify({'error': 'Failed to create SSC recommendation'}), 500
+
+
+# ==================== SSC IMPORT ====================
+
+@bp.route('/import/meetings', methods=['POST'])
+@require_admin
+def import_ssc_meetings():
+    """
+    Import SSC meetings from safmc.net
+    Admin only endpoint to trigger data import
+    """
+    try:
+        from src.services.ssc_import_service import SSCImportService
+
+        download_documents = request.json.get('download_documents', True) if request.json else True
+
+        logger.info("Starting SSC meeting import...")
+        service = SSCImportService()
+        stats = service.import_all_meetings(download_documents=download_documents)
+
+        log_activity(
+            activity_type='ssc.import_meetings',
+            description=f"Imported SSC meetings: {stats['meetings_created']} created, {stats['meetings_updated']} updated",
+            category='ssc',
+            resource_type='ssc_meeting',
+            resource_id=None,
+            resource_name='Bulk Import'
+        )
+
+        return jsonify({
+            'success': True,
+            'stats': stats,
+            'message': 'SSC meetings imported successfully'
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error importing SSC meetings: {e}")
+        return jsonify({'error': f'Failed to import SSC meetings: {str(e)}'}), 500
