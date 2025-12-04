@@ -3,10 +3,47 @@
  * Overview of SSC activities, upcoming meetings, and recent recommendations
  */
 
-import { FlaskConical, Users, Calendar, FileText, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { FlaskConical, Users, Calendar, FileText, TrendingUp, Download, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../../config';
+import { toast } from 'react-toastify';
 
 const SSCDashboard = () => {
+  const [importing, setImporting] = useState(false);
+
+  const handleImportMeetings = async () => {
+    if (!confirm('Import all SSC meetings from safmc.net? This may take several minutes and will download meeting documents.')) {
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE_URL}/api/ssc/import/meetings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ download_documents: true })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to import SSC meetings');
+      }
+
+      toast.success(`Import complete! ${data.stats.meetings_created} meetings created, ${data.stats.documents_created} documents imported`);
+    } catch (err) {
+      console.error('Error importing SSC meetings:', err);
+      toast.error(err.message || 'Failed to import SSC meetings');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div>
       {/* Header */}
@@ -26,6 +63,38 @@ const SSCDashboard = () => {
           The SSC provides independent scientific advice to the South Atlantic Fishery Management Council
           on stock assessments, acceptable biological catch (ABC) recommendations, and fishery management measures.
         </p>
+      </div>
+
+      {/* Admin Actions */}
+      <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Import SSC Meetings</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Import all SSC meetings from safmc.net with documents and recommendations
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleImportMeetings}
+            disabled={importing}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+          >
+            {importing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Importing...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Import Meetings
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Quick Links Grid */}
