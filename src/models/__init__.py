@@ -33,6 +33,15 @@ from src.models.document import (
     AuditLog
 )
 
+# SSC models
+from src.models.ssc import (
+    SSCMember,
+    SSCMeeting,
+    SSCRecommendation,
+    SSCCouncilConnection,
+    SSCDocument
+)
+
 __all__ = [
     # Existing
     'Action',
@@ -63,4 +72,10 @@ __all__ = [
     'ActionTopic',
     'MeetingTopic',
     'AuditLog',
+    # SSC
+    'SSCMember',
+    'SSCMeeting',
+    'SSCRecommendation',
+    'SSCCouncilConnection',
+    'SSCDocument',
 ]
