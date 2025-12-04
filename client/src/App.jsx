@@ -6,7 +6,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import AIQueryBar from './components/AIQueryBar';
 import Dashboard from './pages/DashboardEnhanced';
 import ActionsEnhanced from './pages/ActionsEnhanced';
 import ActionsNew from './pages/ActionsNew';
@@ -69,7 +68,6 @@ function App() {
               <Route path="admin/feedback" element={<FeedbackManagement />} />
             </Route>
           </Routes>
-            <AIQueryBar />
             <ToastContainer position="top-right" autoClose={3000} />
           </Router>
         </SidebarProvider>
