@@ -21,6 +21,8 @@ import ActivityLogs from './pages/ActivityLogs';
 import FeedbackManagement from './pages/FeedbackManagement';
 import SSCDashboard from './pages/SSC/SSCDashboard';
 import SSCMembers from './pages/SSC/SSCMembers';
+import SSCMeetings from './pages/SSC/SSCMeetings';
+import SSCRecommendations from './pages/SSC/SSCRecommendations';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
@@ -67,6 +69,8 @@ function App() {
               <Route path="compare" element={<Compare />} />
               <Route path="ssc" element={<SSCDashboard />} />
               <Route path="ssc/members" element={<SSCMembers />} />
+              <Route path="ssc/meetings" element={<SSCMeetings />} />
+              <Route path="ssc/recommendations" element={<SSCRecommendations />} />
               <Route path="admin/users" element={<UserManagement />} />
               <Route path="admin/logs" element={<ActivityLogs />} />
               <Route path="admin/feedback" element={<FeedbackManagement />} />

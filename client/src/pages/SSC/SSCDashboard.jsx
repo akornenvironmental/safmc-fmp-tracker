@@ -41,21 +41,27 @@ const SSCDashboard = () => {
           </p>
         </Link>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 opacity-50">
-          <Calendar className="w-10 h-10 text-gray-400 mb-3" />
+        <Link
+          to="/ssc/meetings"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200 dark:border-gray-700 group"
+        >
+          <Calendar className="w-10 h-10 text-brand-blue mb-3 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Meetings</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Coming soon
+            View SSC meeting schedule
           </p>
-        </div>
+        </Link>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 opacity-50">
-          <FileText className="w-10 h-10 text-gray-400 mb-3" />
+        <Link
+          to="/ssc/recommendations"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200 dark:border-gray-700 group"
+        >
+          <FileText className="w-10 h-10 text-brand-blue mb-3 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Recommendations</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Coming soon
+            Track SSC recommendations
           </p>
-        </div>
+        </Link>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 opacity-50">
           <TrendingUp className="w-10 h-10 text-gray-400 mb-3" />
