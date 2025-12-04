@@ -27,6 +27,11 @@ python create_ssc_tables_with_app_context.py || echo "SSC tables may already exi
 echo "Seeding SSC members..."
 python seed_ssc_members_production.py || echo "SSC members may already exist"
 
+# Import SSC meetings (optional - can take a while)
+# Uncomment to enable automatic import on startup
+# echo "Importing SSC meetings..."
+# python import_ssc_meetings.py || echo "SSC meetings import failed"
+
 # Start Gunicorn
 echo "Starting Gunicorn web server..."
 exec gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
