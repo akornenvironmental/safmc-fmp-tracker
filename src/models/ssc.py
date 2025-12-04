@@ -162,8 +162,8 @@ class SSCCouncilConnection(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     ssc_recommendation_id = db.Column(UUID(as_uuid=True), db.ForeignKey('ssc_recommendations.id', ondelete='CASCADE'))
-    council_meeting_id = db.Column(UUID(as_uuid=True), db.ForeignKey('meetings.id', ondelete='SET NULL'))
-    action_id = db.Column(UUID(as_uuid=True), db.ForeignKey('actions.id', ondelete='SET NULL'))
+    council_meeting_id = db.Column(UUID(as_uuid=True))  # No FK constraint - different table structure
+    action_id = db.Column(UUID(as_uuid=True))  # No FK constraint - different table structure
     connection_type = db.Column(db.String(100))
     influence_level = db.Column(db.String(50))
     notes = db.Column(db.Text)
