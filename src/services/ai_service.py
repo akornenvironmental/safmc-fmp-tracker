@@ -16,9 +16,11 @@ class AIService:
     """Service for AI-powered queries and analysis using Claude API"""
 
     def __init__(self):
-        self.api_key = os.getenv('CLAUDE_API_KEY')
+        # Support both ANTHROPIC_API_KEY and CLAUDE_API_KEY for backwards compatibility
+        self.api_key = os.getenv('ANTHROPIC_API_KEY') or os.getenv('CLAUDE_API_KEY')
         self.api_url = 'https://api.anthropic.com/v1/messages'
-        self.model = os.getenv('CLAUDE_MODEL', 'claude-sonnet-4-20250514')
+        # Use ANTHROPIC_MODEL or CLAUDE_MODEL env var, default to Claude Sonnet 4.5
+        self.model = os.getenv('ANTHROPIC_MODEL') or os.getenv('CLAUDE_MODEL', 'claude-sonnet-4-5-20250929')
         self.max_tokens = 1000
 
     def query(self, question: str, context: Optional[Dict] = None) -> Dict:
