@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { API_BASE_URL } from '../config';
+import Breadcrumb from '../components/Breadcrumb';
 import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X } from 'lucide-react';
 
 const ActionsEnhanced = () => {
@@ -445,6 +446,9 @@ const ActionsEnhanced = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">

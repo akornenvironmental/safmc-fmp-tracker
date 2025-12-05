@@ -8,6 +8,7 @@ import { FlaskConical, Users, Calendar, FileText, TrendingUp, Download, AlertCir
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
+import Breadcrumb from '../../components/Breadcrumb';
 
 const SSCDashboard = () => {
   const [importing, setImporting] = useState(false);
@@ -46,6 +47,9 @@ const SSCDashboard = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

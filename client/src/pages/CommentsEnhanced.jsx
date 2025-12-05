@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import Breadcrumb from '../components/Breadcrumb';
 import { API_BASE_URL } from '../config';
 import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag, TrendingUp, ExternalLink, MessageSquare, Clock, Expand } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -566,6 +567,9 @@ const CommentsEnhanced = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
@@ -1276,6 +1280,9 @@ const CommentsEnhanced = () => {
                 profileType === 'contact' ? (
                   <div className="space-y-4">
                     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</h3>
                       <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.name || '—'}</p>
                     </div>

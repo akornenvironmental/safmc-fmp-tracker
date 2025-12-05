@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import Breadcrumb from '../components/Breadcrumb';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import {
@@ -360,6 +361,9 @@ const SpeciesStocks = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between">
         <div className="sm:flex-auto">

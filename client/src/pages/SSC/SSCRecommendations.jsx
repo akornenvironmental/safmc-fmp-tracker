@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
+import Breadcrumb from '../../components/Breadcrumb';
 import {
   FileText,
   Search,
@@ -136,6 +137,9 @@ const SSCRecommendations = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

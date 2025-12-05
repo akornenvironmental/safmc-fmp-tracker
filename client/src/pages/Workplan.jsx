@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import Breadcrumb from '../components/Breadcrumb';
 import { API_BASE_URL } from '../config';
 import {
   RefreshCw,
@@ -196,6 +197,9 @@ const Workplan = () => {
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-start justify-between">
           <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
             <h1 className="text-2xl font-bold text-gray-900">{workplan.version.versionName}</h1>
             <p className="text-sm text-gray-600 mt-1">
               Effective: {new Date(workplan.version.effectiveDate).toLocaleDateString()}

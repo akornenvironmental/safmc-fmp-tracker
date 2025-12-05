@@ -1,4 +1,5 @@
 /**
+import Breadcrumb from '../components/Breadcrumb';
  * UserManagement Page - Simplified and Responsive
  *
  * Comprehensive user management interface for super admins.
@@ -350,6 +351,9 @@ const UserManagement = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Header */}
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div className="sm:flex-auto">

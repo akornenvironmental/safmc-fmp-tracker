@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import Breadcrumb from '../components/Breadcrumb';
 import { API_BASE_URL } from '../config';
 import {
   Calendar, MapPin, RefreshCw, Download, Settings, RotateCcw,
@@ -419,6 +420,9 @@ const MeetingsEnhanced = () => {
 
   return (
     <div>
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Page Header */}
       <div className="sm:flex sm:items-start sm:justify-between">
         <div className="sm:flex-auto">
