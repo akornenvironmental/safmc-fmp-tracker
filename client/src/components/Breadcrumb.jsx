@@ -33,6 +33,9 @@ const Breadcrumb = ({ customItems = null }) => {
       'ssc': 'SSC',
       'members': 'Members',
       'recommendations': 'Recommendations',
+      'cmod': 'CMOD',
+      'workshops': 'Workshops',
+      'topics': 'Topics',
       'admin': 'Admin',
       'users': 'User Management',
       'logs': 'Activity Logs',
@@ -48,6 +51,19 @@ const Breadcrumb = ({ customItems = null }) => {
         items.push({
           label: subsection,
           path: `/ssc/${pathSegments[1]}`,
+          isLast: true
+        });
+      }
+    }
+    // Special handling for CMOD subsections
+    else if (pathSegments[0] === 'cmod') {
+      items.push({ label: 'CMOD', path: '/cmod' });
+
+      if (pathSegments[1]) {
+        const subsection = segmentMap[pathSegments[1]] || 'Workshop Details';
+        items.push({
+          label: subsection,
+          path: `/cmod/${pathSegments[1]}${pathSegments[2] ? '/' + pathSegments[2] : ''}`,
           isLast: true
         });
       }

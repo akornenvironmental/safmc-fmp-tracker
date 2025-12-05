@@ -27,6 +27,7 @@ import {
   Shield,
   LogOut,
   FlaskConical,
+  GraduationCap,
 } from 'lucide-react';
 
 // Navigation item component
@@ -142,6 +143,7 @@ const Sidebar = ({ user }) => {
     items: [
       { to: '/stocks', label: 'Stock Assessments', icon: Fish },
       { to: '/ssc', label: 'SSC', icon: FlaskConical },
+      { to: '/cmod', label: 'CMOD Workshops', icon: GraduationCap },
       { to: '/compare', label: 'Compare Actions', icon: GitCompare },
       { to: '/workplan', label: 'Workplan', icon: ClipboardList },
     ],

@@ -23,6 +23,9 @@ import SSCDashboard from './pages/SSC/SSCDashboard';
 import SSCMembers from './pages/SSC/SSCMembers';
 import SSCMeetings from './pages/SSC/SSCMeetings';
 import SSCRecommendations from './pages/SSC/SSCRecommendations';
+import CMODDashboard from './pages/CMOD/CMODDashboard';
+import CMODWorkshops from './pages/CMOD/CMODWorkshops';
+import CMODTopics from './pages/CMOD/CMODTopics';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
@@ -71,6 +74,9 @@ function App() {
               <Route path="ssc/members" element={<SSCMembers />} />
               <Route path="ssc/meetings" element={<SSCMeetings />} />
               <Route path="ssc/recommendations" element={<SSCRecommendations />} />
+              <Route path="cmod" element={<CMODDashboard />} />
+              <Route path="cmod/workshops/:id" element={<CMODWorkshops />} />
+              <Route path="cmod/topics" element={<CMODTopics />} />
               <Route path="admin/users" element={<UserManagement />} />
               <Route path="admin/logs" element={<ActivityLogs />} />
               <Route path="admin/feedback" element={<FeedbackManagement />} />
