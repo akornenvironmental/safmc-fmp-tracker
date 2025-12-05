@@ -42,6 +42,14 @@ from src.models.ssc import (
     SSCDocument
 )
 
+# SSC Process models
+from src.models.ssc_process import (
+    SSCProcessStep,
+    SSCObservedPractice,
+    SSCMeetingCompliance,
+    SSCProcessDocument
+)
+
 __all__ = [
     # Existing
     'Action',
@@ -78,4 +86,9 @@ __all__ = [
     'SSCRecommendation',
     'SSCCouncilConnection',
     'SSCDocument',
+    # SSC Process
+    'SSCProcessStep',
+    'SSCObservedPractice',
+    'SSCMeetingCompliance',
+    'SSCProcessDocument',
 ]
