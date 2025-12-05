@@ -66,7 +66,15 @@ class SSCMeetingScraper:
         """
         try:
             # Get meeting title from heading
-            title = section.get_text(strip=True)
+            title_raw = section.get_text(strip=True)
+
+            # Limit title to first line or first 200 chars, whichever is shorter
+            title_lines = title_raw.split('\n')
+            title = title_lines[0].strip() if title_lines else title_raw
+
+            # Further truncate if still too long (database limit is 500)
+            if len(title) > 200:
+                title = title[:200].strip()
 
             # Skip if not a meeting title
             if not any(keyword in title.lower() for keyword in ['ssc', 'meeting', 'panel', 'committee']):
