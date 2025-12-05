@@ -50,6 +50,14 @@ from src.models.ssc_process import (
     SSCProcessDocument
 )
 
+# CMOD Workshop models
+from src.models.cmod import (
+    CMODWorkshop,
+    CMODSession,
+    CMODDocument,
+    CMODTopicTracking
+)
+
 __all__ = [
     # Existing
     'Action',
@@ -91,4 +99,9 @@ __all__ = [
     'SSCObservedPractice',
     'SSCMeetingCompliance',
     'SSCProcessDocument',
+    # CMOD
+    'CMODWorkshop',
+    'CMODSession',
+    'CMODDocument',
+    'CMODTopicTracking',
 ]

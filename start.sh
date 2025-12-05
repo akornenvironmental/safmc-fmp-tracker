@@ -27,6 +27,10 @@ python create_ssc_tables_with_app_context.py || echo "SSC tables may already exi
 echo "Seeding SSC members..."
 python seed_ssc_members_production.py || echo "SSC members may already exist"
 
+# Seed CMOD workshops
+echo "Seeding CMOD workshops..."
+python seed_cmod_workshops.py || echo "CMOD workshops may already exist"
+
 # Import SSC meetings (optional - can take a while)
 # Uncomment to enable automatic import on startup
 # echo "Importing SSC meetings..."
