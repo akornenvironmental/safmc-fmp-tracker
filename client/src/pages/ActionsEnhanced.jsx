@@ -39,7 +39,7 @@ const ActionsEnhanced = () => {
     progress_stage: true,
     progress: true,
     last_updated: true,
-    description: false,
+    description: true,  // Changed to true per team feedback
     type: false,
   });
 

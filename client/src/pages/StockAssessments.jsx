@@ -194,14 +194,21 @@ const StockAssessments = () => {
   };
 
   const getStatusLabel = (assessment) => {
+    // Use official NOAA terminology per team feedback
     if (assessment.overfished && assessment.overfishing_occurring) {
-      return 'Critical';
+      return 'Overfished/Overfishing';
     } else if (assessment.overfished) {
       return 'Overfished';
     } else if (assessment.overfishing_occurring) {
-      return 'Overfishing';
+      return 'Overfishing Occurring';
+    } else if (assessment.stock_status === 'Unassessed') {
+      return 'Unassessed';
     } else if (assessment.stock_status) {
+      // If custom status exists, use it
       return assessment.stock_status;
+    } else if (!assessment.overfished && !assessment.overfishing_occurring) {
+      // Healthy = Not Overfished and No Overfishing
+      return 'Not Overfished/No Overfishing';
     } else {
       return 'Unknown';
     }
