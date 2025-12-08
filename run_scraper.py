@@ -6,23 +6,21 @@ This bypasses authentication since it runs directly on the server
 import sys
 import os
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+# Add current directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from app import create_app
-    from scrapers.amendments_scraper import AmendmentsScraper
-    from models.action import Action
-    from config.extensions import db
+    import app  # Import the app module
+    from src.scrapers.amendments_scraper import AmendmentsScraper
+    from src.models.action import Action
+    from src.config.extensions import db
     from datetime import datetime
 
     print("=" * 80)
     print("Running Amendments Scraper to Update Titles")
     print("=" * 80)
 
-    app = create_app()
-
-    with app.app_context():
+    with app.app.app_context():
         print("\n1. Initializing scraper...")
         scraper = AmendmentsScraper()
 
