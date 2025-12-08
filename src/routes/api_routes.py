@@ -456,6 +456,8 @@ def scrape_amendments():
                 action.lead_staff = amendment_data['lead_staff']
                 action.source_url = amendment_data.get('source_url', action.source_url)
                 action.status = amendment_data.get('status')
+                action.start_date = amendment_data.get('start_date')
+                action.completion_date = amendment_data.get('completion_date')
                 action.last_scraped = datetime.utcnow()
                 action.updated_at = datetime.utcnow()
                 items_updated += 1
@@ -473,6 +475,8 @@ def scrape_amendments():
                     lead_staff=amendment_data['lead_staff'],
                     source_url=amendment_data['source_url'],
                     status=amendment_data.get('status'),
+                    start_date=amendment_data.get('start_date'),
+                    completion_date=amendment_data.get('completion_date'),
                     last_scraped=datetime.utcnow()
                 )
                 db.session.add(action)
@@ -545,6 +549,8 @@ def _run_comprehensive_scrape_background():
                     action.lead_staff = amendment_data['lead_staff']
                     action.source_url = amendment_data.get('source_url', action.source_url)
                     action.status = amendment_data.get('status')
+                    action.start_date = amendment_data.get('start_date')
+                    action.completion_date = amendment_data.get('completion_date')
 
                     # Enhanced fields
                     if amendment_data.get('detail_url'):
@@ -573,6 +579,8 @@ def _run_comprehensive_scrape_background():
                         lead_staff=amendment_data['lead_staff'],
                         source_url=amendment_data.get('detail_url') or amendment_data.get('source_url'),
                         status=amendment_data.get('status'),
+                        start_date=amendment_data.get('start_date'),
+                        completion_date=amendment_data.get('completion_date'),
                         last_scraped=datetime.utcnow()
                     )
 

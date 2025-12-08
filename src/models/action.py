@@ -47,6 +47,10 @@ class Action(db.Model):
 
     def to_dict(self):
         """Convert action to dictionary for JSON serialization"""
+        # Determine the "last action date" - use completion_date if available,
+        # otherwise fall back to updated_at (which gets set when action is modified)
+        last_action_date = self.completion_date or (self.updated_at.date() if self.updated_at else None)
+
         return {
             'id': self.action_id,
             'title': self.title,
@@ -65,7 +69,9 @@ class Action(db.Model):
             'source_url': self.source_url,
             'documents_found': self.documents_found,
             'last_scraped': self.last_scraped.isoformat() if self.last_scraped else None,
-            'last_updated': self.updated_at.isoformat() if self.updated_at else None
+            # Show actual last action date (completion_date if set, otherwise updated date)
+            'last_updated': last_action_date.isoformat() if last_action_date else None,
+            'db_updated_at': self.updated_at.isoformat() if self.updated_at else None  # For debugging
         }
 
     def __repr__(self):

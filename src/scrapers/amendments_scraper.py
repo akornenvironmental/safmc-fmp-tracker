@@ -4,6 +4,7 @@ Scrapes amendment data from SAFMC website
 """
 
 import re
+import json
 import logging
 from datetime import datetime
 from typing import List, Dict, Optional
@@ -170,6 +171,18 @@ class AmendmentsScraper:
         progress_stage = self._extract_progress_stage(content, title)
         progress_percentage = self._calculate_progress_percentage(progress_stage)
 
+        # Extract dates from the amendment page if we have a source URL
+        dates = {'published': None, 'modified': None}
+        if source_url and source_url != self.AMENDMENTS_URL:
+            dates = self._extract_dates_from_page(source_url)
+
+        # Use dateModified as completion_date for implemented amendments
+        # For in-progress amendments, completion_date will be None
+        completion_date = None
+        if progress_percentage >= 100 and dates['modified']:
+            # Convert to date (not datetime)
+            completion_date = dates['modified'].date()
+
         return {
             'action_id': self._generate_action_id(title),
             'title': title,
@@ -182,7 +195,9 @@ class AmendmentsScraper:
             'lead_staff': self._extract_staff(content),
             'committee': '',  # Will be determined from FMP
             'source_url': source_url or self.AMENDMENTS_URL,
-            'documents_found': 0
+            'documents_found': 0,
+            'completion_date': completion_date,
+            'start_date': dates['published'].date() if dates['published'] else None,
         }
 
     def _is_amendment_text(self, text: str) -> bool:
@@ -372,6 +387,50 @@ class AmendmentsScraper:
                 return link.get('href')
 
         return None
+
+    def _extract_dates_from_page(self, url: str) -> Dict[str, Optional[datetime]]:
+        """
+        Extract dates from amendment page JSON-LD metadata
+
+        Returns dict with 'published', 'modified' keys (datetime objects or None)
+        """
+        dates = {'published': None, 'modified': None}
+
+        try:
+            response = self.session.get(url, timeout=self.timeout)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'lxml')
+
+            # Find JSON-LD structured data
+            json_scripts = soup.find_all('script', type='application/ld+json')
+
+            for script in json_scripts:
+                try:
+                    data = json.loads(script.string)
+
+                    # Navigate through the JSON structure to find dates
+                    if isinstance(data, dict) and '@graph' in data:
+                        for item in data['@graph']:
+                            if isinstance(item, dict) and item.get('@type') == 'WebPage':
+                                # Extract datePublished
+                                if 'datePublished' in item:
+                                    dates['published'] = date_parser.parse(item['datePublished'])
+
+                                # Extract dateModified
+                                if 'dateModified' in item:
+                                    dates['modified'] = date_parser.parse(item['dateModified'])
+
+                                # We found the WebPage, can break
+                                if dates['published'] or dates['modified']:
+                                    break
+
+                except json.JSONDecodeError:
+                    continue
+
+        except Exception as e:
+            logger.debug(f"Could not extract dates from {url}: {e}")
+
+        return dates
 
     def _calculate_progress_percentage(self, stage: str) -> int:
         """
