@@ -35,11 +35,12 @@ class SAFEImportService:
 
         # Initialize Claude if API key available and anthropic installed
         if ANTHROPIC_AVAILABLE:
-            api_key = os.getenv('ANTHROPIC_API_KEY')
+            # Support both ANTHROPIC_API_KEY and CLAUDE_API_KEY for backwards compatibility
+            api_key = os.getenv('ANTHROPIC_API_KEY') or os.getenv('CLAUDE_API_KEY')
             if api_key:
                 self.claude_client = anthropic.Anthropic(api_key=api_key)
             else:
-                logger.warning("ANTHROPIC_API_KEY not set - AI extraction will be skipped")
+                logger.warning("ANTHROPIC_API_KEY/CLAUDE_API_KEY not set - AI extraction will be skipped")
         else:
             logger.warning("anthropic package not installed - AI extraction will be skipped")
 
