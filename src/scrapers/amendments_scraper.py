@@ -250,7 +250,9 @@ class AmendmentsScraper:
         """Determine action type from title"""
         title_lower = title.lower()
 
-        if 'framework' in title_lower:
+        if 'comprehensive' in title_lower or 'omnibus' in title_lower:
+            return 'Comprehensive Amendment'
+        elif 'framework' in title_lower:
             return 'Framework'
         elif 'regulatory' in title_lower:
             return 'Regulatory Amendment'
@@ -260,7 +262,7 @@ class AmendmentsScraper:
             return 'Amendment'
 
     def _extract_fmp(self, title: str, content: str) -> str:
-        """Extract FMP name from title and content"""
+        """Extract FMP name from title and content - returns first match or Multiple FMPs for comprehensive"""
         combined = (title + ' ' + content).lower()
 
         fmp_patterns = {
@@ -274,6 +276,21 @@ class AmendmentsScraper:
             'Coral': r'coral'
         }
 
+        # Check if this is a comprehensive/omnibus amendment
+        if 'comprehensive' in combined or 'omnibus' in combined:
+            # Count how many FMPs are mentioned
+            matched_fmps = []
+            for fmp, pattern in fmp_patterns.items():
+                if re.search(pattern, combined):
+                    matched_fmps.append(fmp)
+
+            # If multiple FMPs mentioned, return "Multiple FMPs"
+            if len(matched_fmps) > 1:
+                return 'Multiple FMPs'
+            elif len(matched_fmps) == 1:
+                return matched_fmps[0]
+
+        # For non-comprehensive amendments, return first match
         for fmp, pattern in fmp_patterns.items():
             if re.search(pattern, combined):
                 return fmp
@@ -363,13 +380,18 @@ class AmendmentsScraper:
 
         stage_lower = stage.lower()
 
+        # Check for exact or close matches first (order matters!)
+        # Check 'implemented' before 'implement' to avoid partial match
+        if 'implemented' in stage_lower or 'completed' in stage_lower:
+            return 100
+
         # Check against known stages
         for stage_key, percentage in self.PROGRESS_STAGES.items():
             if stage_key in stage_lower:
                 return percentage
 
-        # Default based on common patterns
-        if 'implement' in stage_lower:
+        # Default based on common patterns (fallback if not in PROGRESS_STAGES)
+        if 'implement' in stage_lower:  # This now only catches "implementation" not "implemented"
             return 95
         if 'review' in stage_lower:
             return 75

@@ -89,7 +89,7 @@ class SpeciesService:
     @staticmethod
     def extract_species_from_text(text: str) -> List[str]:
         """
-        Extract species names from text using pattern matching
+        Extract species names from text using pattern matching with context awareness
 
         Args:
             text: Text to search for species names
@@ -103,9 +103,48 @@ class SpeciesService:
         found_species = set()
         text_lower = text.lower()
 
+        # Context words that indicate 'permit' is NOT referring to the fish species
+        permit_non_fish_contexts = [
+            'permit system', 'permitting', 'permit requirement', 'permit application',
+            'limited access permit', 'federal permit', 'state permit', 'permit holder',
+            'commercial permit', 'for-hire permit', 'recreational permit', 'permit program',
+            'dealer permit', 'operator permit', 'vessel permit', 'permit exemption',
+            'permit transfer', 'permit fee', 'permit renewal', 'permit eligibility',
+            'permit condition', 'permit regulation', 'permit amendment'
+        ]
+
         for species in SpeciesService.KNOWN_SPECIES:
+            species_lower = species.lower()
+
             # Check for exact species name (case-insensitive)
-            if species.lower() in text_lower:
+            if species_lower in text_lower:
+                # Special handling for 'Permit' fish to avoid false positives
+                if species == 'Permit':
+                    # Check if 'permit' appears in a non-fish context
+                    skip_permit = False
+                    for context in permit_non_fish_contexts:
+                        if context in text_lower:
+                            skip_permit = True
+                            break
+
+                    # Also check for common patterns that suggest regulatory/administrative permits
+                    if not skip_permit:
+                        # Look for patterns like "permit + verb" that suggest administrative action
+                        import re
+                        admin_permit_patterns = [
+                            r'\bpermit\s+(to|for|of|under|by)\b',
+                            r'\b(a|an|the|any|each)\s+permit\b',
+                            r'\bpermits?\s+(shall|will|must|may|should|would)\b',
+                            r'\b(issue|obtain|apply\s+for|acquire|suspend|revoke)\s+permit',
+                        ]
+                        for pattern in admin_permit_patterns:
+                            if re.search(pattern, text_lower):
+                                skip_permit = True
+                                break
+
+                    if skip_permit:
+                        continue
+
                 found_species.add(species)
 
         return sorted(list(found_species))
