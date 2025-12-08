@@ -240,6 +240,10 @@ def create_user():
         organization = data.get('organization', '').strip()
         role = data.get('role', 'editor')
 
+        # Validate name is not an email address
+        if name and '@' in name and '.' in name:
+            return jsonify({'error': 'Name cannot be an email address. Please enter the person\'s actual name.'}), 400
+
         # Validate role
         if role not in ['super_admin', 'admin', 'editor']:
             return jsonify({'error': 'Invalid role'}), 400
@@ -391,8 +395,12 @@ def update_user(user_id):
 
         # Update fields
         if 'name' in data:
-            user.name = data['name'].strip()
-            changes['name'] = data['name']
+            name = data['name'].strip()
+            # Validate name is not an email address
+            if name and '@' in name and '.' in name:
+                return jsonify({'error': 'Name cannot be an email address. Please enter the person\'s actual name.'}), 400
+            user.name = name
+            changes['name'] = name
 
         if 'organization' in data:
             user.organization = data['organization'].strip() or None

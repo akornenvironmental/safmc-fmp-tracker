@@ -147,6 +147,8 @@ const UserManagement = () => {
 
     if (!formData.name.trim()) {
       errors.name = 'Name is required';
+    } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.name.trim())) {
+      errors.name = 'Name cannot be an email address. Please enter a person\'s actual name.';
     }
 
     if (!['super_admin', 'admin', 'editor'].includes(formData.role)) {
@@ -600,8 +602,10 @@ const UserManagement = () => {
                   <input
                     type="email"
                     id="email"
+                    name="email"
+                    autoComplete="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
                     disabled={modalMode === 'edit'}
                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                       formErrors.email ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
@@ -624,6 +628,8 @@ const UserManagement = () => {
                   <input
                     type="text"
                     id="name"
+                    name="name"
+                    autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
@@ -647,6 +653,8 @@ const UserManagement = () => {
                   <input
                     type="text"
                     id="organization"
+                    name="organization"
+                    autoComplete="organization"
                     value={formData.organization}
                     onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"

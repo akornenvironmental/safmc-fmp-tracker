@@ -144,7 +144,7 @@ def find_or_create_contact(
         first_name=first_name,
         last_name=last_name,
         full_name=full_name,
-        email=email,
+        email=email.lower().strip() if email else None,
         city=city,
         state=state,
         sector=sector,

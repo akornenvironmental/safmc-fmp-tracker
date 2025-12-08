@@ -1355,7 +1355,8 @@ def scrape_comments():
                 comment.organization = comment_data.get('organization')
                 comment.city = comment_data.get('city')
                 comment.state = comment_data.get('state')
-                comment.email = comment_data.get('email')
+                email = comment_data.get('email')
+                comment.email = email.lower().strip() if email else None
                 comment.comment_text = comment_data.get('comment_text')
                 comment.commenter_type = comment_data.get('commenter_type')
                 comment.position = comment_data.get('position')
@@ -1372,6 +1373,7 @@ def scrape_comments():
                 logger.info(f"[ENDPOINT DEBUG] Creating new comment {comment_data['comment_id']}")
                 logger.info(f"[ENDPOINT DEBUG] action_id value to be saved: '{action_id_value}'")
 
+                email = comment_data.get('email')
                 comment = Comment(
                     comment_id=comment_data['comment_id'],
                     action_id=action_id_value,
@@ -1381,7 +1383,7 @@ def scrape_comments():
                     organization=comment_data.get('organization'),
                     city=comment_data.get('city'),
                     state=comment_data.get('state'),
-                    email=comment_data.get('email'),
+                    email=email.lower().strip() if email else None,
                     commenter_type=comment_data.get('commenter_type'),
                     position=comment_data.get('position'),
                     key_topics=comment_data.get('key_topics'),
