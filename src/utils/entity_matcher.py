@@ -236,8 +236,9 @@ def _extract_fmp_from_title(title: str) -> Optional[str]:
 
     Examples:
         "Snapper Grouper Amendment 56" -> "Snapper Grouper"
-        "Coral Amendment 11 / Shrimp Amendment 12" -> "Coral"
+        "Coral Amendment 11 / Shrimp Amendment 12" -> "Multiple FMPs"
         "Dolphin Wahoo Regulatory Amendment 3" -> "Dolphin Wahoo"
+        "Comprehensive Amendment 37 - Modifications to Fishing Year" -> "Multiple FMPs"
     """
     if not title:
         return None
@@ -256,6 +257,27 @@ def _extract_fmp_from_title(title: str) -> Optional[str]:
         ('Sargassum', ['sargassum'])
     ]
 
+    # Check if this is a comprehensive/omnibus amendment
+    if 'comprehensive' in title_lower or 'omnibus' in title_lower:
+        # Count how many FMPs are mentioned
+        matched_fmps = []
+        for fmp_name, keywords in fmp_patterns:
+            for keyword in keywords:
+                if keyword in title_lower:
+                    if fmp_name not in matched_fmps:
+                        matched_fmps.append(fmp_name)
+                    break
+
+        # If multiple FMPs or no specific FMP, return "Multiple FMPs"
+        if len(matched_fmps) > 1:
+            return 'Multiple FMPs'
+        elif len(matched_fmps) == 1:
+            return matched_fmps[0]
+        else:
+            # Comprehensive but no specific FMP mentioned - likely affects multiple
+            return 'Multiple FMPs'
+
+    # For non-comprehensive amendments, return first match
     for fmp_name, keywords in fmp_patterns:
         for keyword in keywords:
             if keyword in title_lower:

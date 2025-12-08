@@ -108,19 +108,31 @@ if 'implement' in stage_lower:
 - "Detect Species" feature not working
 
 **Root Cause:**
-- Likely missing ANTHROPIC_API_KEY in environment
+- Missing ANTHROPIC_API_KEY in Render environment variables
 - Similar to interview system issue
 - May also be issue with prompt engineering for position detection
 
-**Investigation Needed:**
-- Check if ANTHROPIC_API_KEY is set in Render environment
-- Review AI prompts for position detection accuracy
-- Test species detection logic
+**Solution - Add Environment Variable to Render:**
+1. Go to https://dashboard.render.com
+2. Select the safmc-fmp-tracker service
+3. Navigate to "Environment" tab
+4. Add new environment variable:
+   - **Key:** `ANTHROPIC_API_KEY`
+   - **Value:** `sk-ant-api03-...` (obtain from Anthropic Console)
+5. Save and redeploy
 
-**Files to Check:**
+**To Get Anthropic API Key:**
+1. Visit https://console.anthropic.com/
+2. Go to API Keys section
+3. Create new key or copy existing key
+4. Add to Render environment
+
+**Files to Review (for prompt engineering improvements):**
 - `/src/services/` - Look for AI service files
-- Environment variables on Render
-- Comment analysis endpoints in `/src/routes/`
+- `/src/routes/` - Comment analysis endpoints
+- Check prompt accuracy for position detection once key is added
+
+**Status:** Documented - Requires Anthropic API key from user
 
 ---
 

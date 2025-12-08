@@ -1,9 +1,13 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import Breadcrumb from '../components/Breadcrumb';
 import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X } from 'lucide-react';
 
 const ActionsEnhanced = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightActionId = searchParams.get('highlight');
+
   const [filterStage, setFilterStage] = useState([]);
   const [filterFMP, setFilterFMP] = useState([]);
   const [filterType, setFilterType] = useState([]);
@@ -20,10 +24,12 @@ const ActionsEnhanced = () => {
   const [showStageDropdown, setShowStageDropdown] = useState(false);
   const [showFMPDropdown, setShowFMPDropdown] = useState(false);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [highlightedActionId, setHighlightedActionId] = useState(null);
 
   const stageDropdownRef = useRef(null);
   const fmpDropdownRef = useRef(null);
   const typeDropdownRef = useRef(null);
+  const highlightedRowRef = useRef(null);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -54,6 +60,29 @@ const ActionsEnhanced = () => {
   useEffect(() => {
     fetchActions();
   }, []);
+
+  // Handle highlighting and scrolling to action from URL parameter
+  useEffect(() => {
+    if (highlightActionId && actions.length > 0) {
+      setHighlightedActionId(highlightActionId);
+      // Remove highlight after 5 seconds
+      const timeout = setTimeout(() => {
+        setHighlightedActionId(null);
+        setSearchParams({}); // Clear URL parameter
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [highlightActionId, actions, setSearchParams]);
+
+  // Scroll to highlighted row
+  useEffect(() => {
+    if (highlightedActionId && highlightedRowRef.current) {
+      highlightedRowRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  }, [highlightedActionId, currentPage]);
 
   // Click outside handler for dropdowns
   useEffect(() => {
@@ -748,8 +777,19 @@ const ActionsEnhanced = () => {
                 </td>
               </tr>
             ) : (
-              paginatedActions.map((action, index) => (
-                <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
+              paginatedActions.map((action, index) => {
+                const isHighlighted = highlightedActionId && (action.action_id === highlightedActionId || action.id === highlightedActionId);
+                return (
+                <tr
+                  key={action.id || index}
+                  ref={isHighlighted ? highlightedRowRef : null}
+                  className={`${
+                    isHighlighted
+                      ? 'bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-400 dark:border-yellow-600'
+                      : index % 2 === 0
+                        ? 'bg-white dark:bg-gray-800'
+                        : 'bg-gray-50 dark:bg-gray-850'
+                  } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
                   <td className="px-1.5 py-0.5">
                     <input
                       type="checkbox"
@@ -836,7 +876,8 @@ const ActionsEnhanced = () => {
                     </td>
                   ))}
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>

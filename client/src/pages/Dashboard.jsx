@@ -174,7 +174,7 @@ const Dashboard = () => {
                 </tr>
               ) : (
                 recentActions.map((action, index) => (
-                  <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150`}>
+                  <tr key={action.id || index} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-50 transition-colors duration-150 cursor-pointer`} onClick={() => navigate(`/actions?highlight=${action.action_id || action.id}`)}>
                     <td className="px-2 py-0.5">
                       {action.source_url ? (
                         <a
@@ -182,6 +182,7 @@ const Dashboard = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {action.title}
                         </a>

@@ -55,13 +55,13 @@ const Comments = () => {
   });
 
   const getPositionColor = (position) => {
-    if (!position) return 'bg-gray-100 text-gray-800';
+    if (!position) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
 
     const positionLower = position.toLowerCase();
-    if (positionLower.includes('support')) return 'bg-green-100 text-green-800';
-    if (positionLower.includes('oppose')) return 'bg-red-100 text-red-800';
-    if (positionLower.includes('neutral')) return 'bg-blue-100 text-blue-800';
-    return 'bg-gray-100 text-gray-800';
+    if (positionLower.includes('support')) return 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100';
+    if (positionLower.includes('oppose')) return 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200';
+    if (positionLower.includes('neutral')) return 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100';
+    return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   };
 
   return (
