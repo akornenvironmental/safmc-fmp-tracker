@@ -374,25 +374,31 @@ class AmendmentsScraper:
         return None
 
     def _calculate_progress_percentage(self, stage: str) -> int:
-        """Calculate progress percentage from stage"""
+        """
+        Calculate progress percentage from stage
+
+        Note: 'Implementation' stage means the rule has been finalized and is being
+        implemented (or already implemented), so we consider it 100% complete.
+        """
         if not stage:
             return 0
 
         stage_lower = stage.lower()
 
-        # Check for exact or close matches first (order matters!)
-        # Check 'implemented' before 'implement' to avoid partial match
-        if 'implemented' in stage_lower or 'completed' in stage_lower:
+        # Check for completion indicators first (100%)
+        if any(keyword in stage_lower for keyword in ['implemented', 'completed', 'implementation']):
             return 100
 
-        # Check against known stages
+        # Check against known stages (these are for in-progress stages)
         for stage_key, percentage in self.PROGRESS_STAGES.items():
+            if stage_key == 'implementation' or stage_key == 'implemented':
+                continue  # Skip these, already handled above
             if stage_key in stage_lower:
                 return percentage
 
         # Default based on common patterns (fallback if not in PROGRESS_STAGES)
-        if 'implement' in stage_lower:  # This now only catches "implementation" not "implemented"
-            return 95
+        if 'rule making' in stage_lower or 'rulemaking' in stage_lower:
+            return 85
         if 'review' in stage_lower:
             return 75
         if 'approval' in stage_lower:
