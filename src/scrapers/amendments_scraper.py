@@ -166,8 +166,95 @@ class AmendmentsScraper:
 
         return amendment
 
+    def _extract_clean_title(self, text: str) -> str:
+        """
+        Extract clean title (just the amendment name) from text that may contain description
+
+        Examples:
+            "Coral Amendment 1Joint amendment with..." -> "Coral Amendment 1"
+            "CMP Amendment 10Identified essential fish..." -> "CMP Amendment 10"
+            "Snapper Grouper Regulatory Amendment 3" -> "Snapper Grouper Regulatory Amendment 3"
+        """
+        # Look for the amendment pattern and extract just that part
+        # Pattern: FMP name + (Amendment|Framework|Regulatory Amendment) + Number
+        patterns = [
+            # Match: "FMP (Regulatory) Amendment/Framework Number" (no space before description)
+            r'^([A-Za-z\s&]+(?:Regulatory\s+)?(?:Amendment|Framework)\s+\d+)(?=[A-Z][a-z])',
+            # Match: "FMP Abbreviated Framework Amendment Number"
+            r'^([A-Za-z\s&]+Abbreviated\s+Framework\s+Amendment\s+\d+)(?=[A-Z][a-z])',
+            # Match: standalone amendment with number at end of string or before space
+            r'^([A-Za-z\s&]+(?:Regulatory\s+)?(?:Amendment|Framework)\s+\d+)(?:\s|$)',
+            # Match: "Comprehensive Amendment Name" with longer title
+            r'^(Comprehensive\s+(?:Amendment\s+)?[A-Za-z\s&]+)(?=[A-Z][a-z])',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                return match.group(1).strip()
+
+        # If no pattern matches, take text up to first sentence break or 100 chars
+        # Look for first period followed by space and capital letter
+        sentence_break = re.search(r'\.\s+[A-Z]', text)
+        if sentence_break:
+            return text[:sentence_break.start() + 1].strip()
+
+        # Otherwise just truncate at 100 characters
+        if len(text) > 100:
+            return text[:100].strip()
+
+        return text.strip()
+
+    def _expand_acronyms(self, title: str) -> str:
+        """
+        Expand common acronyms in action titles
+
+        Exception: Keep "ABC" in "ABC Control Rule"
+
+        Examples:
+            "CMP Amendment 10" -> "Coastal Migratory Pelagics Amendment 10"
+            "SG Amendment 5" -> "Snapper Grouper Amendment 5"
+            "ABC Control Rule Amendment" -> "ABC Control Rule Amendment" (keep ABC)
+        """
+        # Map of acronyms to full names
+        acronym_map = {
+            'CMP': 'Coastal Migratory Pelagics',
+            'SG': 'Snapper Grouper',
+            'DW': 'Dolphin Wahoo',
+            'EFH': 'Essential Fish Habitat',
+            'HAPC': 'Habitat Area of Particular Concern',
+            'FMP': 'Fishery Management Plan',
+            'MSE': 'Management Strategy Evaluation',
+        }
+
+        # Special handling: Don't expand ABC if it's part of "ABC Control Rule"
+        if 'ABC Control Rule' in title or 'ABC control rule' in title:
+            # Keep ABC as-is, but expand other acronyms
+            result = title
+            for acronym, expansion in acronym_map.items():
+                # Use word boundaries to match whole acronyms only
+                result = re.sub(r'\b' + acronym + r'\b', expansion, result)
+            return result
+
+        # Expand all acronyms including ABC
+        result = title
+        # Add ABC to the map for non-control-rule contexts
+        full_map = {**acronym_map, 'ABC': 'Acceptable Biological Catch'}
+
+        for acronym, expansion in full_map.items():
+            # Use word boundaries to match whole acronyms only
+            result = re.sub(r'\b' + acronym + r'\b', expansion, result)
+
+        return result
+
     def _create_amendment_object(self, title: str, content: str, source_url: str = None) -> Dict:
         """Create amendment object from title and content"""
+        # Clean the title to remove any description that got concatenated
+        clean_title = self._extract_clean_title(title)
+
+        # Expand acronyms in the title (except ABC in "ABC Control Rule")
+        clean_title = self._expand_acronyms(clean_title)
+
         progress_stage = self._extract_progress_stage(content, title)
         progress_percentage = self._calculate_progress_percentage(progress_stage)
 
@@ -184,10 +271,10 @@ class AmendmentsScraper:
             completion_date = dates['modified'].date()
 
         return {
-            'action_id': self._generate_action_id(title),
-            'title': title,
-            'type': self._determine_action_type(title),
-            'fmp': self._extract_fmp(title, content),
+            'action_id': self._generate_action_id(clean_title),
+            'title': clean_title,
+            'type': self._determine_action_type(clean_title),
+            'fmp': self._extract_fmp(clean_title, content),
             'progress_stage': progress_stage,
             'progress_percentage': progress_percentage,
             'phase': self._determine_phase(progress_stage),
