@@ -10,10 +10,19 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.app import create_app
-from src.scrapers.amendments_scraper import AmendmentsScraper
-from src.models.action import Action
-from src.config.extensions import db
+# Try different import paths for different environments
+try:
+    from src.app import create_app
+    from src.scrapers.amendments_scraper import AmendmentsScraper
+    from src.models.action import Action
+    from src.config.extensions import db
+except ModuleNotFoundError:
+    # If running from /opt/render/project/src, use app directly
+    from app import create_app
+    from src.scrapers.amendments_scraper import AmendmentsScraper
+    from src.models.action import Action
+    from src.config.extensions import db
+
 from datetime import datetime
 
 def main():
