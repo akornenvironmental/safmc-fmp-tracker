@@ -25,6 +25,7 @@ def get_current_user():
         auth_header = request.headers.get('Authorization')
 
         if not auth_header or not auth_header.startswith('Bearer '):
+            logger.warning(f"Missing or invalid Authorization header for {request.path}")
             return None
 
         token = auth_header.split(' ')[1]
@@ -35,19 +36,24 @@ def get_current_user():
         # Get user from database to ensure they're still active
         user = User.query.filter_by(id=decoded.get('user_id')).first()
 
-        if not user or not user.is_active:
+        if not user:
+            logger.warning(f"User not found for ID: {decoded.get('user_id')}")
+            return None
+
+        if not user.is_active:
+            logger.warning(f"Inactive user attempted access: {user.email}")
             return None
 
         return user
 
     except jwt.ExpiredSignatureError:
-        logger.warning("Expired JWT token")
+        logger.warning(f"Expired JWT token for {request.path}")
         return None
-    except jwt.InvalidTokenError:
-        logger.warning("Invalid JWT token")
+    except jwt.InvalidTokenError as e:
+        logger.warning(f"Invalid JWT token for {request.path}: {e}")
         return None
     except Exception as e:
-        logger.error(f"Error extracting user from token: {e}")
+        logger.error(f"Error extracting user from token for {request.path}: {e}")
         return None
 
 
