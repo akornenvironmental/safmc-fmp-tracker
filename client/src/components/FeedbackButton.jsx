@@ -21,7 +21,7 @@ const FeedbackButton = ({ component = 'General' }) => {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/feedback`, {
         method: 'POST',
         headers: {

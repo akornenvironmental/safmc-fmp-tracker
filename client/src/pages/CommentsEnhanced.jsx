@@ -94,7 +94,7 @@ const CommentsEnhanced = () => {
   const detectSpecies = async () => {
     try {
       setDetectingSpecies(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/comments/detect-species`, {
         method: 'POST',
         headers: {
@@ -477,7 +477,7 @@ const CommentsEnhanced = () => {
       setAnalysisError(null);
       setAnalysisResult(null);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/ai/analyze-comments`, {
         method: 'POST',
         headers: {

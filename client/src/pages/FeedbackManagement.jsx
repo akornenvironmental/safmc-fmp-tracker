@@ -19,7 +19,7 @@ const FeedbackManagement = () => {
 
   const fetchFeedback = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const url = statusFilter === 'all'
         ? `${API_BASE_URL}/api/feedback/all`
         : `${API_BASE_URL}/api/feedback/all?status=${statusFilter}`;
@@ -44,8 +44,8 @@ const FeedbackManagement = () => {
   };
 
   const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('token');
+    try:
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/feedback/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -64,7 +64,7 @@ const FeedbackManagement = () => {
   const updateFeedbackStatus = async (feedbackId, newStatus, adminNotes) => {
     setUpdating(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/feedback/${feedbackId}`, {
         method: 'PATCH',
         headers: {
