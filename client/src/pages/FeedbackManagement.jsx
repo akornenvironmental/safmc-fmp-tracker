@@ -44,7 +44,7 @@ const FeedbackManagement = () => {
   };
 
   const fetchStats = async () => {
-    try:
+    try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(`${API_BASE_URL}/api/feedback/stats`, {
         headers: {
