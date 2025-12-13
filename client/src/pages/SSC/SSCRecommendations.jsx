@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
-import Breadcrumb from '../../components/Breadcrumb';
+import PageHeader from '../../components/PageHeader';
+import Button from '../../components/Button';
 import {
   FileText,
   Search,
@@ -137,26 +138,13 @@ const SSCRecommendations = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <FileText className="w-8 h-8 text-brand-blue" />
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-              SSC Recommendations
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Scientific advice to the Council on stock assessments and management measures
-            </p>
-          </div>
-        </div>
-        <p className="text-gray-700 dark:text-gray-300">
-          Track SSC recommendations including ABC values, overfishing limits, and Council responses.
-        </p>
-      </div>
+      <PageHeader
+        icon={FileText}
+        title="SSC Recommendations"
+        subtitle="Scientific recommendations"
+        description="Scientific recommendations on catch levels and management measures."
+      />
 
       {/* Error Alert */}
       {error && (
@@ -175,14 +163,14 @@ const SSCRecommendations = () => {
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Filters
           </h3>
-          <button
+          <Button
+            variant="ghost"
+            icon={Filter}
             onClick={() => setShowFilters(!showFilters)}
-            className="inline-flex items-center gap-2 text-sm text-brand-blue hover:text-brand-blue-light"
+            className="text-brand-blue hover:text-brand-blue-light"
           >
-            <Filter className="w-4 h-4" />
             {showFilters ? 'Hide' : 'Show'} Filters
-            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-          </button>
+          </Button>
         </div>
 
         {/* Search Bar */}

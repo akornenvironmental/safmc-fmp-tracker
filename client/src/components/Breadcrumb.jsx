@@ -13,10 +13,8 @@ const Breadcrumb = ({ customItems = null }) => {
   const generateBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
 
-    // Always start with Home
-    const items = [
-      { label: 'SAFMC FMP Tracker', path: '/', icon: Home }
-    ];
+    // Start with empty items array (no home breadcrumb)
+    const items = [];
 
     // Map path segments to readable labels
     const segmentMap = {
@@ -112,25 +110,25 @@ const Breadcrumb = ({ customItems = null }) => {
   }
 
   return (
-    <nav className="flex items-center space-x-2 text-sm mb-6 px-1" aria-label="Breadcrumb">
+    <nav className="flex items-center space-x-2 text-lg mb-6 px-1" aria-label="Breadcrumb">
       <ol className="flex items-center space-x-2">
         {breadcrumbItems.map((item, index) => (
-          <li key={item.path || index} className="flex items-center">
+          <li key={`${item.path}-${index}`} className="flex items-center">
             {index > 0 && (
-              <ChevronRight className="w-4 h-4 mx-2 text-gray-400 dark:text-gray-600" />
+              <ChevronRight className="w-5 h-5 mx-2 text-gray-400 dark:text-gray-600" />
             )}
 
             {item.isLast ? (
-              <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-1.5">
-                {item.icon && <item.icon className="w-4 h-4" />}
+              <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                {item.icon && <item.icon className="w-5 h-5" />}
                 {item.label}
               </span>
             ) : (
               <Link
                 to={item.path}
-                className="text-gray-600 dark:text-gray-400 hover:text-brand-blue dark:hover:text-brand-blue-light transition-colors flex items-center gap-1.5"
+                className="text-gray-600 dark:text-gray-400 hover:text-brand-blue dark:hover:text-brand-blue-light transition-colors flex items-center gap-2"
               >
-                {item.icon && <item.icon className="w-4 h-4" />}
+                {item.icon && <item.icon className="w-5 h-5" />}
                 {item.label}
               </Link>
             )}

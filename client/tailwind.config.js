@@ -7,6 +7,7 @@ export default {
       fontFamily: {
         sans: ['"Josefin Sans"', 'sans-serif'], // Body font
         heading: ['"Josefin Sans"', 'sans-serif'], // Heading font (matching FMP theme)
+        serif: ['"Josefin Sans"', 'sans-serif'], // Use same font for serif class to maintain consistency
       },
       colors: {
         brand: {

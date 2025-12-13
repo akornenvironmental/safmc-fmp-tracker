@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Ocean blue background circle -->
+  <circle cx="50" cy="50" r="50" fill="#08306b"/>
+
+  <!-- Fish body -->
+  <ellipse cx="45" cy="50" rx="25" ry="15" fill="#4fa3d1"/>
+
+  <!-- Fish tail -->
+  <path d="M 20 50 L 10 40 L 10 60 Z" fill="#4fa3d1"/>
+
+  <!-- Fish eye -->
+  <circle cx="60" cy="45" r="3" fill="white"/>
+  <circle cx="61" cy="44" r="1.5" fill="#08306b"/>
+
+  <!-- Fish fins -->
+  <path d="M 45 65 L 40 75 L 50 70 Z" fill="#2980b9"/>
+  <path d="M 45 35 L 40 25 L 50 30 Z" fill="#2980b9"/>
+
+  <!-- Fish mouth -->
+  <path d="M 68 50 Q 70 48, 72 50" stroke="#08306b" stroke-width="2" fill="none"/>
+</svg>

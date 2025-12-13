@@ -25,8 +25,19 @@ export const SidebarProvider = ({ children }) => {
   });
   const [isHovered, setIsHovered] = useState(false);
 
+  // Load navigation favorites from localStorage
+  const [navFavorites, setNavFavorites] = useState(() => {
+    const saved = localStorage.getItem('navFavorites');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
   // Effective collapsed state - expanded if hovered while collapsed
   const effectiveCollapsed = isCollapsed && !isHovered;
+
+  // Persist favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('navFavorites', JSON.stringify(Array.from(navFavorites)));
+  }, [navFavorites]);
 
   // Toggle sidebar collapse state
   const toggleSidebar = useCallback(() => {
@@ -60,6 +71,24 @@ export const SidebarProvider = ({ children }) => {
     setIsHovered(false);
   }, []);
 
+  // Toggle navigation favorite
+  const toggleNavFavorite = useCallback((path) => {
+    setNavFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(path)) {
+        newFavorites.delete(path);
+      } else {
+        newFavorites.add(path);
+      }
+      return newFavorites;
+    });
+  }, []);
+
+  // Check if path is favorited
+  const isNavFavorited = useCallback((path) => {
+    return navFavorites.has(path);
+  }, [navFavorites]);
+
   // Keyboard shortcut to toggle sidebar ([ key or Cmd+\)
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -92,6 +121,9 @@ export const SidebarProvider = ({ children }) => {
     expandSidebar,
     handleMouseEnter,
     handleMouseLeave,
+    navFavorites,
+    toggleNavFavorite,
+    isNavFavorited,
   };
 
   return (

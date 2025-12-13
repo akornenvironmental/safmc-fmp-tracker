@@ -231,20 +231,22 @@ class SSCMeetingScraper:
         """
         recommendations = []
 
-        # Look for recommendation sections
-        # SSC reports typically have numbered recommendations
-        recommendation_pattern = r'(?:Recommendation|Motion)\s+(\d+):\s*([^\n]+(?:\n(?!\s*(?:Recommendation|Motion)\s+\d+)[^\n]+)*)'
+        # Pattern 1: "SSC RECOMMENDATION:" or "SSC RECOMMENDS" followed by content
+        pattern1 = r'(?:SSC|SEP)\s+RECOMMEND(?:ATION)?S?:\s*([^\n]+(?:\n(?!(?:SSC|SEP)\s+RECOMMEND|●|[A-Z][A-Z\s]+:)[^\n]+)*)'
+        matches1 = re.finditer(pattern1, report_text, re.IGNORECASE | re.MULTILINE)
 
-        matches = re.finditer(recommendation_pattern, report_text, re.IGNORECASE | re.MULTILINE)
+        rec_counter = 1
+        for match in matches1:
+            rec_text = match.group(1).strip()
 
-        for match in matches:
-            rec_number = match.group(1)
-            rec_text = match.group(2).strip()
+            # Skip very short matches (likely headers)
+            if len(rec_text) < 20:
+                continue
 
             recommendation = {
-                'recommendation_number': f"REC-{rec_number}",
-                'title': f"SSC Recommendation {rec_number}",
-                'recommendation_text': rec_text,
+                'recommendation_number': f"REC-{rec_counter}",
+                'title': f"SSC Recommendation {rec_counter}",
+                'recommendation_text': rec_text[:2000],  # Limit length
                 'recommendation_type': self._classify_recommendation(rec_text),
                 'species': self._extract_species(rec_text),
                 'status': 'pending'
@@ -253,10 +255,56 @@ class SSCMeetingScraper:
             # Try to extract ABC values
             abc_match = re.search(r'ABC.*?(\d[\d,]+)\s*(lbs?|pounds?|mt|metric\s+tons?)', rec_text, re.IGNORECASE)
             if abc_match:
-                recommendation['abc_value'] = float(abc_match.group(1).replace(',', ''))
-                recommendation['abc_units'] = abc_match.group(2)
+                try:
+                    recommendation['abc_value'] = float(abc_match.group(1).replace(',', ''))
+                    recommendation['abc_units'] = abc_match.group(2)
+                except:
+                    pass
 
             recommendations.append(recommendation)
+            rec_counter += 1
+
+        # Pattern 2: Bullet points with "recommends" in text
+        pattern2 = r'[●•]\s*(?:The\s+)?(?:SSC|SEP)\s+recommend[s]?\s+([^\n]+(?:\n(?![●•]|(?:SSC|SEP)\s+RECOMMEND)[^\n]+)*)'
+        matches2 = re.finditer(pattern2, report_text, re.IGNORECASE | re.MULTILINE)
+
+        for match in matches2:
+            rec_text = match.group(1).strip()
+
+            # Skip if already captured or too short
+            if len(rec_text) < 20:
+                continue
+
+            # Check if this text is already in recommendations
+            is_duplicate = False
+            for existing_rec in recommendations:
+                if rec_text[:100] in existing_rec['recommendation_text']:
+                    is_duplicate = True
+                    break
+
+            if is_duplicate:
+                continue
+
+            recommendation = {
+                'recommendation_number': f"REC-{rec_counter}",
+                'title': f"SSC Recommendation {rec_counter}",
+                'recommendation_text': rec_text[:2000],  # Limit length
+                'recommendation_type': self._classify_recommendation(rec_text),
+                'species': self._extract_species(rec_text),
+                'status': 'pending'
+            }
+
+            # Try to extract ABC values
+            abc_match = re.search(r'ABC.*?(\d[\d,]+)\s*(lbs?|pounds?|mt|metric\s+tons?)', rec_text, re.IGNORECASE)
+            if abc_match:
+                try:
+                    recommendation['abc_value'] = float(abc_match.group(1).replace(',', ''))
+                    recommendation['abc_units'] = abc_match.group(2)
+                except:
+                    pass
+
+            recommendations.append(recommendation)
+            rec_counter += 1
 
         return recommendations
 

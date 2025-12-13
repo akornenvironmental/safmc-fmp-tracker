@@ -7,7 +7,8 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
-import Breadcrumb from '../../components/Breadcrumb';
+import PageHeader from '../../components/PageHeader';
+import Button from '../../components/Button';
 import {
   Users,
   Search,
@@ -155,27 +156,13 @@ const SSCMembers = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Users className="w-8 h-8 text-brand-blue" />
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-              SSC Members
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Scientific and Statistical Committee • {members.length} Members
-            </p>
-          </div>
-        </div>
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl">
-          The SSC comprises biologists, stock assessment scientists, economists, social scientists,
-          and natural resource specialists from academic institutions and state/federal agencies.
-        </p>
-      </div>
+      <PageHeader
+        icon={Users}
+        title="SSC Members"
+        subtitle="21 members"
+        description="Scientific and Statistical Committee membership and expertise."
+      />
 
       {/* Error Alert */}
       {error && (
@@ -194,14 +181,14 @@ const SSCMembers = () => {
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Filters
           </h3>
-          <button
+          <Button
+            variant="ghost"
+            icon={Filter}
             onClick={() => setShowFilters(!showFilters)}
-            className="inline-flex items-center gap-2 text-sm text-brand-blue hover:text-brand-blue-light"
+            className="text-brand-blue hover:text-brand-blue-light"
           >
-            <Filter className="w-4 h-4" />
             {showFilters ? 'Hide' : 'Show'} Filters
-            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-          </button>
+          </Button>
         </div>
 
         {/* Search Bar */}

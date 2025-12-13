@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import Breadcrumb from '../components/Breadcrumb';
 import { API_BASE_URL } from '../config';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
 import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag, TrendingUp, ExternalLink, MessageSquare, Clock, Expand } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -567,43 +569,40 @@ const CommentsEnhanced = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Page Header */}
-      <div className="sm:flex sm:items-start sm:justify-between">
-        <div className="sm:flex-auto">
-          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Comments synced weekly from SAFMC public hearings and comment periods.
-          </p>
-        </div>
-        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 items-center">
-          <button
-            onClick={syncComments}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
-            {syncing ? 'Syncing...' : 'Sync Comments'}
-          </button>
-          <button
-            onClick={() => setShowAnalysisModal(true)}
-            disabled={comments.length === 0}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Sparkles size={14} />
-            AI Analysis
-          </button>
-          <button
-            onClick={detectSpecies}
-            disabled={detectingSpecies || comments.length === 0}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Fish size={14} className={detectingSpecies ? 'animate-pulse' : ''} />
-            {detectingSpecies ? 'Detecting...' : 'Detect Species'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={MessageSquare}
+        title="Public Comments"
+        subtitle={`${comments.length} comments tracked`}
+        description="Public comments submitted on fishery management actions."
+      />
+
+      <ButtonGroup>
+        <Button
+          variant="primary"
+          icon={RefreshCw}
+          onClick={syncComments}
+          disabled={syncing}
+        >
+          {syncing ? 'Syncing...' : 'Sync Comments'}
+        </Button>
+        <Button
+          variant="secondary"
+          icon={Sparkles}
+          onClick={() => setShowAnalysisModal(true)}
+          disabled={comments.length === 0}
+        >
+          AI Analysis
+        </Button>
+        <Button
+          variant="secondary"
+          icon={Fish}
+          onClick={detectSpecies}
+          disabled={detectingSpecies || comments.length === 0}
+        >
+          {detectingSpecies ? 'Detecting...' : 'Detect Species'}
+        </Button>
+      </ButtonGroup>
 
       {/* Active Filters Indicator */}
       {hasActiveFilters && (
@@ -1280,9 +1279,6 @@ const CommentsEnhanced = () => {
                 profileType === 'contact' ? (
                   <div className="space-y-4">
                     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</h3>
                       <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{profileData.name || '—'}</p>
                     </div>

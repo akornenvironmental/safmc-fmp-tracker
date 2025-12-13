@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, LayoutDashboard } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -76,28 +79,24 @@ const Dashboard = () => {
 
   return (
     <div>
-      {/* Header with Update Button */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Overview of FMP actions, meetings, and public comments
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            Data is automatically synced weekly. Showing {recentActions.length} recent actions.
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            onClick={triggerScrape}
-            disabled={scraping}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`w-4 h-4 ${scraping ? 'animate-spin' : ''}`} />
-            {scraping ? 'Updating...' : 'Update Data'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={LayoutDashboard}
+        title="Dashboard"
+        subtitle={`${recentActions.length} recent actions • Data synced weekly`}
+        description="Overview of amendment actions, meetings, and fishery management activities across all FMPs."
+      />
+
+      <ButtonGroup>
+        <Button
+          variant="primary"
+          onClick={triggerScrape}
+          disabled={scraping}
+          icon={scraping ? RefreshCw : RefreshCw}
+          className={scraping ? '[&_svg]:animate-spin' : ''}
+        >
+          {scraping ? 'Updating...' : 'Update Data'}
+        </Button>
+      </ButtonGroup>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

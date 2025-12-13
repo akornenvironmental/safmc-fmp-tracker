@@ -8,7 +8,6 @@ import { GraduationCap, Calendar, FileText, Users, TrendingUp, ExternalLink } fr
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
-import Breadcrumb from '../../components/Breadcrumb';
 
 const CMODDashboard = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -68,9 +67,6 @@ const CMODDashboard = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
@@ -84,7 +80,7 @@ const CMODDashboard = () => {
             </p>
           </div>
         </div>
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl">
+        <p className="text-base text-gray-700 dark:text-gray-300 max-w-3xl">
           CMOD workshops provide professional development and training for council members across all eight
           Regional Fishery Management Councils, focusing on emerging fishery management topics and skills development.
         </p>

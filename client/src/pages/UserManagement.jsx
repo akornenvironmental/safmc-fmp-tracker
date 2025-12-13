@@ -1,5 +1,4 @@
 /**
-import Breadcrumb from '../components/Breadcrumb';
  * UserManagement Page - Simplified and Responsive
  *
  * Comprehensive user management interface for super admins.
@@ -10,6 +9,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
 import {
   Users,
   Plus,
@@ -353,30 +354,22 @@ const UserManagement = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div className="sm:flex-auto">
-          <div className="flex items-center gap-3">
-            <Users className="w-8 h-8 text-brand-blue" />
-            <div>
-              <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
-              <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                Manage user accounts and permissions
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <PageHeader
+            icon={Users}
+            title="User Management"
+            subtitle="Manage users"
+            description="Manage user accounts, roles, and permissions."
+          />
+          <Button
+            variant="primary"
+            icon={Plus}
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2"
           >
-            <Plus className="w-4 h-4" />
             Add User
-          </button>
+          </Button>
         </div>
       </div>
 

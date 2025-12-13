@@ -6,9 +6,9 @@
 import { useState } from 'react';
 import { FlaskConical, Users, Calendar, FileText, TrendingUp, Download, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Button from '../../components/Button';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
-import Breadcrumb from '../../components/Breadcrumb';
 
 const SSCDashboard = () => {
   const [importing, setImporting] = useState(false);
@@ -47,28 +47,6 @@ const SSCDashboard = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <FlaskConical className="w-8 h-8 text-brand-blue" />
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-              Scientific & Statistical Committee
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              SSC Dashboard & Overview
-            </p>
-          </div>
-        </div>
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl">
-          The SSC provides independent scientific advice to the South Atlantic Fishery Management Council
-          on stock assessments, acceptable biological catch (ABC) recommendations, and fishery management measures.
-        </p>
-      </div>
-
       {/* Admin Actions */}
       <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div className="flex items-center justify-between">
@@ -81,23 +59,14 @@ const SSCDashboard = () => {
               </p>
             </div>
           </div>
-          <button
+          <Button
+            variant="primary"
+            icon={Download}
             onClick={handleImportMeetings}
             disabled={importing}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
           >
-            {importing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Importing...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Import Meetings
-              </>
-            )}
-          </button>
+            {importing ? 'Importing...' : 'Import Meetings'}
+          </Button>
         </div>
       </div>
 

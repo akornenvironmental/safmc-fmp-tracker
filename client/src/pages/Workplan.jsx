@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import Breadcrumb from '../components/Breadcrumb';
+import { Link } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
 import { API_BASE_URL } from '../config';
 import {
   RefreshCw,
@@ -11,7 +14,11 @@ import {
   ChevronDown,
   History,
   Filter,
-  RotateCcw
+  RotateCcw,
+  FileText,
+  ExternalLink,
+  Upload,
+  ClipboardList
 } from 'lucide-react';
 
 const Workplan = () => {
@@ -186,7 +193,14 @@ const Workplan = () => {
     return (
       <div className="p-8 bg-yellow-50 border border-yellow-200 rounded-lg">
         <h3 className="text-lg font-semibold text-yellow-900 mb-2">No Active Workplan</h3>
-        <p className="text-yellow-700">No workplan has been imported yet. Import a workplan file to get started.</p>
+        <p className="text-yellow-700 mb-4">No workplan has been imported yet. Import a workplan file to get started.</p>
+        <Link
+          to="/workplan/upload"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <Upload className="w-4 h-4" />
+          Upload Workplan
+        </Link>
       </div>
     );
   }
@@ -194,13 +208,17 @@ const Workplan = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
+      <PageHeader
+        icon={ClipboardList}
+        title="Workplan"
+        subtitle="Management priorities"
+        description="Council workplan showing current and upcoming management priorities."
+      />
+
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-start justify-between">
           <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
-            <h1 className="text-2xl font-bold text-gray-900">{workplan.version.versionName}</h1>
+            <h2 className="text-xl font-bold text-gray-900">{workplan.version.versionName}</h2>
             <p className="text-sm text-gray-600 mt-1">
               Effective: {new Date(workplan.version.effectiveDate).toLocaleDateString()}
             </p>
@@ -211,23 +229,27 @@ const Workplan = () => {
             )}
           </div>
 
-          <div className="flex gap-2">
-            <button
+          <ButtonGroup>
+            <Link to="/workplan/upload">
+              <Button variant="secondary" icon={Upload}>
+                Upload Workplan
+              </Button>
+            </Link>
+            <Button
+              variant="secondary"
+              icon={History}
               onClick={() => setShowVersionHistory(!showVersionHistory)}
-              className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              <History className="w-4 h-4" />
               Version History
-            </button>
-
-            <button
+            </Button>
+            <Button
+              variant="primary"
+              icon={RefreshCw}
               onClick={fetchWorkplan}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              <RefreshCw className="w-4 h-4" />
               Refresh
-            </button>
-          </div>
+            </Button>
+          </ButtonGroup>
         </div>
       </div>
 
@@ -324,16 +346,16 @@ const Workplan = () => {
             </select>
           </div>
 
-          <button
+          <Button
+            variant="secondary"
+            icon={RotateCcw}
             onClick={() => {
               setSearchTerm('');
               setSelectedStatus('all');
             }}
-            className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            <RotateCcw className="w-4 h-4" />
             Reset
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -412,17 +434,34 @@ const Workplan = () => {
                                 </div>
 
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {milestone.scheduledMeeting}
-                                  </p>
-                                  <p className="text-xs text-gray-600">
-                                    {new Date(milestone.scheduledDate).toLocaleDateString()}
-                                  </p>
-                                  {milestone.isCompleted && (
-                                    <p className="text-xs text-green-600 mt-1">
-                                      ✓ Completed {milestone.completedDate ? new Date(milestone.completedDate).toLocaleDateString() : ''}
-                                    </p>
-                                  )}
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {milestone.scheduledMeeting}
+                                      </p>
+                                      <p className="text-xs text-gray-600">
+                                        {new Date(milestone.scheduledDate).toLocaleDateString()}
+                                      </p>
+                                      {milestone.isCompleted && (
+                                        <p className="text-xs text-green-600 mt-1">
+                                          ✓ Completed {milestone.completedDate ? new Date(milestone.completedDate).toLocaleDateString() : ''}
+                                        </p>
+                                      )}
+                                    </div>
+                                    {milestone.meeting && milestone.meeting.sourceUrl && (
+                                      <a
+                                        href={milestone.meeting.sourceUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1 px-2 py-1 text-xs text-brand-blue hover:text-blue-700 hover:bg-blue-50 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+                                        title="View meeting materials"
+                                      >
+                                        <FileText size={14} />
+                                        <span>Docs</span>
+                                        <ExternalLink size={12} />
+                                      </a>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             ))}

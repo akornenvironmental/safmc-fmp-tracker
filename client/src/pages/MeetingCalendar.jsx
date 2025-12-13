@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
 import { API_BASE_URL } from '../config';
 import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight,
@@ -66,14 +69,23 @@ const MeetingCalendar = () => {
     return days;
   }, [currentDate]);
 
-  // Group meetings by date
+  // Group meetings by date (expanding multi-day meetings)
   const meetingsByDate = useMemo(() => {
     const map = {};
     meetings.forEach(meeting => {
       if (!meeting.start_date) return;
-      const dateKey = meeting.start_date.split('T')[0];
-      if (!map[dateKey]) map[dateKey] = [];
-      map[dateKey].push(meeting);
+
+      const startDate = new Date(meeting.start_date);
+      const endDate = meeting.end_date ? new Date(meeting.end_date) : startDate;
+
+      // Add meeting to each day it spans
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dateKey = currentDate.toISOString().split('T')[0];
+        if (!map[dateKey]) map[dateKey] = [];
+        map[dateKey].push(meeting);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
     });
     return map;
   }, [meetings]);
@@ -137,39 +149,29 @@ const MeetingCalendar = () => {
   return (
     <div>
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <CalendarIcon className="w-8 h-8 text-brand-blue" />
-            Meeting Calendar
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            {meetings.length} meetings tracked
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex gap-2">
-          <button
-            onClick={() => setView('calendar')}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium ${
-              view === 'calendar'
-                ? 'bg-brand-blue text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Grid size={16} /> Calendar
-          </button>
-          <button
-            onClick={() => setView('list')}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium ${
-              view === 'list'
-                ? 'bg-brand-blue text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <List size={16} /> List
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={CalendarIcon}
+        title="Meeting Calendar"
+        subtitle="Upcoming meetings"
+        description="Schedule of upcoming Council and committee meetings."
+      />
+
+      <ButtonGroup>
+        <Button
+          variant={view === 'calendar' ? 'primary' : 'secondary'}
+          onClick={() => setView('calendar')}
+          icon={Grid}
+        >
+          Calendar
+        </Button>
+        <Button
+          variant={view === 'list' ? 'primary' : 'secondary'}
+          onClick={() => setView('list')}
+          icon={List}
+        >
+          List
+        </Button>
+      </ButtonGroup>
 
       {view === 'calendar' ? (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

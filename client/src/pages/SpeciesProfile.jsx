@@ -185,6 +185,28 @@ const SpeciesProfile = () => {
             <div className="text-sm text-gray-500">Last Tracked</div>
           </div>
         </div>
+
+        {/* External Resources */}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href={`https://www.fisheries.noaa.gov/foss/f?p=215:200:::::P200_SEARCH:${encodeURIComponent(profile.name)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue hover:bg-blue-700 dark:bg-brand-blue-light dark:hover:bg-blue-600 text-white rounded-lg transition-colors shadow-sm hover:shadow-md"
+          >
+            <ExternalLink size={16} />
+            View on Stock Smart
+          </a>
+          <a
+            href="https://sedarweb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-700 text-white rounded-lg transition-colors shadow-sm hover:shadow-md"
+          >
+            <ExternalLink size={16} />
+            View on SEDAR
+          </a>
+        </div>
       </div>
 
       {/* Status Breakdown */}

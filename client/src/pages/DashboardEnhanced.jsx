@@ -3,8 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import {
   RefreshCw, FileText, Calendar, MessageSquare, Fish,
-  TrendingUp, Clock, AlertCircle, ChevronRight, BarChart3
+  TrendingUp, Clock, AlertCircle, ChevronRight, BarChart3, LayoutDashboard
 } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
 
 const DashboardEnhanced = () => {
   const navigate = useNavigate();
@@ -80,21 +82,57 @@ const DashboardEnhanced = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/scrape/all`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      // List of all scraper endpoints to trigger
+      const scrapers = [
+        { endpoint: '/api/scrape/all', name: 'SAFMC Actions' },
+        { endpoint: '/api/ssc/import/meetings', name: 'SSC Meetings', body: { download_documents: true } },
+        { endpoint: '/api/cmod/import/workshops', name: 'CMOD Workshops' },
+        { endpoint: '/api/ecosystem/import', name: 'Ecosystem Data' },
+      ];
+
+      let successCount = 0;
+      let failCount = 0;
+
+      // Run all scrapers sequentially
+      for (const scraper of scrapers) {
+        try {
+          const response = await fetch(`${API_BASE_URL}${scraper.endpoint}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(scraper.body || {})
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            successCount++;
+          } else {
+            failCount++;
+            console.error(`${scraper.name} failed:`, data.error);
+          }
+        } catch (error) {
+          failCount++;
+          console.error(`${scraper.name} error:`, error);
         }
-      });
 
-      const data = await response.json();
+        // Wait 1 second between scrapers
+        if (scrapers.indexOf(scraper) < scrapers.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
 
-      if (response.ok && data.success) {
-        // Refresh dashboard data after scrape completes
-        setTimeout(() => fetchDashboardData(), 3000);
+      // Refresh dashboard data after all scrapers complete
+      setTimeout(() => fetchDashboardData(), 2000);
+
+      if (failCount === 0) {
+        alert(`All data updated successfully! (${successCount} scrapers completed)`);
+      } else if (successCount > 0) {
+        alert(`Partial update complete. ${successCount} succeeded, ${failCount} failed. Check console for details.`);
       } else {
-        alert(data.error || 'Failed to update data. Please try again.');
+        alert('All scrapers failed. Please check your connection and try again.');
       }
     } catch (error) {
       console.error('Error triggering scrape:', error);
@@ -117,30 +155,34 @@ const DashboardEnhanced = () => {
       const status = (action.status || '').toLowerCase();
       const stage = (action.progress_stage || '').toLowerCase();
 
-      // Classify actions using status field (primary) or progress_stage (fallback):
-      // - In Progress: Status is "UNDERWAY" or "Public Comment" OR stage contains "hearing", "review", "approval"
-      // - Planned: Status is "PLANNED" OR stage contains "scoping"
-      // - Completed: Everything else (implemented or null)
+      // Classify actions using progress_stage (primary) and status (fallback):
+      // Priority order: Completed > In Progress > Planned
 
-      // Check for "Implemented" first - these are explicitly done
-      if (stage.includes('implement') || stage.includes('complete')) {
+      // COMPLETED: Explicitly implemented or completed stages
+      if (stage.includes('implement') || stage.includes('complete') ||
+          stage.includes('final action') || stage.includes('adopted') ||
+          status === 'completed' || status === 'implemented') {
         fmpMap[action.fmp].completed++;
       }
-      // Check for active work stages
-      else if (status === 'underway' || status === 'public comment' ||
-               stage.includes('public hearing') || stage.includes('public comment') ||
+      // IN PROGRESS: Active work stages (mid-to-late process)
+      else if (stage.includes('public hearing') || stage.includes('public comment') ||
                stage.includes('secretarial review') || stage.includes('final approval') ||
-               stage.includes('council review') || stage.includes('rule making') ||
-               stage.includes('federal register')) {
+               stage.includes('council review') || stage.includes('council approval') ||
+               stage.includes('rule making') || stage.includes('federal register') ||
+               stage.includes('review') || stage.includes('approval') ||
+               status === 'underway' || status === 'public comment' || status === 'in progress') {
         fmpMap[action.fmp].inProgress++;
       }
-      // Check for planning stages
-      else if (status === 'planned' || stage.includes('scoping') || stage.includes('pre-scoping')) {
+      // PLANNED: Early planning/scoping stages
+      else if (stage.includes('scoping') || stage.includes('pre-scoping') ||
+               stage.includes('planning') || stage.includes('development') ||
+               stage.includes('drafting') || stage.includes('preparing') ||
+               status === 'planned' || status === 'pending') {
         fmpMap[action.fmp].planned++;
       }
-      // Default to completed if no active indicators
+      // DEFAULT: If no clear indicators, treat as planned (safer assumption)
       else {
-        fmpMap[action.fmp].completed++;
+        fmpMap[action.fmp].planned++;
       }
     });
 
@@ -230,26 +272,25 @@ const DashboardEnhanced = () => {
   };
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="sm:flex sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">SAFMC FMP Tracker Overview</h2>
-        </div>
-        <div className="mt-2 sm:mt-0">
-          <button
-            onClick={triggerScrape}
-            disabled={scraping}
-            className="relative inline-flex items-center gap-2 h-8 px-2.5 text-xs font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:cursor-not-allowed transition-colors overflow-hidden"
-          >
-            {scraping && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-slide-progress"></div>
-            )}
-            <RefreshCw className={`w-3.5 h-3.5 ${scraping ? 'animate-spin' : ''} relative z-10`} />
-            <span className="relative z-10">{scraping ? 'Updating...' : 'Update Data'}</span>
-          </button>
-        </div>
-      </div>
+    <div>
+      <PageHeader
+        icon={LayoutDashboard}
+        title="Dashboard"
+        subtitle="Real-time overview"
+        description="Monitor active amendments, upcoming meetings, and FMP progress across all fishery management plans in the South Atlantic region."
+      />
+
+      <Button
+        variant="primary"
+        icon={RefreshCw}
+        onClick={triggerScrape}
+        disabled={scraping}
+        className="mb-6"
+      >
+        {scraping ? 'Updating...' : 'Update Data'}
+      </Button>
+
+      <div className="space-y-3">
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -298,9 +339,9 @@ const DashboardEnhanced = () => {
         {/* FMP Progress */}
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-              Progress by FMP
+              FMP Progress Overview
             </h2>
             <Link to="/actions" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
               View all
@@ -485,6 +526,7 @@ const DashboardEnhanced = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

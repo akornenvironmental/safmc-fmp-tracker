@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import Breadcrumb from '../components/Breadcrumb';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
 import {
   RefreshCw, Download, Search, Fish, ChevronDown, X,
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ArrowUpDown,
@@ -361,62 +362,65 @@ const SpeciesStocks = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <Fish className="w-8 h-8 text-brand-blue" />
-            Stock Status
-          </h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            {filteredData.length} species tracked with stock assessment data
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
-          {/* View Toggle */}
-          <div className="flex rounded-md shadow-sm">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
-                viewMode === 'grid'
-                  ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-            >
-              <LayoutGrid size={16} />
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-r border-b ${
-                viewMode === 'table'
-                  ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-            >
-              <Table size={16} />
-            </button>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <Fish className="w-8 h-8 text-brand-blue" />
+          <div>
+            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
+              Stock Assessments
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {filteredData.length} species tracked with stock assessment data
+            </p>
           </div>
+        </div>
+        <p className="text-base text-gray-700 dark:text-gray-300 max-w-3xl">
+          Scientific stock assessments and fishery data for managed species in the South Atlantic region.
+        </p>
+      </div>
 
+      <ButtonGroup>
+        {/* View Toggle */}
+        <div className="flex rounded-md shadow-sm">
           <button
-            onClick={exportToCSV}
-            className="inline-flex items-center gap-1.5 rounded-md border border-teal-300 dark:border-teal-600 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 px-3 py-1.5 text-xs font-medium text-teal-700 dark:text-teal-300 shadow-sm hover:from-teal-100 hover:to-cyan-100 dark:hover:from-teal-900/50 dark:hover:to-cyan-900/50"
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
+              viewMode === 'grid'
+                ? 'bg-brand-blue text-white border-brand-blue'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
           >
-            <Download size={14} />
-            Export
+            <LayoutGrid size={16} />
           </button>
           <button
-            onClick={syncData}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 rounded-md border border-transparent bg-brand-blue px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-brand-blue-light disabled:opacity-50"
+            onClick={() => setViewMode('table')}
+            className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-r border-b ${
+              viewMode === 'table'
+                ? 'bg-brand-blue text-white border-brand-blue'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
           >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync'}
+            <Table size={16} />
           </button>
         </div>
-      </div>
+
+        <Button
+          variant="secondary"
+          icon={Download}
+          onClick={exportToCSV}
+        >
+          Export
+        </Button>
+        <Button
+          variant="primary"
+          icon={RefreshCw}
+          onClick={syncData}
+          disabled={syncing}
+        >
+          {syncing ? 'Syncing...' : 'Sync'}
+        </Button>
+      </ButtonGroup>
 
       {/* Stats Cards */}
       <div className="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-4">

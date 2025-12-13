@@ -495,18 +495,36 @@ class CommentsScraper:
         return topics
 
     def _remove_duplicates(self, comments: List[Dict]) -> List[Dict]:
-        """Remove duplicate comments"""
+        """
+        Remove duplicate comments using email-first hierarchy
+
+        Deduplication strategy:
+        1. If email exists, use email + comment_text as key
+        2. If no email, use name + location + comment_text as key
+
+        This ensures same person (identified by email) can submit multiple unique comments
+        while preventing duplicate submissions
+        """
         unique_comments = []
         seen = set()
 
         for comment in comments:
-            # Create unique key from email + name + comment text
-            key_parts = [
-                comment.get('email', '').lower(),
-                comment.get('name', '').lower(),
-                comment.get('comment_text', '')[:100].lower()
-            ]
-            key = '|'.join(key_parts)
+            email = comment.get('email', '').strip().lower()
+            name = comment.get('name', '').strip().lower()
+            location = comment.get('location', '').strip().lower()
+            comment_preview = comment.get('comment_text', '')[:100].lower()
+
+            # Email-based deduplication (preferred)
+            if email:
+                # Use email + comment text preview to identify unique submissions
+                # Same email can submit multiple different comments
+                key = f"email:{email}|text:{comment_preview}"
+            # Fallback to name + location for comments without email
+            elif name:
+                key = f"name:{name}|loc:{location}|text:{comment_preview}"
+            else:
+                # Last resort: use comment text only (likely anonymous)
+                key = f"text:{comment_preview}"
 
             if key not in seen:
                 unique_comments.append(comment)

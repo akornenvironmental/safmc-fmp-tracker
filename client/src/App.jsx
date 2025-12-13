@@ -16,9 +16,12 @@ import SpeciesStocks from './pages/SpeciesStocks';
 import Workplan from './pages/Workplan';
 import SpeciesProfile from './pages/SpeciesProfile';
 import Compare from './pages/Compare';
+import Timeline from './pages/Timeline';
+import Ecosystem from './pages/Ecosystem';
 import UserManagement from './pages/UserManagement';
 import ActivityLogs from './pages/ActivityLogs';
 import FeedbackManagement from './pages/FeedbackManagement';
+import DataManagement from './pages/DataManagement';
 import SSCDashboard from './pages/SSC/SSCDashboard';
 import SSCMembers from './pages/SSC/SSCMembers';
 import SSCMeetings from './pages/SSC/SSCMeetings';
@@ -26,6 +29,9 @@ import SSCRecommendations from './pages/SSC/SSCRecommendations';
 import CMODDashboard from './pages/CMOD/CMODDashboard';
 import CMODWorkshops from './pages/CMOD/CMODWorkshops';
 import CMODTopics from './pages/CMOD/CMODTopics';
+import UserProfile from './pages/UserProfile';
+import Favorites from './pages/Favorites';
+import WorkplanUpload from './pages/WorkplanUpload';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
 
@@ -68,6 +74,9 @@ function App() {
               <Route path="species" element={<SpeciesStocks />} /> {/* Redirect old route */}
               <Route path="assessments" element={<SpeciesStocks />} /> {/* Redirect old route */}
               <Route path="workplan" element={<Workplan />} />
+              <Route path="workplan/upload" element={<WorkplanUpload />} />
+              <Route path="timeline" element={<Timeline />} />
+              <Route path="ecosystem" element={<Ecosystem />} />
               <Route path="species/:speciesName" element={<SpeciesProfile />} />
               <Route path="compare" element={<Compare />} />
               <Route path="ssc" element={<SSCDashboard />} />
@@ -80,6 +89,9 @@ function App() {
               <Route path="admin/users" element={<UserManagement />} />
               <Route path="admin/logs" element={<ActivityLogs />} />
               <Route path="admin/feedback" element={<FeedbackManagement />} />
+              <Route path="admin/data" element={<DataManagement />} />
+              <Route path="profile" element={<UserProfile />} />
+              <Route path="favorites" element={<Favorites />} />
             </Route>
           </Routes>
             <ToastContainer position="top-right" autoClose={3000} />

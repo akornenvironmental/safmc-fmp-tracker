@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
 import { GitCompare, Search, Plus, X, Check, AlertCircle, ArrowRight } from 'lucide-react';
 
 const Compare = () => {
@@ -116,17 +118,12 @@ const Compare = () => {
   return (
     <div>
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <GitCompare className="w-8 h-8 text-brand-blue" />
-            Amendment Comparison Tool
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Compare amendments side-by-side to identify differences and similarities
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={GitCompare}
+        title="Compare Actions"
+        subtitle="Side-by-side comparison"
+        description="Compare amendment actions and alternatives side-by-side."
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Action Selection Panel */}
@@ -184,13 +181,14 @@ const Compare = () => {
                     </div>
                   ))}
                 </div>
-                <button
+                <Button
+                  variant="primary"
                   onClick={runComparison}
                   disabled={selectedActions.length < 2 || comparing}
-                  className="mt-3 w-full bg-brand-blue text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-brand-blue-light disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-3 w-full"
                 >
                   {comparing ? 'Comparing...' : 'Compare Actions'}
-                </button>
+                </Button>
               </div>
             )}
 

@@ -21,6 +21,7 @@ from src.models.contact import Contact
 from src.models.organization import Organization
 from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
+from src.models.workplan import WorkplanVersion, WorkplanItem, WorkplanMilestone, WorkplanUploadLog
 from src.scrapers.amendments_scraper import AmendmentsScraper
 from src.scrapers.amendments_scraper_enhanced import EnhancedAmendmentsScraper
 from src.scrapers.meetings_scraper import MeetingsScraper
@@ -2021,6 +2022,40 @@ def update_feedback_status(feedback_id):
         return safe_error_response(e)[0], safe_error_response(e)[1]
 
 
+@bp.route('/feedback/<int:feedback_id>', methods=['DELETE'])
+@require_role('admin', 'super_admin')
+def delete_feedback(feedback_id):
+    """Delete feedback - admin only"""
+    try:
+        # Delete feedback
+        delete_query = """
+            DELETE FROM user_feedback
+            WHERE id = :id
+            RETURNING id
+        """
+
+        result = db.session.execute(text(delete_query), {'id': feedback_id})
+        deleted = result.fetchone()
+
+        if not deleted:
+            return jsonify({'error': 'Feedback not found'}), 404
+
+        db.session.commit()
+
+        logger.info(f"Feedback {feedback_id} deleted by {session.get('email')}")
+
+        return jsonify({
+            'success': True,
+            'message': 'Feedback deleted successfully',
+            'feedback_id': deleted[0]
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting feedback: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
 @bp.route('/feedback/stats', methods=['GET'])
 @require_role('admin', 'super_admin')
 def get_feedback_stats():
@@ -2072,4 +2107,302 @@ def get_feedback_stats():
 
     except Exception as e:
         logger.error(f"Error fetching feedback stats: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+# ==================== WORKPLAN ENDPOINTS ====================
+
+@bp.route('/workplan/upload', methods=['POST'])
+@require_auth
+def upload_workplan():
+    """
+    Upload and parse workplan Excel file
+    Creates a new workplan version with items and milestones
+    """
+    try:
+        import os
+        import tempfile
+        from werkzeug.utils import secure_filename
+        from src.utils.workplan_parser import parse_workplan_file
+        from src.models.workplan import WorkplanVersion, WorkplanItem, WorkplanMilestone, WorkplanUploadLog
+
+        start_time = time.time()
+
+        # Check if file was uploaded
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+
+        # Get metadata from form
+        version_name = request.form.get('version_name')
+        quarter = request.form.get('quarter')
+        fiscal_year = request.form.get('fiscal_year', type=int)
+
+        if not version_name:
+            return jsonify({'success': False, 'error': 'Version name required'}), 400
+
+        # Check if version name already exists
+        existing = WorkplanVersion.query.filter_by(version_name=version_name).first()
+        if existing:
+            return jsonify({'success': False, 'error': f'Version "{version_name}" already exists'}), 400
+
+        # Save file temporarily
+        filename = secure_filename(file.filename)
+        file_size = 0
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+            file.save(tmp_file.name)
+            tmp_file.seek(0, os.SEEK_END)
+            file_size = tmp_file.tell()
+            temp_path = tmp_file.name
+
+        try:
+            # Parse the Excel file
+            logger.info(f"Parsing workplan file: {filename}")
+            parsed_data = parse_workplan_file(temp_path)
+
+            # Create workplan version
+            version = WorkplanVersion(
+                version_name=version_name,
+                source_file_name=filename,
+                upload_type='manual_upload',
+                uploaded_by_user_id=session.get('user_id'),
+                quarter=quarter,
+                fiscal_year=fiscal_year,
+                created_at=datetime.utcnow(),
+                is_active=True
+            )
+            db.session.add(version)
+            db.session.flush()  # Get version.id
+
+            items_created = 0
+            milestones_created = 0
+
+            # Create workplan items and milestones
+            for item_data in parsed_data.get('items', []):
+                # Map parser fields to model fields
+                workplan_item = WorkplanItem(
+                    workplan_version_id=version.id,
+                    amendment_id=item_data.get('amendment_number', ''),
+                    topic=item_data.get('amendment_name', ''),
+                    status=item_data.get('category', 'other').upper(),
+                    lead_staff=item_data.get('safmc_lead'),
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow()
+                )
+                db.session.add(workplan_item)
+                db.session.flush()  # Get workplan_item.id
+                items_created += 1
+
+                # Create milestones for this item
+                for milestone_data in item_data.get('milestones', []):
+                    milestone = WorkplanMilestone(
+                        workplan_item_id=workplan_item.id,
+                        milestone_type=milestone_data.get('status_code', ''),
+                        scheduled_date=datetime.fromisoformat(milestone_data['quarter_date']) if milestone_data.get('quarter_date') else None,
+                        scheduled_meeting=milestone_data.get('quarter', ''),
+                        is_completed=milestone_data.get('is_complete', False),
+                        notes=milestone_data.get('status_description'),
+                        created_at=datetime.utcnow()
+                    )
+                    db.session.add(milestone)
+                    milestones_created += 1
+
+            # Create upload log
+            duration_ms = int((time.time() - start_time) * 1000)
+            upload_log = WorkplanUploadLog(
+                workplan_version_id=version.id,
+                upload_type='manual_upload',
+                file_name=filename,
+                file_size_bytes=file_size,
+                uploaded_by_user_id=session.get('user_id'),
+                status='success',
+                items_found=len(parsed_data.get('items', [])),
+                items_created=items_created,
+                items_updated=0,
+                milestones_created=milestones_created,
+                processing_duration_ms=duration_ms,
+                created_at=datetime.utcnow()
+            )
+            db.session.add(upload_log)
+
+            # Commit all changes
+            db.session.commit()
+
+            logger.info(f"Successfully imported workplan: {version_name} ({items_created} items, {milestones_created} milestones)")
+
+            return jsonify({
+                'success': True,
+                'version': version.to_dict(),
+                'stats': {
+                    'itemsCreated': items_created,
+                    'milestonesCreated': milestones_created,
+                    'processingTimeMs': duration_ms
+                }
+            })
+
+        finally:
+            # Clean up temp file
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error uploading workplan: {e}")
+
+        # Log failed upload
+        try:
+            failed_log = WorkplanUploadLog(
+                upload_type='manual_upload',
+                file_name=filename if 'filename' in locals() else 'unknown',
+                uploaded_by_user_id=session.get('user_id'),
+                status='failed',
+                error_message=str(e),
+                created_at=datetime.utcnow()
+            )
+            db.session.add(failed_log)
+            db.session.commit()
+        except:
+            pass
+
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/workplan/versions')
+def get_workplan_versions():
+    """Get all workplan versions"""
+    try:
+        versions = WorkplanVersion.query.order_by(desc(WorkplanVersion.created_at)).all()
+
+        return jsonify({
+            'success': True,
+            'versions': [v.to_dict() for v in versions]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching workplan versions: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/workplan/versions/<int:version_id>')
+def get_workplan_version(version_id):
+    """Get specific workplan version with all items and milestones"""
+    try:
+        from src.models.workplan import WorkplanVersion, WorkplanItem
+
+        version = WorkplanVersion.query.get(version_id)
+        if not version:
+            return jsonify({'success': False, 'error': 'Version not found'}), 404
+
+        # Get all items with milestones
+        items = WorkplanItem.query.filter_by(workplan_version_id=version_id).all()
+
+        return jsonify({
+            'success': True,
+            'version': version.to_dict(),
+            'items': [item.to_dict(include_milestones=True) for item in items]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching workplan version: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/workplan/items')
+def get_workplan_items():
+    """Get workplan items with optional filtering"""
+    try:
+        from src.models.workplan import WorkplanItem, WorkplanVersion
+
+        # Get query parameters
+        version_id = request.args.get('version_id', type=int)
+        status = request.args.get('status')
+
+        # Build query
+        query = WorkplanItem.query
+
+        # Join with version to get active items
+        query = query.join(WorkplanVersion)
+
+        if version_id:
+            query = query.filter(WorkplanItem.workplan_version_id == version_id)
+        else:
+            # Default to active version
+            query = query.filter(WorkplanVersion.is_active == True)
+
+        if status:
+            query = query.filter(WorkplanItem.status == status.upper())
+
+        items = query.all()
+
+        return jsonify({
+            'success': True,
+            'items': [item.to_dict(include_milestones=True) for item in items]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching workplan items: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/workplan/items/<int:item_id>')
+def get_workplan_item(item_id):
+    """Get specific workplan item with details"""
+    try:
+        from src.models.workplan import WorkplanItem
+
+        item = WorkplanItem.query.get(item_id)
+        if not item:
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+        return jsonify({
+            'success': True,
+            'item': item.to_dict(include_milestones=True)
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching workplan item: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/workplan/upload-history')
+def get_workplan_upload_history():
+    """Get upload history logs"""
+    try:
+        from src.models.workplan import WorkplanUploadLog
+
+        limit = request.args.get('limit', 50, type=int)
+        limit = max(1, min(limit, 200))
+
+        logs = WorkplanUploadLog.query.order_by(desc(WorkplanUploadLog.created_at)).limit(limit).all()
+
+        return jsonify({
+            'success': True,
+            'uploads': [log.to_dict() for log in logs]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching upload history: {e}")
+        return safe_error_response(e)[0], safe_error_response(e)[1]
+
+
+@bp.route('/workplan/milestone-types')
+def get_milestone_types():
+    """Get all milestone type codes and descriptions"""
+    try:
+        from src.models.workplan import MilestoneType
+
+        types = MilestoneType.query.order_by(MilestoneType.typical_order).all()
+
+        return jsonify({
+            'success': True,
+            'milestoneTypes': [t.to_dict() for t in types]
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching milestone types: {e}")
         return safe_error_response(e)[0], safe_error_response(e)[1]

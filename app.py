@@ -67,10 +67,10 @@ migrate.init_app(app, db)
 
 # CORS configuration - allows frontend to communicate with backend API
 # Supports both monolithic deployment (same origin) and separated deployment (different domains)
-cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173,https://safmc-fmp-tracker.onrender.com,https://safmc-fmp-tracker-frontend.onrender.com').split(',')
+cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:5174,https://safmc-fmp-tracker.onrender.com,https://safmc-fmp-tracker-frontend.onrender.com').split(',')
 CORS(app, origins=cors_origins, supports_credentials=True,
      allow_headers=['Content-Type', 'Authorization'],
-     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
+     methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
 
 # Global rate limiting
 try:
@@ -150,6 +150,7 @@ from src.models.comment import Comment
 from src.models.milestone import Milestone
 from src.models.scrape_log import ScrapeLog
 from src.models.user import User
+from src.models.user_favorite import UserFavorite
 
 # Import workplan models
 from src.models.workplan import (
@@ -787,6 +788,7 @@ from src.routes.comparison_routes import bp as comparison_bp
 from src.routes.export_routes import bp as export_bp
 from src.routes.ssc_routes import bp as ssc_bp
 from src.routes.cmod_routes import bp as cmod_bp
+from src.routes.user_routes import bp as user_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
@@ -800,6 +802,7 @@ app.register_blueprint(comparison_bp)
 app.register_blueprint(export_bp)
 app.register_blueprint(ssc_bp)
 app.register_blueprint(cmod_bp)
+app.register_blueprint(user_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler

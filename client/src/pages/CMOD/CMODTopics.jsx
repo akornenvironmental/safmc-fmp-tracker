@@ -5,10 +5,10 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Filter, Search } from 'lucide-react';
+import PageHeader from '../../components/PageHeader';
+import { GraduationCap, TrendingUp, Filter, Search } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
-import Breadcrumb from '../../components/Breadcrumb';
 
 const CMODTopics = () => {
   const [topics, setTopics] = useState([]);
@@ -76,27 +76,13 @@ const CMODTopics = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <TrendingUp className="w-8 h-8 text-brand-blue" />
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-              CMOD Topic Tracking
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Track implementation of workshop topics across councils
-            </p>
-          </div>
-        </div>
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl">
-          Monitor how CMOD workshop topics are being implemented across Regional Fishery Management Councils,
-          including related Council actions, meetings, and amendments.
-        </p>
-      </div>
+      <PageHeader
+        icon={GraduationCap}
+        title="CMOD Topics"
+        subtitle="Educational topics"
+        description="Educational topics and resources for Council members."
+      />
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">

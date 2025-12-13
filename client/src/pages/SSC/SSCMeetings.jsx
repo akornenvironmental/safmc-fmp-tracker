@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
-import Breadcrumb from '../../components/Breadcrumb';
+import PageHeader from '../../components/PageHeader';
+import Button from '../../components/Button';
 import {
   Calendar,
   MapPin,
@@ -144,26 +145,13 @@ const SSCMeetings = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Calendar className="w-8 h-8 text-brand-blue" />
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-              SSC Meetings
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Scientific and Statistical Committee Meeting Schedule
-            </p>
-          </div>
-        </div>
-        <p className="text-gray-700 dark:text-gray-300">
-          The SSC generally meets twice a year to review stock assessments and provide scientific advice to the Council.
-        </p>
-      </div>
+      <PageHeader
+        icon={Calendar}
+        title="SSC Meetings"
+        subtitle="Meeting schedule"
+        description="SSC meeting dates, agendas, and summary reports."
+      />
 
       {/* Error Alert */}
       {error && (
@@ -182,14 +170,14 @@ const SSCMeetings = () => {
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Filters & Sorting
           </h3>
-          <button
+          <Button
+            variant="ghost"
+            icon={Filter}
             onClick={() => setShowFilters(!showFilters)}
-            className="inline-flex items-center gap-2 text-sm text-brand-blue hover:text-brand-blue-light"
+            className="text-brand-blue hover:text-brand-blue-light"
           >
-            <Filter className="w-4 h-4" />
             {showFilters ? 'Hide' : 'Show'} Filters
-            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-          </button>
+          </Button>
         </div>
 
         {showFilters && (
@@ -233,13 +221,14 @@ const SSCMeetings = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Sort Order
               </label>
-              <button
+              <Button
+                variant="secondary"
+                icon={ArrowUpDown}
                 onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white flex items-center justify-between"
+                className="w-full justify-between"
               >
-                <span>{sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}</span>
-                <ArrowUpDown className="w-4 h-4" />
-              </button>
+                {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+              </Button>
             </div>
           </div>
         )}

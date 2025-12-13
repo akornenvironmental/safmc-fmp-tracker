@@ -8,7 +8,6 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, Users, MapPin, FileText, ExternalLink, ChevronLeft } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
-import Breadcrumb from '../../components/Breadcrumb';
 
 const CMODWorkshops = () => {
   const { id } = useParams();
@@ -102,9 +101,6 @@ const CMODWorkshops = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Back Button */}
       <Link
         to="/cmod"

@@ -9,6 +9,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
 import {
   Activity,
   Search,
@@ -219,30 +221,22 @@ const ActivityLogs = () => {
   return (
     <div>
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div className="sm:flex-auto">
-          <div className="flex items-center gap-3">
-            <Activity className="w-8 h-8 text-brand-blue" />
-            <div>
-              <h1 className="font-heading text-3xl font-bold text-gray-900">Activity Logs</h1>
-              <p className="mt-2 text-sm text-gray-700">
-                Monitor user activity across the system
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Activity is logged in real-time. Showing {logs.length} of {totalLogs.toLocaleString()} logs.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <PageHeader
+            icon={Activity}
+            title="Activity Logs"
+            subtitle="System activity"
+            description="System activity logs and user actions for administrative monitoring."
+          />
+          <Button
+            variant="primary"
+            icon={Download}
             onClick={handleExport}
             disabled={exporting || logs.length === 0}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Download className="w-4 h-4" />
             {exporting ? 'Exporting...' : 'Export CSV'}
-          </button>
+          </Button>
         </div>
       </div>
 

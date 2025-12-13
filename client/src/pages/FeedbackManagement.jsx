@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, Filter, CheckCircle, Clock, Archive, AlertCircle } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { MessageSquare, Filter, CheckCircle, Clock, Archive, AlertCircle, Trash2, Check } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -94,6 +95,48 @@ const FeedbackManagement = () => {
     }
   };
 
+  const deleteFeedback = async (feedbackId) => {
+    if (!confirm('Are you sure you want to delete this feedback? This action cannot be undone.')) {
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE_URL}/api/feedback/${feedbackId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // Refresh feedback list
+        await fetchFeedback();
+        await fetchStats();
+        setSelectedFeedback(null);
+      } else {
+        alert(`Failed to delete feedback: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+      alert(`Error deleting feedback: ${error.message}`);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const acceptFeedback = async (feedbackId) => {
+    const adminNotes = document.getElementById('admin-notes').value;
+    await updateFeedbackStatus(feedbackId, 'resolved', adminNotes);
+  };
+
+  const archiveFeedback = async (feedbackId) => {
+    const adminNotes = document.getElementById('admin-notes').value;
+    await updateFeedbackStatus(feedbackId, 'archived', adminNotes);
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'new':
@@ -143,17 +186,12 @@ const FeedbackManagement = () => {
   return (
     <div>
       {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <MessageSquare className="w-8 h-8 text-brand-blue" />
-            Feedback Management
-          </h1>
-          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            Review and manage user feedback submissions
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={MessageSquare}
+        title="Feedback Management"
+        subtitle="User feedback"
+        description="User feedback submissions and issue reports."
+      />
 
         {/* Stats Cards */}
         {stats && (
@@ -213,7 +251,7 @@ const FeedbackManagement = () => {
               {feedback.map((item) => (
                 <div
                   key={item.id}
-                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200 hover:shadow-md"
                   onClick={() => setSelectedFeedback(item)}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -326,24 +364,56 @@ const FeedbackManagement = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white placeholder-gray-500 dark:placeholder-gray-300"
                   />
 
+                  {/* Quick Action Buttons */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => {
-                        const newStatus = document.getElementById('status-select').value;
-                        const adminNotes = document.getElementById('admin-notes').value;
-                        updateFeedbackStatus(selectedFeedback.id, newStatus, adminNotes);
-                      }}
+                      onClick={() => acceptFeedback(selectedFeedback.id)}
                       disabled={updating}
-                      className="flex-1 px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                     >
-                      {updating ? 'Updating...' : 'Update'}
+                      <Check size={16} />
+                      {updating ? 'Processing...' : 'Accept'}
                     </button>
                     <button
-                      onClick={() => setSelectedFeedback(null)}
-                      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-medium transition-colors"
+                      onClick={() => archiveFeedback(selectedFeedback.id)}
+                      disabled={updating}
+                      className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                     >
-                      Close
+                      <Archive size={16} />
+                      {updating ? 'Processing...' : 'Archive'}
                     </button>
+                    <button
+                      onClick={() => deleteFeedback(selectedFeedback.id)}
+                      disabled={updating}
+                      className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={16} />
+                      {updating ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+
+                  {/* Manual Status Update */}
+                  <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Or manually update status:</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const newStatus = document.getElementById('status-select').value;
+                          const adminNotes = document.getElementById('admin-notes').value;
+                          updateFeedbackStatus(selectedFeedback.id, newStatus, adminNotes);
+                        }}
+                        disabled={updating}
+                        className="flex-1 px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {updating ? 'Updating...' : 'Update Status'}
+                      </button>
+                      <button
+                        onClick={() => setSelectedFeedback(null)}
+                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-medium transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

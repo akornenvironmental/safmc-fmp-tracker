@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-import Breadcrumb from '../components/Breadcrumb';
-import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X } from 'lucide-react';
+import FavoriteButton from '../components/FavoriteButton';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
+import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X, FileText } from 'lucide-react';
 
 const ActionsEnhanced = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -475,64 +478,61 @@ const ActionsEnhanced = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Page Header */}
-      <div className="sm:flex sm:items-start sm:justify-between">
-        <div className="sm:flex-auto">
-          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Actions and amendments are automatically synced weekly from SAFMC.
-          </p>
-        </div>
-        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 items-center">
-          <div className="relative">
-            <button
-              className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-              onClick={(e) => {
-                const menu = e.currentTarget.nextElementSibling;
-                menu.classList.toggle('hidden');
-              }}
-            >
-              <Download size={14} />
-              Export
-            </button>
-            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
-              <div className="py-1">
-                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-                  {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
-                </div>
-                <button
-                  onClick={exportToCSV}
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                >
-                  CSV Format (.csv)
-                </button>
-                <button
-                  onClick={exportToTSV}
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                >
-                  TSV Format (.tsv)
-                </button>
-                <button
-                  onClick={exportToExcel}
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                >
-                  Excel Format (.xls)
-                </button>
+      <PageHeader
+        icon={FileText}
+        title="Amendment Actions"
+        subtitle={`${actions.length} actions tracked`}
+        description="Track amendments and regulatory actions for fishery management plans."
+      />
+
+      <ButtonGroup>
+        <div className="relative">
+          <Button
+            variant="secondary"
+            icon={Download}
+            onClick={(e) => {
+              const menu = e.currentTarget.nextElementSibling;
+              menu.classList.toggle('hidden');
+            }}
+          >
+            Export
+          </Button>
+          <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
+            <div className="py-1">
+              <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
               </div>
+              <button
+                onClick={exportToCSV}
+                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              >
+                CSV Format (.csv)
+              </button>
+              <button
+                onClick={exportToTSV}
+                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              >
+                TSV Format (.tsv)
+              </button>
+              <button
+                onClick={exportToExcel}
+                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              >
+                Excel Format (.xls)
+              </button>
             </div>
           </div>
-          <button
-            onClick={syncActions}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Actions'}
-          </button>
         </div>
-      </div>
+        <Button
+          variant="primary"
+          icon={RefreshCw}
+          onClick={syncActions}
+          disabled={syncing}
+        >
+          {syncing ? 'Syncing...' : 'Sync Actions'}
+        </Button>
+      </ButtonGroup>
 
       {/* Column selector */}
       {showColumnSelector && (
@@ -802,23 +802,26 @@ const ActionsEnhanced = () => {
                   {getDisplayColumns().map(col => (
                     <td key={col.key} className={`px-1.5 py-0.5 ${col.minWidth || ''}`}>
                       {col.key === 'title' ? (
-                        <>
-                          {action.source_url ? (
-                            <a
-                              href={action.source_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs font-medium text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-green-400 hover:underline"
-                            >
-                              {action.title}
-                            </a>
-                          ) : (
-                            <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{action.title}</div>
-                          )}
-                          {action.description && visibleColumns.description && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{action.description.substring(0, 100)}...</div>
-                          )}
-                        </>
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            {action.source_url ? (
+                              <a
+                                href={action.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-green-400 hover:underline"
+                              >
+                                {action.title}
+                              </a>
+                            ) : (
+                              <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{action.title}</div>
+                            )}
+                            {action.description && visibleColumns.description && (
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{action.description.substring(0, 100)}...</div>
+                            )}
+                          </div>
+                          <FavoriteButton itemType="action" itemId={action.action_id} />
+                        </div>
                       ) : col.key === 'species' ? (
                         <div className="flex flex-wrap gap-1">
                           {action.species && action.species.length > 0 ? (

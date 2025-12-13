@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import Breadcrumb from '../components/Breadcrumb';
+import FavoriteButton from '../components/FavoriteButton';
+import PageHeader from '../components/PageHeader';
+import Button from '../components/Button';
+import ButtonGroup from '../components/ButtonGroup';
 import { API_BASE_URL } from '../config';
 import {
   Calendar, MapPin, RefreshCw, Download, Settings, RotateCcw,
@@ -20,8 +23,10 @@ const MeetingsEnhanced = () => {
   const [selectedMeetings, setSelectedMeetings] = useState(new Set());
   const [organizationFilter, setOrganizationFilter] = useState([]);
   const [regionFilter, setRegionFilter] = useState([]);
+  const [fmpFilter, setFmpFilter] = useState([]);
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [showRegionDropdown, setShowRegionDropdown] = useState(false);
+  const [showFmpDropdown, setShowFmpDropdown] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
 
   // View mode: 'table', 'calendar', 'agenda'
@@ -65,14 +70,15 @@ const MeetingsEnhanced = () => {
       if (!event.target.closest('.relative')) {
         setShowOrgDropdown(false);
         setShowRegionDropdown(false);
+        setShowFmpDropdown(false);
       }
     };
 
-    if (showOrgDropdown || showRegionDropdown) {
+    if (showOrgDropdown || showRegionDropdown || showFmpDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showOrgDropdown, showRegionDropdown]);
+  }, [showOrgDropdown, showRegionDropdown, showFmpDropdown]);
 
   const fetchMeetings = async () => {
     try {
@@ -143,6 +149,7 @@ const MeetingsEnhanced = () => {
     setShowColumnSelector(false);
     setOrganizationFilter([]);
     setRegionFilter([]);
+    setFmpFilter([]);
     setUpcomingOnly(false);
   };
 
@@ -159,7 +166,7 @@ const MeetingsEnhanced = () => {
   // Filter and sort meetings
   const filteredAndSortedMeetings = useMemo(() => {
     const filtered = meetings.filter(meeting => {
-      // Text search filter
+      // Text search filter - enhanced to search species and topics
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = (
         meeting.title?.toLowerCase().includes(searchLower) ||
@@ -167,7 +174,10 @@ const MeetingsEnhanced = () => {
         meeting.location?.toLowerCase().includes(searchLower) ||
         meeting.type?.toLowerCase().includes(searchLower) ||
         meeting.description?.toLowerCase().includes(searchLower) ||
-        meeting.region?.toLowerCase().includes(searchLower)
+        meeting.region?.toLowerCase().includes(searchLower) ||
+        meeting.agenda_content?.toLowerCase().includes(searchLower) ||
+        meeting.topics?.some(topic => topic.toLowerCase().includes(searchLower)) ||
+        meeting.species_discussed?.some(species => species.toLowerCase().includes(searchLower))
       );
 
       // Organization filter (multi-select)
@@ -178,11 +188,19 @@ const MeetingsEnhanced = () => {
       const matchesRegion = regionFilter.length === 0 ||
         regionFilter.some(reg => meeting.region?.toLowerCase() === reg.toLowerCase());
 
+      // FMP filter (multi-select)
+      const matchesFmp = fmpFilter.length === 0 ||
+        fmpFilter.some(fmp => {
+          const titleLower = meeting.title?.toLowerCase() || '';
+          const descLower = meeting.description?.toLowerCase() || '';
+          return titleLower.includes(fmp.toLowerCase()) || descLower.includes(fmp.toLowerCase());
+        });
+
       // Upcoming only filter
       const matchesUpcoming = !upcomingOnly ||
         (meeting.start_date && new Date(meeting.start_date) >= new Date());
 
-      return matchesSearch && matchesOrganization && matchesRegion && matchesUpcoming;
+      return matchesSearch && matchesOrganization && matchesRegion && matchesFmp && matchesUpcoming;
     });
 
     return [...filtered].sort((a, b) => {
@@ -202,7 +220,7 @@ const MeetingsEnhanced = () => {
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [meetings, searchTerm, sortField, sortDirection, organizationFilter, regionFilter, upcomingOnly]);
+  }, [meetings, searchTerm, sortField, sortDirection, organizationFilter, regionFilter, fmpFilter, upcomingOnly]);
 
   // Pagination
   const paginatedMeetings = useMemo(() => {
@@ -420,105 +438,102 @@ const MeetingsEnhanced = () => {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Page Header */}
-      <div className="sm:flex sm:items-start sm:justify-between">
-        <div className="sm:flex-auto">
-          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Meetings synced from SAFMC and 16 other fishery management organizations.
-          </p>
+      <PageHeader
+        icon={Calendar}
+        title="Council Meetings"
+        subtitle={`${meetings.length} meetings tracked`}
+        description="Council and committee meetings, schedules, and materials."
+      />
+
+      <ButtonGroup>
+        {/* View Toggle */}
+        <div className="inline-flex rounded-md shadow-sm" role="group">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-l-md border transition-colors ${
+              viewMode === 'table'
+                ? 'bg-brand-blue text-white border-brand-blue'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
+            }`}
+          >
+            <Table size={14} /> Table
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium border-t border-b transition-colors ${
+              viewMode === 'calendar'
+                ? 'bg-brand-blue text-white border-brand-blue'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
+            }`}
+          >
+            <LayoutGrid size={14} /> Calendar
+          </button>
+          <button
+            onClick={() => setViewMode('agenda')}
+            className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-r-md border transition-colors ${
+              viewMode === 'agenda'
+                ? 'bg-brand-blue text-white border-brand-blue'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
+            }`}
+          >
+            <List size={14} /> Agenda
+          </button>
         </div>
-        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 items-center">
-          {/* View Toggle */}
-          <div className="inline-flex rounded-md shadow-sm" role="group">
-            <button
-              onClick={() => setViewMode('table')}
-              className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-l-md border transition-colors ${
-                viewMode === 'table'
-                  ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
-              }`}
-            >
-              <Table size={14} /> Table
-            </button>
-            <button
-              onClick={() => setViewMode('calendar')}
-              className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium border-t border-b transition-colors ${
-                viewMode === 'calendar'
-                  ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
-              }`}
-            >
-              <LayoutGrid size={14} /> Calendar
-            </button>
-            <button
-              onClick={() => setViewMode('agenda')}
-              className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-r-md border transition-colors ${
-                viewMode === 'agenda'
-                  ? 'bg-brand-blue text-white border-brand-blue'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
-              }`}
-            >
-              <List size={14} /> Agenda
-            </button>
-          </div>
-          <div className="relative">
-            <button
-              className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-              onClick={(e) => {
-                const menu = e.currentTarget.nextElementSibling;
-                menu.classList.toggle('hidden');
-              }}
-            >
-              <Download size={14} />
-              Export
-            </button>
-            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-10">
-              <div className="py-1">
-                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-                  {selectedMeetings.size > 0 ? `Export ${selectedMeetings.size} selected` : 'Export all meetings'}
-                </div>
-                <button
-                  onClick={exportToCSV}
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                >
-                  CSV Format (.csv)
-                </button>
-                <button
-                  onClick={exportToTSV}
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                >
-                  TSV Format (.tsv)
-                </button>
-                <button
-                  onClick={exportToExcel}
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-                >
-                  Excel Format (.xls)
-                </button>
+        <div className="relative">
+          <Button
+            variant="secondary"
+            icon={Download}
+            onClick={(e) => {
+              const menu = e.currentTarget.nextElementSibling;
+              menu.classList.toggle('hidden');
+            }}
+          >
+            Export
+          </Button>
+          <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-10">
+            <div className="py-1">
+              <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                {selectedMeetings.size > 0 ? `Export ${selectedMeetings.size} selected` : 'Export all meetings'}
               </div>
+              <button
+                onClick={exportToCSV}
+                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              >
+                CSV Format (.csv)
+              </button>
+              <button
+                onClick={exportToTSV}
+                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              >
+                TSV Format (.tsv)
+              </button>
+              <button
+                onClick={exportToExcel}
+                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              >
+                Excel Format (.xls)
+              </button>
             </div>
           </div>
-          <button
-            onClick={syncMeetings}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-blue text-white border border-brand-blue hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync SAFMC'}
-          </button>
-          <button
-            onClick={syncFisheryPulse}
-            disabled={syncingFisheryPulse}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-brand-green text-white border border-brand-green hover:bg-green-600 hover:border-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncingFisheryPulse ? 'animate-spin' : ''}`} />
-            {syncingFisheryPulse ? 'Syncing...' : 'Sync All'}
-          </button>
         </div>
-      </div>
+        <Button
+          variant="primary"
+          icon={RefreshCw}
+          onClick={syncMeetings}
+          disabled={syncing}
+        >
+          {syncing ? 'Syncing...' : 'Sync SAFMC'}
+        </Button>
+        <Button
+          variant="primary"
+          icon={RefreshCw}
+          onClick={syncFisheryPulse}
+          disabled={syncingFisheryPulse}
+        >
+          {syncingFisheryPulse ? 'Syncing...' : 'Sync All'}
+        </Button>
+      </ButtonGroup>
 
       {/* Column selector */}
       {showColumnSelector && (
@@ -548,14 +563,14 @@ const MeetingsEnhanced = () => {
         {/* Search input */}
         <input
           type="text"
-          placeholder="Search meetings..."
+          placeholder="Search meetings, species, topics..."
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
           className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          aria-label="Search meetings by title, council, location, or type"
+          aria-label="Search meetings by title, council, location, species, or topics"
         />
 
         {/* Organization multi-select filter */}
@@ -564,6 +579,7 @@ const MeetingsEnhanced = () => {
             onClick={() => {
               setShowOrgDropdown(!showOrgDropdown);
               setShowRegionDropdown(false);
+              setShowFmpDropdown(false);
             }}
             className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
@@ -640,6 +656,7 @@ const MeetingsEnhanced = () => {
             onClick={() => {
               setShowRegionDropdown(!showRegionDropdown);
               setShowOrgDropdown(false);
+              setShowFmpDropdown(false);
             }}
             className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
@@ -667,6 +684,56 @@ const MeetingsEnhanced = () => {
                       className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
                     />
                     <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{region}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* FMP multi-select filter */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowFmpDropdown(!showFmpDropdown);
+              setShowOrgDropdown(false);
+              setShowRegionDropdown(false);
+            }}
+            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+          >
+            FMP
+            {fmpFilter.length > 0 && (
+              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
+                {fmpFilter.length}
+              </span>
+            )}
+          </button>
+          {showFmpDropdown && (
+            <div className="absolute z-50 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto">
+              <div className="p-2 space-y-1">
+                {[
+                  'Snapper Grouper',
+                  'Coastal Migratory Pelagics',
+                  'Dolphin Wahoo',
+                  'Spiny Lobster',
+                  'Golden Crab',
+                  'Shrimp',
+                  'Coral',
+                  'Sargassum'
+                ].map(fmp => (
+                  <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={fmpFilter.includes(fmp)}
+                      onChange={(e) => {
+                        setFmpFilter(prev =>
+                          e.target.checked ? [...prev, fmp] : prev.filter(v => v !== fmp)
+                        );
+                        setCurrentPage(1);
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{fmp}</span>
                   </label>
                 ))}
               </div>
@@ -799,18 +866,23 @@ const MeetingsEnhanced = () => {
                   {getDisplayColumns().map(col => (
                     <td key={col.key} className="px-1.5 py-0.5">
                       {col.key === 'title' ? (
-                        meeting.source_url ? (
-                          <a
-                            href={meeting.source_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
-                          >
-                            {meeting.title}
-                          </a>
-                        ) : (
-                          <div className="text-xs font-medium text-gray-900">{meeting.title}</div>
-                        )
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            {meeting.source_url ? (
+                              <a
+                                href={meeting.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                              >
+                                {meeting.title}
+                              </a>
+                            ) : (
+                              <div className="text-xs font-medium text-gray-900">{meeting.title}</div>
+                            )}
+                          </div>
+                          <FavoriteButton itemType="meeting" itemId={meeting.meeting_id} />
+                        </div>
                       ) : col.key === 'council' ? (
                         <div>
                           <div className="text-xs font-semibold text-brand-blue">{meeting.council || 'SAFMC'}</div>

@@ -131,9 +131,10 @@ class WorkplanMilestone(db.Model):
 
     # Relationships
     item = db.relationship('WorkplanItem', back_populates='milestones')
+    meeting = db.relationship('Meeting', foreign_keys=[meeting_id], primaryjoin='WorkplanMilestone.meeting_id == Meeting.meeting_id')
 
     def to_dict(self):
-        return {
+        result = {
             'id': self.id,
             'workplanItemId': self.workplan_item_id,
             'milestoneType': self.milestone_type,
@@ -145,6 +146,17 @@ class WorkplanMilestone(db.Model):
             'notes': self.notes,
             'createdAt': self.created_at.isoformat() if self.created_at else None
         }
+
+        # Include meeting information if linked
+        if self.meeting:
+            result['meeting'] = {
+                'id': self.meeting.meeting_id,
+                'title': self.meeting.title,
+                'sourceUrl': self.meeting.source_url,
+                'startDate': self.meeting.start_date.isoformat() if self.meeting.start_date else None
+            }
+
+        return result
 
 
 class MilestoneType(db.Model):

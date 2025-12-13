@@ -147,10 +147,16 @@ def request_login():
         # Create magic link
         magic_link = f"{CLIENT_URL}/auth/verify?token={login_token}&email={email}"
 
-        # Send email - fail if not configured
+        # Send email - or print link for local development
         if not EMAIL_USER or not EMAIL_PASSWORD:
-            logger.error("Email not configured! Set EMAIL_USER and EMAIL_PASSWORD environment variables.")
-            return jsonify({'error': 'Email service not configured. Please contact the administrator.'}), 500
+            logger.warning("⚠️  Email not configured - printing magic link for local development:")
+            logger.warning(f"🔑 MAGIC LOGIN LINK: {magic_link}")
+            logger.warning(f"   Valid for 15 minutes")
+            # For local dev, return success without sending email
+            return jsonify({
+                'message': 'Login link generated! Check the backend console for the magic link.',
+                'dev_mode': True
+            }), 200
 
         email_sent = send_magic_link_email(email, user.name, magic_link)
 
