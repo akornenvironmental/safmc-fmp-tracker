@@ -68,6 +68,7 @@ def retry_on_db_error(max_retries=3, delay=0.5):
 # ==================== DASHBOARD ENDPOINTS ====================
 
 @bp.route('/dashboard/stats')
+@require_auth
 @retry_on_db_error(max_retries=3, delay=0.5)
 def dashboard_stats():
     """Get dashboard statistics"""
@@ -109,6 +110,7 @@ def dashboard_stats():
         return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/dashboard/recent-amendments')
+@require_auth
 def recent_amendments():
     """Get recent amendments"""
     try:
@@ -1041,7 +1043,8 @@ def ai_analyze_comments():
 
         if fmp:
             # Need to join with Action to filter by FMP
-            query = query.join(Action, Comment.action_id == Action.action_id).filter(Action.fmp.ilike(f'%{fmp}%'))
+            # Use parameterized query to prevent SQL injection
+            query = query.join(Action, Comment.action_id == Action.action_id).filter(Action.fmp.ilike('%' + fmp.replace('%', '\\%').replace('_', '\\_') + '%'))
 
         if position:
             query = query.filter(Comment.position == position)
@@ -1455,6 +1458,7 @@ def scrape_comments():
 # ==================== LOGS ENDPOINTS ====================
 
 @bp.route('/logs/scrape')
+@require_admin
 def get_scrape_logs():
     """Get scrape logs"""
     try:
@@ -1739,6 +1743,7 @@ def scrape_briefing_books():
         return safe_error_response(e)[0], safe_error_response(e)[1]
 
 @bp.route('/scrape/queue/status')
+@require_admin
 def get_scrape_queue_status():
     """Get status of document scrape queue"""
     try:
@@ -1792,6 +1797,7 @@ def get_scrape_queue_status():
 
 
 @bp.route('/comments/fix-links', methods=['POST'])
+@require_admin
 def fix_comment_links():
     """
     Fix comment-action links by re-matching comments to actions.
@@ -2273,6 +2279,7 @@ def upload_workplan():
 
 
 @bp.route('/workplan/versions')
+@require_auth
 def get_workplan_versions():
     """Get all workplan versions"""
     try:
@@ -2289,6 +2296,7 @@ def get_workplan_versions():
 
 
 @bp.route('/workplan/versions/<int:version_id>')
+@require_auth
 def get_workplan_version(version_id):
     """Get specific workplan version with all items and milestones"""
     try:
@@ -2313,6 +2321,7 @@ def get_workplan_version(version_id):
 
 
 @bp.route('/workplan/items')
+@require_auth
 def get_workplan_items():
     """Get workplan items with optional filtering"""
     try:
@@ -2350,6 +2359,7 @@ def get_workplan_items():
 
 
 @bp.route('/workplan/items/<int:item_id>')
+@require_auth
 def get_workplan_item(item_id):
     """Get specific workplan item with details"""
     try:
@@ -2370,6 +2380,7 @@ def get_workplan_item(item_id):
 
 
 @bp.route('/workplan/upload-history')
+@require_admin
 def get_workplan_upload_history():
     """Get upload history logs"""
     try:
@@ -2391,6 +2402,7 @@ def get_workplan_upload_history():
 
 
 @bp.route('/workplan/milestone-types')
+@require_auth
 def get_milestone_types():
     """Get all milestone type codes and descriptions"""
     try:
