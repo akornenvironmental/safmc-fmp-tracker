@@ -47,7 +47,7 @@ const ActionsEnhanced = () => {
     { key: 'progress_stage', label: 'Stage', core: true, minWidth: 'min-w-[180px]' },
     { key: 'progress', label: 'Progress', core: true, minWidth: 'min-w-[120px]' },
     { key: 'last_updated', label: 'Last Action', core: true, minWidth: 'min-w-[140px]' },
-    { key: 'description', label: 'Description', core: false, minWidth: 'min-w-[300px]' },
+    { key: 'description', label: 'Description', core: false, minWidth: 'min-w-[450px]' },
     { key: 'type', label: 'Type', core: false, minWidth: 'min-w-[120px]' },
   ]);
 
@@ -269,6 +269,9 @@ const ActionsEnhanced = () => {
         let value = action[col.key] || '';
         if (col.key === 'last_updated' && value) {
           value = new Date(value).toLocaleDateString();
+        } else if (col.key === 'species' && Array.isArray(value)) {
+          // Convert species array to comma-separated string of names
+          value = value.map(sp => sp.scientific_name || sp.name || '').filter(Boolean).join(', ');
         }
         return `"${value.toString().replace(/"/g, '""')}"`;
       }).join(',')
@@ -292,6 +295,9 @@ const ActionsEnhanced = () => {
         let value = action[col.key] || '';
         if (col.key === 'last_updated' && value) {
           value = new Date(value).toLocaleDateString();
+        } else if (col.key === 'species' && Array.isArray(value)) {
+          // Convert species array to comma-separated string of names
+          value = value.map(sp => sp.scientific_name || sp.name || '').filter(Boolean).join(', ');
         }
         return value;
       }).join('\t')
@@ -316,6 +322,9 @@ const ActionsEnhanced = () => {
         let value = action[col.key] || '';
         if (col.key === 'last_updated' && value) {
           value = new Date(value).toLocaleDateString();
+        } else if (col.key === 'species' && Array.isArray(value)) {
+          // Convert species array to comma-separated string of names
+          value = value.map(sp => sp.scientific_name || sp.name || '').filter(Boolean).join(', ');
         }
         return value;
       }).join('</td><td>') + '</td></tr>'
@@ -601,7 +610,7 @@ const ActionsEnhanced = () => {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`px-1.5 py-1 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none align-middle ${col.minWidth || ''} ${
+                  className={`px-1.5 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none align-middle ${col.minWidth || ''} ${
                     !col.locked ? 'cursor-grab hover:bg-gray-200 dark:hover:bg-gray-700' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                   } ${draggedColumn === index ? 'opacity-50 bg-gray-200 dark:bg-gray-700' : ''}`}
                   onClick={() => handleSort(col.key)}
@@ -657,7 +666,7 @@ const ActionsEnhanced = () => {
                   {getDisplayColumns().map(col => (
                     <td key={col.key} className={`px-1.5 py-2 align-middle ${col.minWidth || ''}`}>
                       {col.key === 'title' ? (
-                        <div className="flex items-start gap-2">
+                        <div className="flex items-center gap-2">
                           <div className="flex-1">
                             {action.source_url ? (
                               <a
@@ -725,6 +734,8 @@ const ActionsEnhanced = () => {
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                         </div>
+                      ) : col.key === 'description' ? (
+                        <div className="text-sm text-gray-900 dark:text-gray-100 line-clamp-3 leading-tight">{action[col.key] || 'N/A'}</div>
                       ) : (
                         <div className="text-sm text-gray-900 dark:text-gray-100">{action[col.key] || 'N/A'}</div>
                       )}
