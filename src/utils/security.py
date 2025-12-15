@@ -171,6 +171,96 @@ def sanitize_sql_identifier(identifier: str) -> str:
     return identifier
 
 
+def validate_email(email: str) -> str:
+    """
+    Validate email format.
+
+    Args:
+        email: Email to validate
+
+    Returns:
+        Validated email
+
+    Raises:
+        ValueError: If email format is invalid
+    """
+    if not email or not isinstance(email, str):
+        raise ValueError('Email is required')
+
+    # Basic email regex pattern
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_pattern, email):
+        raise ValueError('Invalid email format')
+
+    if len(email) > 254:  # RFC 5321
+        raise ValueError('Email exceeds maximum length')
+
+    return email.lower().strip()
+
+
+def validate_url(url: str, allowed_schemes: list = ['http', 'https']) -> str:
+    """
+    Validate URL format and scheme.
+
+    Args:
+        url: URL to validate
+        allowed_schemes: List of allowed URL schemes
+
+    Returns:
+        Validated URL
+
+    Raises:
+        ValueError: If URL format is invalid or scheme not allowed
+    """
+    if not url or not isinstance(url, str):
+        raise ValueError('URL is required')
+
+    # Check for basic URL structure
+    url_pattern = r'^(https?|ftp)://[^\s/$.?#].[^\s]*$'
+    if not re.match(url_pattern, url, re.IGNORECASE):
+        raise ValueError('Invalid URL format')
+
+    # Extract scheme
+    scheme = url.split('://')[0].lower()
+    if scheme not in allowed_schemes:
+        raise ValueError(f'URL scheme "{scheme}" not allowed. Allowed: {", ".join(allowed_schemes)}')
+
+    if len(url) > 2048:  # Common max URL length
+        raise ValueError('URL exceeds maximum length')
+
+    return url.strip()
+
+
+def validate_integer_range(value: int, min_value: int = None, max_value: int = None, field_name: str = 'value') -> int:
+    """
+    Validate integer is within specified range.
+
+    Args:
+        value: Integer to validate
+        min_value: Minimum allowed value
+        max_value: Maximum allowed value
+        field_name: Field name for error message
+
+    Returns:
+        Validated integer
+
+    Raises:
+        ValueError: If value is out of range
+    """
+    try:
+        int_value = int(value)
+    except (ValueError, TypeError):
+        raise ValueError(f'{field_name} must be an integer')
+
+    if min_value is not None and int_value < min_value:
+        raise ValueError(f'{field_name} must be at least {min_value}')
+
+    if max_value is not None and int_value > max_value:
+        raise ValueError(f'{field_name} must be at most {max_value}')
+
+    return int_value
+
+
 class RateLimitExceeded(Exception):
     """Exception raised when rate limit is exceeded"""
     pass

@@ -66,13 +66,18 @@ db.init_app(app)
 migrate.init_app(app, db)
 
 # CORS configuration - allows frontend to communicate with backend API
-# Supports both monolithic deployment (same origin) and separated deployment (different domains)
+# Restricted to specific domains for security (no wildcards)
 cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:5174,https://safmc-fmp-tracker.onrender.com,https://safmc-fmp-tracker-frontend.onrender.com').split(',')
+# Validate CORS origins in production
+if os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production':
+    for origin in cors_origins:
+        if '*' in origin:
+            raise ValueError(f"Wildcard CORS origins not allowed in production: {origin}")
 CORS(app, origins=cors_origins, supports_credentials=True,
      allow_headers=['Content-Type', 'Authorization'],
      methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])
 
-# Global rate limiting
+# Global rate limiting - REQUIRED in production
 try:
     from flask_limiter import Limiter
     from flask_limiter.util import get_remote_address
@@ -86,9 +91,12 @@ try:
     RATE_LIMITING_ENABLED = True
     logger.info("Rate limiting enabled")
 except ImportError:
+    # Fail in production if rate limiting unavailable
+    if os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production':
+        raise ImportError("flask-limiter is required in production! Run: pip install flask-limiter")
     limiter = None
     RATE_LIMITING_ENABLED = False
-    logger.warning("flask-limiter not installed, rate limiting disabled")
+    logger.warning("flask-limiter not installed, rate limiting disabled (DEV ONLY)")
 
 # Security headers middleware
 @app.after_request
@@ -110,18 +118,33 @@ def add_security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
 
     # Content Security Policy - Prevent XSS and injection attacks
-    # Allow 'unsafe-inline' for styles due to Tailwind and inline styles
-    csp = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://kit.fontawesome.com; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.typekit.net; "
-        "font-src 'self' https://fonts.gstatic.com https://use.typekit.net data:; "
-        "img-src 'self' data: https: blob:; "
-        "connect-src 'self' https://api.anthropic.com https://*.render.com https://docs.google.com https://sheets.googleapis.com; "
-        "frame-ancestors 'none'; "
-        "base-uri 'self'; "
-        "form-action 'self'"
-    )
+    # In production, use stricter CSP; in dev, allow for HMR and dev tools
+    if os.getenv('RENDER') or os.getenv('FLASK_ENV') == 'production':
+        csp = (
+            "default-src 'self'; "
+            "script-src 'self' https://cdn.jsdelivr.net https://kit.fontawesome.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.typekit.net; "
+            "font-src 'self' https://fonts.gstatic.com https://use.typekit.net data:; "
+            "img-src 'self' data: https: blob:; "
+            "connect-src 'self' https://api.anthropic.com https://safmc-fmp-tracker.onrender.com https://safmc-fmp-tracker-frontend.onrender.com https://docs.google.com https://sheets.googleapis.com; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'; "
+            "upgrade-insecure-requests"
+        )
+    else:
+        # Development CSP - allows HMR and inline scripts for Vite
+        csp = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://kit.fontawesome.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.typekit.net; "
+            "font-src 'self' https://fonts.gstatic.com https://use.typekit.net data:; "
+            "img-src 'self' data: https: blob:; "
+            "connect-src 'self' ws://localhost:* http://localhost:* https://api.anthropic.com https://docs.google.com https://sheets.googleapis.com; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        )
     response.headers['Content-Security-Policy'] = csp
 
     # Cache control for sensitive endpoints

@@ -34,7 +34,7 @@ if not JWT_SECRET:
     JWT_SECRET = 'dev-secret-key-for-local-only'
     logger.warning("Using development JWT_SECRET - NOT FOR PRODUCTION")
 
-JWT_EXPIRATION_HOURS = 8  # 8 hours for active sessions (a workday)
+JWT_EXPIRATION_HOURS = 1  # 1 hour for security (reduced from 8h)
 REFRESH_TOKEN_DAYS = 7  # Refresh tokens valid for 7 days
 
 # Email Configuration
