@@ -67,21 +67,19 @@ const Actions = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Actions & Amendments</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            {actions.length} actions total • {filteredActions.length} displayed
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Track all amendments and regulatory actions for fishery management plans in the South Atlantic region.
+        </p>
+        <div className="page-description-actions">
           <button
             onClick={syncActions}
             disabled={syncing}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-transparent bg-brand-blue px-2.5 h-9 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Actions'}
+            {syncing ? 'Syncing...' : 'Sync'}
           </button>
         </div>
       </div>
@@ -184,11 +182,11 @@ const Actions = () => {
                       <div className="text-sm font-medium text-gray-900">{action.title}</div>
                     )}
                     {action.description && (
-                      <div className="text-xs text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
+                      <div className="text-sm text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
                     )}
                   </td>
                   <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
-                    <div className="text-xs text-gray-900">{action.fmp || 'N/A'}</div>
+                    <div className="text-sm text-gray-900">{action.fmp || 'N/A'}</div>
                   </td>
                   <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
@@ -203,10 +201,10 @@ const Actions = () => {
                           style={{ width: `${action.progress || 0}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs text-gray-700">{action.progress || 0}%</span>
+                      <span className="text-sm text-gray-700">{action.progress || 0}%</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap text-xs text-gray-500">
+                  <td className="px-4 py-3 sm:px-6 whitespace-nowrap text-sm text-gray-500">
                     {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

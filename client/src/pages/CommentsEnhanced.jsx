@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import { RefreshCw, Download, Settings, RotateCcw, X, BarChart3, Users, MapPin, FileText, ChevronDown, ChevronUp, Sparkles, Brain, Loader2, Fish, Tag, TrendingUp, ExternalLink, MessageSquare, Clock, Expand } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -569,40 +569,41 @@ const CommentsEnhanced = () => {
 
   return (
     <div>
-      {/* Page Header */}
-      <PageHeader
-        icon={MessageSquare}
-        title="Public Comments"
-        subtitle={`${comments.length} comments tracked`}
-        description="Public comments submitted on fishery management actions."
-      />
-
-      <ButtonGroup>
-        <Button
-          variant="primary"
-          icon={RefreshCw}
-          onClick={syncComments}
-          disabled={syncing}
-        >
-          {syncing ? 'Syncing...' : 'Sync Comments'}
-        </Button>
-        <Button
-          variant="secondary"
-          icon={Sparkles}
-          onClick={() => setShowAnalysisModal(true)}
-          disabled={comments.length === 0}
-        >
-          AI Analysis
-        </Button>
-        <Button
-          variant="secondary"
-          icon={Fish}
-          onClick={detectSpecies}
-          disabled={detectingSpecies || comments.length === 0}
-        >
-          {detectingSpecies ? 'Detecting...' : 'Detect Species'}
-        </Button>
-      </ButtonGroup>
+      {/* Description and Actions */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Browse public comments on FMP amendments and regulatory actions.
+        </p>
+        <div className="page-description-actions">
+          <Button
+            variant="primary"
+            icon={RefreshCw}
+            onClick={syncComments}
+            disabled={syncing}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            {syncing ? 'Syncing...' : 'Sync'}
+          </Button>
+          <Button
+            variant="secondary"
+            icon={Sparkles}
+            onClick={() => setShowAnalysisModal(true)}
+            disabled={comments.length === 0}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            AI Analysis
+          </Button>
+          <Button
+            variant="secondary"
+            icon={Fish}
+            onClick={detectSpecies}
+            disabled={detectingSpecies || comments.length === 0}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            {detectingSpecies ? 'Detecting...' : 'Detect Species'}
+          </Button>
+        </div>
+      </div>
 
       {/* Active Filters Indicator */}
       {hasActiveFilters && (
@@ -941,60 +942,64 @@ const CommentsEnhanced = () => {
       )}
 
       {/* Single row: Search → Filters → Export → Show → Reset */}
-      <div className="mt-6 flex flex-wrap items-center gap-2">
+      <PageControlsContainer>
         {/* Search input */}
-        <input
-          type="text"
-          placeholder="Search comments..."
+        <SearchBar
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
+          onChange={(value) => {
+            setSearchTerm(value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          aria-label="Search comments by name, organization, position, or comment text"
+          placeholder="Search comments..."
+          ariaLabel="Search comments by name, organization, position, or comment text"
         />
 
         {/* FMP Filter */}
         {uniqueFmps.length > 0 && (
-          <select
-            value={activeFilters.fmp}
-            onChange={(e) => setActiveFilters(prev => ({ ...prev, fmp: e.target.value }))}
-            className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
-          >
-            <option value="">All FMPs</option>
-            {uniqueFmps.map(fmp => (
-              <option key={fmp} value={fmp}>{fmp}</option>
-            ))}
-          </select>
+          <FilterDropdown
+            label="FMP"
+            options={uniqueFmps.map(fmp => ({
+              value: fmp,
+              label: fmp,
+              count: comments.filter(c => c.actionFmp === fmp).length
+            }))}
+            selectedValues={activeFilters.fmp ? [activeFilters.fmp] : []}
+            onChange={(values) => setActiveFilters(prev => ({ ...prev, fmp: values[0] || '' }))}
+            showCounts={true}
+            multiSelect={false}
+          />
         )}
 
         {/* Position Filter */}
         {uniquePositions.length > 0 && (
-          <select
-            value={activeFilters.position}
-            onChange={(e) => setActiveFilters(prev => ({ ...prev, position: e.target.value }))}
-            className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
-          >
-            <option value="">All Positions</option>
-            {uniquePositions.map(pos => (
-              <option key={pos} value={pos}>{pos}</option>
-            ))}
-          </select>
+          <FilterDropdown
+            label="Position"
+            options={uniquePositions.map(pos => ({
+              value: pos,
+              label: pos,
+              count: comments.filter(c => c.position === pos).length
+            }))}
+            selectedValues={activeFilters.position ? [activeFilters.position] : []}
+            onChange={(values) => setActiveFilters(prev => ({ ...prev, position: values[0] || '' }))}
+            showCounts={true}
+            multiSelect={false}
+          />
         )}
 
         {/* State Filter */}
         {uniqueStates.length > 0 && (
-          <select
-            value={activeFilters.state}
-            onChange={(e) => setActiveFilters(prev => ({ ...prev, state: e.target.value }))}
-            className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
-          >
-            <option value="">All States</option>
-            {uniqueStates.map(state => (
-              <option key={state} value={state}>{state}</option>
-            ))}
-          </select>
+          <FilterDropdown
+            label="State"
+            options={uniqueStates.map(state => ({
+              value: state,
+              label: state,
+              count: comments.filter(c => c.state === state).length
+            }))}
+            selectedValues={activeFilters.state ? [activeFilters.state] : []}
+            onChange={(values) => setActiveFilters(prev => ({ ...prev, state: values[0] || '' }))}
+            showCounts={true}
+            multiSelect={false}
+          />
         )}
 
         {/* Export Button */}
@@ -1023,6 +1028,15 @@ const CommentsEnhanced = () => {
           <option value={999999}>Show ALL</option>
         </select>
 
+        {/* Columns Button */}
+        <button
+          onClick={() => setShowColumnSelector(!showColumnSelector)}
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+        >
+          <Settings size={14} />
+          Columns
+        </button>
+
         {/* Reset Button */}
         <button
           onClick={handleReset}
@@ -1032,16 +1046,7 @@ const CommentsEnhanced = () => {
           <RotateCcw size={14} />
           Reset
         </button>
-
-        {/* Columns Button */}
-        <button
-          onClick={() => setShowColumnSelector(!showColumnSelector)}
-          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-        >
-          <Settings size={14} />
-          Columns
-        </button>
-      </div>
+      </PageControlsContainer>
 
       {/* Table Count */}
       <div className="mt-6 mb-2 flex items-center justify-between">
@@ -1116,7 +1121,7 @@ const CommentsEnhanced = () => {
                         <div className="flex flex-col gap-0.5">
                           <button
                             onClick={() => comment.contactId ? fetchContactProfile(comment.contactId) : openCommenterHistory(comment.name)}
-                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer text-left"
+                            className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline cursor-pointer text-left"
                           >
                             {comment.name || 'Anonymous'}
                           </button>
@@ -1134,38 +1139,38 @@ const CommentsEnhanced = () => {
                         comment.actionFmp ? (
                           <Link
                             to={`/actions?fmp=${encodeURIComponent(comment.actionFmp)}`}
-                            className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                            className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
                           >
                             {comment.actionFmp}
                           </Link>
                         ) : (
-                          <span className="text-xs text-gray-400">—</span>
+                          <span className="text-sm text-gray-400">—</span>
                         )
                       ) : col.key === 'actionTitle' ? (
                         comment.actionTitle ? (
                           <Link
                             to={`/actions?search=${encodeURIComponent(comment.actionTitle)}`}
-                            className="text-xs text-brand-blue hover:text-brand-green hover:underline line-clamp-3"
+                            className="text-sm text-brand-blue hover:text-brand-green hover:underline line-clamp-3"
                             title={comment.actionTitle}
                           >
                             {comment.actionTitle}
                           </Link>
                         ) : (
-                          <span className="text-xs text-gray-400">—</span>
+                          <span className="text-sm text-gray-400">—</span>
                         )
                       ) : col.key === 'organization' ? (
                         comment.organizationId ? (
                           <button
                             onClick={() => fetchOrganizationProfile(comment.organizationId)}
-                            className="text-xs text-brand-blue hover:text-brand-green hover:underline cursor-pointer text-left"
+                            className="text-sm text-brand-blue hover:text-brand-green hover:underline cursor-pointer text-left"
                           >
                             {comment.organization || '—'}
                           </button>
                         ) : (
-                          <div className="text-xs text-gray-900 dark:text-gray-100 line-clamp-2" title={comment.organization}>{comment.organization || '—'}</div>
+                          <div className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2" title={comment.organization}>{comment.organization || '—'}</div>
                         )
                       ) : col.key === 'state' ? (
-                        <div className="text-xs text-gray-900 dark:text-gray-100 text-left">{comment.state || '—'}</div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100 text-left">{comment.state || '—'}</div>
                       ) : col.key === 'position' ? (
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           comment.position?.toLowerCase().includes('support') ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' :
@@ -1188,17 +1193,17 @@ const CommentsEnhanced = () => {
                               </button>
                             ))
                           ) : (
-                            <span className="text-xs text-gray-400">—</span>
+                            <span className="text-sm text-gray-400">—</span>
                           )}
                           {comment.speciesMentioned && comment.speciesMentioned.length > 3 && (
                             <span className="text-[10px] text-teal-600 dark:text-teal-400">+{comment.speciesMentioned.length - 3}</span>
                           )}
                         </div>
                       ) : col.key === 'commentDate' ? (
-                        <div className="text-xs text-gray-700 dark:text-gray-300 text-left">{formatDate(comment.commentDate)}</div>
+                        <div className="text-sm text-gray-700 dark:text-gray-300 text-left">{formatDate(comment.commentDate)}</div>
                       ) : col.key === 'commentText' ? (
                         <div className="max-w-md">
-                          <div className="text-xs text-gray-700 dark:text-gray-300 line-clamp-3 text-left">
+                          <div className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 text-left">
                             {comment.commentText || '—'}
                           </div>
                           {comment.commentText && comment.commentText.length > 150 && (

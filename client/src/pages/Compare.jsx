@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
-import { GitCompare, Search, Plus, X, Check, AlertCircle, ArrowRight } from 'lucide-react';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import { GitCompare, Plus, X, Check, AlertCircle, ArrowRight } from 'lucide-react';
 
 const Compare = () => {
   const [actions, setActions] = useState([]);
@@ -117,13 +117,13 @@ const Compare = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={GitCompare}
-        title="Compare Actions"
-        subtitle="Side-by-side comparison"
-        description="Compare amendment actions and alternatives side-by-side."
-      />
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Compare multiple amendments and regulatory actions side-by-side to identify patterns and trends.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Action Selection Panel */}
@@ -131,33 +131,28 @@ const Compare = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <h2 className="font-semibold text-gray-900 mb-4">Select Actions to Compare</h2>
 
-            {/* Search */}
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search actions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm"
-                />
-              </div>
-            </div>
+            {/* Search and Filters */}
+            <PageControlsContainer className="mb-4">
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Search actions..."
+                ariaLabel="Search actions by title, FMP, or action ID"
+              />
 
-            {/* FMP Filter */}
-            <div className="mb-4">
-              <select
-                value={filterFMP}
-                onChange={(e) => setFilterFMP(e.target.value)}
-                className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
-              >
-                <option value="">All FMPs</option>
-                {uniqueFMPs.map(fmp => (
-                  <option key={fmp} value={fmp}>{fmp}</option>
-                ))}
-              </select>
-            </div>
+              <FilterDropdown
+                label="FMP"
+                options={uniqueFMPs.map(fmp => ({
+                  value: fmp,
+                  label: fmp,
+                  count: actions.filter(a => a.fmp === fmp).length
+                }))}
+                selectedValues={filterFMP ? [filterFMP] : []}
+                onChange={(values) => setFilterFMP(values[0] || '')}
+                showCounts={true}
+                multiSelect={false}
+              />
+            </PageControlsContainer>
 
             {/* Selected Actions */}
             {selectedActions.length > 0 && (
@@ -233,7 +228,7 @@ const Compare = () => {
         <div className="lg:col-span-2">
           {comparison ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
+              <div className="page-description-container">
                 <h2 className="font-semibold text-gray-900">Comparison Results</h2>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1">

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Search, ArrowUpDown } from 'lucide-react';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ArrowUpDown } from 'lucide-react';
 
 const StockAssessments = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [fmpFilter, setFmpFilter] = useState('all');
-  const [managementFilter, setManagementFilter] = useState('all');
+  const [fmpFilter, setFmpFilter] = useState([]);
+  const [managementFilter, setManagementFilter] = useState([]);
   const [sortColumn, setSortColumn] = useState('species');
   const [sortDirection, setSortDirection] = useState('asc');
   const [assessments, setAssessments] = useState([]);
@@ -119,15 +120,19 @@ const StockAssessments = () => {
     }
 
     // FMP filter
-    if (fmpFilter !== 'all') {
-      if (!assessment.fmps_affected || !assessment.fmps_affected.includes(fmpFilter)) return false;
+    if (fmpFilter.length > 0) {
+      if (!assessment.fmps_affected || !assessment.fmps_affected.some(fmp => fmpFilter.includes(fmp))) return false;
     }
 
     // Management filter (SAFMC-only vs Jointly-managed)
-    if (managementFilter !== 'all') {
+    if (managementFilter.length > 0) {
       const fmpCount = assessment.fmps_affected?.length || 0;
-      if (managementFilter === 'safmc' && fmpCount > 1) return false;
-      if (managementFilter === 'joint' && fmpCount <= 1) return false;
+      const matchesAny = managementFilter.some(filter => {
+        if (filter === 'safmc') return fmpCount <= 1;
+        if (filter === 'joint') return fmpCount > 1;
+        return false;
+      });
+      if (!matchesAny) return false;
     }
 
     return true;
@@ -226,25 +231,19 @@ const StockAssessments = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Stocks</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            <span className="font-medium">SAFMC-only:</span> {stats.safmc_only?.total || 0} total ({stats.safmc_only?.overfished || 0} overfished, {stats.safmc_only?.overfishing || 0} overfishing, {stats.safmc_only?.healthy || 0} healthy) •
-            <span className="font-medium ml-2">Jointly-managed:</span> {stats.jointly_managed?.total || 0} total ({stats.jointly_managed?.overfished || 0} overfished, {stats.jointly_managed?.overfishing || 0} overfishing, {stats.jointly_managed?.healthy || 0} healthy)
-          </p>
-          <p className="mt-1 text-xs text-gray-500 italic">
-            Stock assessments sync weekly from SEDAR and StockSMART
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Comprehensive stock status data from SEDAR and NOAA StockSMART for South Atlantic fisheries.
+        </p>
+        <div className="page-description-actions">
           <button
             onClick={syncAssessments}
             disabled={syncing}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-transparent bg-brand-blue px-2.5 h-9 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Data'}
+            {syncing ? 'Syncing...' : 'Sync'}
           </button>
         </div>
       </div>
@@ -293,109 +292,83 @@ const StockAssessments = () => {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="mt-6 bg-white shadow rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search species, scientific name, or SEDAR #..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
-              />
-            </div>
-          </div>
+      <PageControlsContainer>
+        {/* Search Bar */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search species, scientific name, or SEDAR #..."
+          ariaLabel="Search assessments by species, scientific name, or SEDAR number"
+        />
 
-          {/* FMP Filter */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">FMP</label>
-            <select
-              value={fmpFilter}
-              onChange={(e) => setFmpFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
-            >
-              <option value="all">All FMPs</option>
-              {uniqueFmps.map(fmp => (
-                <option key={fmp} value={fmp}>{fmp}</option>
-              ))}
-            </select>
-          </div>
+        {/* Status Filter */}
+        <FilterDropdown
+          label="Status"
+          options={[
+            {
+              value: 'all',
+              label: 'All',
+              count: assessments.length
+            },
+            {
+              value: 'healthy',
+              label: 'Healthy',
+              count: assessments.filter(a => !a.overfished && !a.overfishing_occurring).length
+            },
+            {
+              value: 'overfished',
+              label: 'Overfished',
+              count: assessments.filter(a => a.overfished).length
+            },
+            {
+              value: 'overfishing',
+              label: 'Overfishing',
+              count: assessments.filter(a => a.overfishing_occurring).length
+            },
+            {
+              value: 'in_progress',
+              label: 'In Progress',
+              count: assessments.filter(a => a.status === 'In Progress' || a.status === 'Planning').length
+            }
+          ]}
+          selectedValues={filterStatus === 'all' ? [] : [filterStatus]}
+          onChange={(values) => setFilterStatus(values.length > 0 ? values[0] : 'all')}
+          showCounts={true}
+        />
 
-          {/* Management Filter */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Management</label>
-            <select
-              value={managementFilter}
-              onChange={(e) => setManagementFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white"
-            >
-              <option value="all">All</option>
-              <option value="safmc">SAFMC-only</option>
-              <option value="joint">Jointly-managed</option>
-            </select>
-          </div>
-        </div>
-      </div>
+        {/* FMP Filter */}
+        <FilterDropdown
+          label="FMP"
+          options={uniqueFmps.map(fmp => ({
+            value: fmp,
+            label: fmp,
+            count: assessments.filter(a => a.fmps_affected?.includes(fmp)).length
+          }))}
+          selectedValues={fmpFilter}
+          onChange={setFmpFilter}
+          showCounts={true}
+        />
 
-      {/* Filter Buttons */}
-      <div className="mt-6">
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setFilterStatus('all')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStatus === 'all'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            All ({assessments.length})
-          </button>
-          <button
-            onClick={() => setFilterStatus('healthy')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStatus === 'healthy'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Healthy ({assessments.filter(a => !a.overfished && !a.overfishing_occurring).length})
-          </button>
-          <button
-            onClick={() => setFilterStatus('overfished')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStatus === 'overfished'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Overfished ({assessments.filter(a => a.overfished).length})
-          </button>
-          <button
-            onClick={() => setFilterStatus('overfishing')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStatus === 'overfishing'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Overfishing ({assessments.filter(a => a.overfishing_occurring).length})
-          </button>
-          <button
-            onClick={() => setFilterStatus('in_progress')}
-            className={`px-4 py-2 text-sm font-medium rounded-md ${
-              filterStatus === 'in_progress'
-                ? 'bg-brand-blue text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            In Progress ({assessments.filter(a => a.status === 'In Progress' || a.status === 'Planning').length})
-          </button>
-        </div>
-      </div>
+        {/* Management Filter */}
+        <FilterDropdown
+          label="Management"
+          options={[
+            {
+              value: 'safmc',
+              label: 'SAFMC-only',
+              count: assessments.filter(a => (a.fmps_affected?.length || 0) <= 1).length
+            },
+            {
+              value: 'joint',
+              label: 'Jointly-managed',
+              count: assessments.filter(a => (a.fmps_affected?.length || 0) > 1).length
+            }
+          ]}
+          selectedValues={managementFilter}
+          onChange={setManagementFilter}
+          showCounts={true}
+        />
+      </PageControlsContainer>
 
       {/* Assessments Table */}
       <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
@@ -489,19 +462,19 @@ const StockAssessments = () => {
                         href={assessment.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                        className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
                       >
                         {assessment.species}
                       </a>
                     ) : (
-                      <div className="text-xs font-medium text-gray-900">{assessment.species}</div>
+                      <div className="text-sm font-medium text-gray-900">{assessment.species}</div>
                     )}
                     {assessment.scientific_name && (
                       <div className="text-xs text-gray-500 italic">{assessment.scientific_name}</div>
                     )}
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
-                    <div className="text-xs text-gray-900">{assessment.sedar_number || 'N/A'}</div>
+                    <div className="text-sm text-gray-900">{assessment.sedar_number || 'N/A'}</div>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(assessment)}`}>
@@ -510,7 +483,7 @@ const StockAssessments = () => {
                     </span>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
-                    <div className="text-xs text-gray-900">
+                    <div className="text-sm text-gray-900">
                       {assessment.b_bmsy ? (
                         <span className={assessment.b_bmsy >= 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                           {assessment.b_bmsy.toFixed(2)}
@@ -521,7 +494,7 @@ const StockAssessments = () => {
                     </div>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
-                    <div className="text-xs text-gray-900">
+                    <div className="text-sm text-gray-900">
                       {assessment.f_fmsy ? (
                         <span className={assessment.f_fmsy <= 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                           {assessment.f_fmsy.toFixed(2)}
@@ -541,10 +514,10 @@ const StockAssessments = () => {
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400">N/A</span>
+                      <span className="text-sm text-gray-400">N/A</span>
                     )}
                   </td>
-                  <td className="px-2 py-0.5 whitespace-nowrap text-xs text-gray-500">
+                  <td className="px-2 py-0.5 whitespace-nowrap text-sm text-gray-500">
                     {assessment.updated_at ? new Date(assessment.updated_at).toLocaleDateString() : 'N/A'}
                   </td>
                 </tr>

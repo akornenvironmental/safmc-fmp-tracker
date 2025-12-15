@@ -9,14 +9,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import {
   Users,
   Plus,
   Edit2,
   Trash2,
-  Search,
   X,
   Mail,
   Shield,
@@ -354,19 +353,17 @@ const UserManagement = () => {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <PageHeader
-            icon={Users}
-            title="User Management"
-            subtitle="Manage users"
-            description="Manage user accounts, roles, and permissions."
-          />
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Manage user accounts, roles, permissions, and access control for the platform.
+        </p>
+        <div className="page-description-actions">
           <Button
             variant="primary"
             icon={Plus}
             onClick={handleCreate}
+            className="gap-1.5 px-2.5 h-9"
           >
             Add User
           </Button>
@@ -385,39 +382,34 @@ const UserManagement = () => {
       )}
 
       {/* Filters */}
-      <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by email or name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
+      <PageControlsContainer>
+        {/* Search input */}
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by email or name..."
+          ariaLabel="Search users by email or name"
+        />
 
-          {/* Role Filter */}
-          <div>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="all">All Roles</option>
-              <option value="super_admin">Super Admin</option>
-              <option value="admin">Admin</option>
-              <option value="editor">Editor</option>
-            </select>
-          </div>
-        </div>
+        {/* Role Filter */}
+        <FilterDropdown
+          label="Role"
+          options={[
+            { value: 'super_admin', label: 'Super Admin', count: users.filter(u => u.role === 'super_admin').length },
+            { value: 'admin', label: 'Admin', count: users.filter(u => u.role === 'admin').length },
+            { value: 'editor', label: 'Editor', count: users.filter(u => u.role === 'editor').length }
+          ]}
+          selectedValues={roleFilter === 'all' ? [] : [roleFilter]}
+          onChange={(selected) => setRoleFilter(selected.length === 0 ? 'all' : selected[0])}
+          showCounts={true}
+        />
+      </PageControlsContainer>
 
-        {/* Results count */}
-        <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredUsers.length} of {users.length} users
-        </div>
+      {/* Results count */}
+      <div className="mt-6 mb-2 flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing <span className="font-medium text-gray-900 dark:text-gray-100">{filteredUsers.length}</span> of <span className="font-medium text-gray-900 dark:text-gray-100">{users.length}</span> users
+        </p>
       </div>
 
       {/* Users Table */}
@@ -464,7 +456,7 @@ const UserManagement = () => {
                       </div>
                       <div className="min-w-0">
                         <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name || 'No name'}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.email}</div>
                       </div>
                     </div>
                   </td>
@@ -490,7 +482,7 @@ const UserManagement = () => {
                         <option value="super_admin">Super Admin</option>
                       </select>
                       {!user.is_active && (
-                        <span className="text-xs text-red-600 dark:text-red-400">Suspended</span>
+                        <span className="text-sm text-red-600 dark:text-red-400">Suspended</span>
                       )}
                     </div>
                   </td>
@@ -499,18 +491,18 @@ const UserManagement = () => {
                   <td className="px-2 py-2 whitespace-nowrap">
                     {user.invitation_status === 'accepted' ? (
                       <div className="flex flex-col">
-                        <span className="inline-flex items-center text-xs text-green-700 dark:text-green-400 font-medium">
+                        <span className="inline-flex items-center text-sm text-green-700 dark:text-green-400 font-medium">
                           <Check className="w-3 h-3 mr-1" />
                           Accepted
                         </span>
                         {user.invitation_accepted_at && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
                             {new Date(user.invitation_accepted_at).toLocaleDateString()}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <span className="inline-flex items-center text-xs text-yellow-700 dark:text-yellow-400 font-medium">
+                      <span className="inline-flex items-center text-sm text-yellow-700 dark:text-yellow-400 font-medium">
                         Pending
                       </span>
                     )}

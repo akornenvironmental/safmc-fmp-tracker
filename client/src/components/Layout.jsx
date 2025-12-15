@@ -6,7 +6,11 @@ import Sidebar from './Sidebar';
 import AIAssistant from './AIAssistant';
 import FeedbackButton from './FeedbackButton';
 import Footer from './Footer';
-import { Sun, Moon, Type, Fish, ChevronRight } from 'lucide-react';
+import {
+  Sun, Moon, Type, Fish, ChevronRight, LayoutDashboard, FileText,
+  Calendar, MessageSquare, GitCompare, ClipboardList, Activity,
+  Users, GitBranch, FlaskConical, GraduationCap, Waves, RefreshCw
+} from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
@@ -46,20 +50,26 @@ const Layout = () => {
             {/* Hierarchical Breadcrumb Path */}
             {(() => {
               const breadcrumb = getBreadcrumbPath(location.pathname);
+              const Icon = breadcrumb.icon;
 
               return (
                 <>
-                  {/* Path segments and current page */}
+                  {/* Path segments */}
                   {breadcrumb.path.map((segment, index) => (
-                    <div key={index} className="flex items-center gap-3 flex-shrink-0">
-                      {index > 0 && <ChevronRight className="w-5 h-5 text-gray-400" />}
-                      <span className="text-lg font-heading text-gray-600 dark:text-gray-400">
+                    <div key={index} className="flex items-center gap-2 flex-shrink-0">
+                      {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
+                      <span className="text-body text-gray-600 dark:text-gray-400">
                         {segment}
                       </span>
                     </div>
                   ))}
-                  {breadcrumb.path.length > 0 && <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />}
-                  <h1 className="text-lg font-heading font-semibold text-gray-900 dark:text-white truncate">
+                  {breadcrumb.path.length > 0 && <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+
+                  {/* Page icon */}
+                  <Icon className="w-5 h-5 text-brand-blue flex-shrink-0" style={{ position: 'relative', top: '4px' }} />
+
+                  {/* Page title */}
+                  <h1 className="font-heading text-gray-900 dark:text-white truncate mb-0 leading-none" style={{ fontSize: '24px', position: 'relative', top: '4px', margin: '0', padding: '0' }}>
                     {breadcrumb.label}
                   </h1>
                 </>
@@ -122,52 +132,60 @@ const Layout = () => {
 function getBreadcrumbPath(pathname) {
   // Breadcrumb structure: Section > Subsection > Page
   const pathMap = {
-    '/': { label: 'Dashboard', path: [] },
-    '/actions': { label: 'Amendment Actions', path: [] },
-    '/meetings': { label: 'Council Meetings', path: [] },
-    '/calendar': { label: 'Meeting Calendar', path: [] },
-    '/comments': { label: 'Public Comments', path: [] },
-    '/favorites': { label: 'My Favorites', path: [] },
+    '/': { label: 'Dashboard', path: [], icon: LayoutDashboard },
+    '/actions': { label: 'Actions', path: [], icon: FileText },
+    '/meetings': { label: 'Council Meetings', path: [], icon: Calendar },
+    '/calendar': { label: 'Meeting Calendar', path: [], icon: Calendar },
+    '/comments': { label: 'Public Comments', path: [], icon: MessageSquare },
+    '/favorites': { label: 'My Favorites', path: [], icon: MessageSquare },
 
     // Data & Analysis section
-    '/stocks': { label: 'Stock Assessments', path: ['Data & Analysis'] },
-    '/ecosystem': { label: 'Ecosystem Assessment', path: ['Data & Analysis'] },
-    '/timeline': { label: 'Timeline', path: ['Data & Analysis'] },
-    '/compare': { label: 'Compare Actions', path: ['Data & Analysis'] },
-    '/workplan': { label: 'Workplan', path: ['Data & Analysis'] },
+    '/stocks': { label: 'Stock Assessments', path: ['Data & Analysis'], icon: Fish },
+    '/ecosystem': { label: 'Ecosystem Assessment', path: ['Data & Analysis'], icon: Waves },
+    '/timeline': { label: 'Timeline', path: ['Data & Analysis'], icon: GitBranch },
+    '/compare': { label: 'Compare Actions', path: ['Data & Analysis'], icon: GitCompare },
+    '/workplan': { label: 'Workplan', path: ['Data & Analysis'], icon: ClipboardList },
 
     // SSC section
-    '/ssc': { label: 'SSC Dashboard', path: ['Data & Analysis'] },
-    '/ssc/members': { label: 'SSC Members', path: ['Data & Analysis', 'SSC'] },
-    '/ssc/meetings': { label: 'SSC Meetings', path: ['Data & Analysis', 'SSC'] },
-    '/ssc/recommendations': { label: 'SSC Recommendations', path: ['Data & Analysis', 'SSC'] },
+    '/ssc': { label: 'SSC Dashboard', path: ['Data & Analysis'], icon: FlaskConical },
+    '/ssc/members': { label: 'SSC Members', path: ['Data & Analysis', 'SSC'], icon: Users },
+    '/ssc/meetings': { label: 'SSC Meetings', path: ['Data & Analysis', 'SSC'], icon: Calendar },
+    '/ssc/recommendations': { label: 'SSC Recommendations', path: ['Data & Analysis', 'SSC'], icon: FileText },
 
     // CMOD section
-    '/cmod': { label: 'CMOD Dashboard', path: ['Data & Analysis'] },
-    '/cmod/topics': { label: 'Topics', path: ['Data & Analysis', 'CMOD'] },
+    '/cmod': { label: 'CMOD Dashboard', path: ['Data & Analysis'], icon: GraduationCap },
+    '/cmod/topics': { label: 'Topics', path: ['Data & Analysis', 'CMOD'], icon: FileText },
 
     // Admin section
-    '/admin/logs': { label: 'Activity Logs', path: ['Admin'] },
-    '/admin/users': { label: 'User Management', path: ['Admin'] },
-    '/admin/feedback': { label: 'Feedback Management', path: ['Admin'] },
-    '/admin/data': { label: 'Data Management', path: ['Admin'] },
+    '/admin/logs': { label: 'Activity Logs', path: ['Admin'], icon: Activity },
+    '/admin/users': { label: 'User Management', path: ['Admin'], icon: Users },
+    '/admin/feedback': { label: 'Feedback Management', path: ['Admin'], icon: MessageSquare },
+    '/admin/data': { label: 'Data Management', path: ['Admin'], icon: RefreshCw },
   };
 
   // Check for exact match
   if (pathMap[pathname]) return pathMap[pathname];
 
-  // Handle dynamic routes
+  // Handle dynamic routes with security validation
   if (pathname.startsWith('/species/')) {
-    const speciesName = decodeURIComponent(pathname.split('/')[2]);
-    return { label: speciesName, path: ['Data & Analysis', 'Stock Assessments'] };
+    try {
+      const speciesName = decodeURIComponent(pathname.split('/')[2]);
+      // Limit length to prevent UI issues and validate it's a reasonable string
+      if (speciesName && speciesName.length < 100 && speciesName.length > 0) {
+        return { label: speciesName, path: ['Data & Analysis', 'Stock Assessments'], icon: Fish };
+      }
+    } catch (error) {
+      console.error('Invalid species name in URL:', error);
+    }
+    return { label: 'Stock Assessments', path: ['Data & Analysis'], icon: Fish };
   }
 
   if (pathname.startsWith('/cmod/workshops/')) {
-    return { label: 'Workshop Details', path: ['Data & Analysis', 'CMOD'] };
+    return { label: 'Workshop Details', path: ['Data & Analysis', 'CMOD'], icon: GraduationCap };
   }
 
   // Default fallback
-  return { label: 'SAFMC FMP Tracker', path: [] };
+  return { label: 'SAFMC FMP Tracker', path: [], icon: LayoutDashboard };
 }
 
 export default Layout;

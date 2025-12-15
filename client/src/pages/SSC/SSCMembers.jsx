@@ -7,21 +7,16 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
-import PageHeader from '../../components/PageHeader';
-import Button from '../../components/Button';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
 import {
   Users,
-  Search,
-  Filter,
   Mail,
   Phone,
   Building2,
   Award,
   MapPin,
-  ChevronDown,
   Crown,
   Shield,
-  User,
   AlertCircle
 } from 'lucide-react';
 
@@ -33,9 +28,8 @@ const SSCMembers = () => {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [stateFilter, setStateFilter] = useState('all');
-  const [seatTypeFilter, setSeatTypeFilter] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const [stateFilter, setStateFilter] = useState([]);
+  const [seatTypeFilter, setSeatTypeFilter] = useState([]);
 
   // Fetch SSC members
   useEffect(() => {
@@ -84,13 +78,13 @@ const SSCMembers = () => {
     }
 
     // State filter
-    if (stateFilter !== 'all') {
-      filtered = filtered.filter(member => member.state === stateFilter);
+    if (stateFilter.length > 0) {
+      filtered = filtered.filter(member => stateFilter.includes(member.state));
     }
 
     // Seat type filter
-    if (seatTypeFilter !== 'all') {
-      filtered = filtered.filter(member => member.seat_type === seatTypeFilter);
+    if (seatTypeFilter.length > 0) {
+      filtered = filtered.filter(member => seatTypeFilter.includes(member.seat_type));
     }
 
     setFilteredMembers(filtered);
@@ -156,13 +150,13 @@ const SSCMembers = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={Users}
-        title="SSC Members"
-        subtitle="21 members"
-        description="Scientific and Statistical Committee membership and expertise."
-      />
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Browse the Scientific and Statistical Committee member directory with expertise and contact information.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       {/* Error Alert */}
       {error && (
@@ -175,79 +169,46 @@ const SSCMembers = () => {
         </div>
       )}
 
-      {/* Filters Bar */}
-      <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Filters
-          </h3>
-          <Button
-            variant="ghost"
-            icon={Filter}
-            onClick={() => setShowFilters(!showFilters)}
-            className="text-brand-blue hover:text-brand-blue-light"
-          >
-            {showFilters ? 'Hide' : 'Show'} Filters
-          </Button>
-        </div>
-
+      {/* Page Controls */}
+      <PageControlsContainer>
         {/* Search Bar */}
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by name, expertise, or affiliation..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-        </div>
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by name, expertise, or affiliation..."
+          ariaLabel="Search SSC members"
+        />
 
-        {/* Filter Dropdowns */}
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* State Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                State
-              </label>
-              <select
-                value={stateFilter}
-                onChange={(e) => setStateFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">All States</option>
-                {states.map(state => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
-            </div>
+        {/* State Filter */}
+        <FilterDropdown
+          label="State"
+          options={states.map(state => ({
+            value: state,
+            label: state,
+            count: members.filter(m => m.state === state).length
+          }))}
+          selectedValues={stateFilter}
+          onChange={setStateFilter}
+          showCounts={true}
+        />
 
-            {/* Seat Type Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Seat Type
-              </label>
-              <select
-                value={seatTypeFilter}
-                onChange={(e) => setSeatTypeFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Seat Types</option>
-                {seatTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
+        {/* Seat Type Filter */}
+        <FilterDropdown
+          label="Seat Type"
+          options={seatTypes.map(type => ({
+            value: type,
+            label: type,
+            count: members.filter(m => m.seat_type === type).length
+          }))}
+          selectedValues={seatTypeFilter}
+          onChange={setSeatTypeFilter}
+          showCounts={true}
+        />
+      </PageControlsContainer>
 
-        {/* Results Count */}
-        <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredMembers.length} of {members.length} members
-        </div>
+      {/* Results Count */}
+      <div className="mt-6 mb-4 text-sm text-gray-600 dark:text-gray-400">
+        Showing {filteredMembers.length} of {members.length} members
       </div>
 
       {/* Members Grid */}

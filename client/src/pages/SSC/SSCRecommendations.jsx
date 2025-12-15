@@ -5,13 +5,10 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
-import PageHeader from '../../components/PageHeader';
 import Button from '../../components/Button';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
 import {
   FileText,
-  Search,
-  Filter,
-  ChevronDown,
   AlertCircle,
   TrendingUp,
   Fish,
@@ -29,10 +26,9 @@ const SSCRecommendations = () => {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [speciesFilter, setSpeciesFilter] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [typeFilter, setTypeFilter] = useState([]);
+  const [speciesFilter, setSpeciesFilter] = useState([]);
 
   // Fetch SSC recommendations
   useEffect(() => {
@@ -80,18 +76,20 @@ const SSCRecommendations = () => {
     }
 
     // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(rec => rec.status === statusFilter);
+    if (statusFilter.length > 0) {
+      filtered = filtered.filter(rec => statusFilter.includes(rec.status));
     }
 
     // Type filter
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(rec => rec.recommendation_type === typeFilter);
+    if (typeFilter.length > 0) {
+      filtered = filtered.filter(rec => typeFilter.includes(rec.recommendation_type));
     }
 
     // Species filter
-    if (speciesFilter !== 'all') {
-      filtered = filtered.filter(rec => rec.species && rec.species.includes(speciesFilter));
+    if (speciesFilter.length > 0) {
+      filtered = filtered.filter(rec =>
+        rec.species && rec.species.some(sp => speciesFilter.includes(sp))
+      );
     }
 
     setFilteredRecommendations(filtered);
@@ -138,13 +136,13 @@ const SSCRecommendations = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={FileText}
-        title="SSC Recommendations"
-        subtitle="Scientific recommendations"
-        description="Scientific recommendations on catch levels and management measures."
-      />
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Review and search all SSC recommendations, scientific advice, and Council responses.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       {/* Error Alert */}
       {error && (
@@ -157,101 +155,64 @@ const SSCRecommendations = () => {
         </div>
       )}
 
-      {/* Filters Bar */}
-      <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Filters
-          </h3>
-          <Button
-            variant="ghost"
-            icon={Filter}
-            onClick={() => setShowFilters(!showFilters)}
-            className="text-brand-blue hover:text-brand-blue-light"
-          >
-            {showFilters ? 'Hide' : 'Show'} Filters
-          </Button>
-        </div>
-
+      {/* Page Controls */}
+      <PageControlsContainer>
         {/* Search Bar */}
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search recommendations by title or content..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-        </div>
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search recommendations..."
+          ariaLabel="Search recommendations by title or content"
+        />
 
-        {/* Filter Dropdowns */}
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Status
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="adopted">Adopted</option>
-                <option value="modified">Modified</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
+        {/* Status Filter */}
+        <FilterDropdown
+          label="Status"
+          options={[
+            { value: 'pending', label: 'Pending', count: recommendations.filter(r => r.status === 'pending').length },
+            { value: 'adopted', label: 'Adopted', count: recommendations.filter(r => r.status === 'adopted').length },
+            { value: 'modified', label: 'Modified', count: recommendations.filter(r => r.status === 'modified').length },
+            { value: 'rejected', label: 'Rejected', count: recommendations.filter(r => r.status === 'rejected').length }
+          ]}
+          selectedValues={statusFilter}
+          onChange={setStatusFilter}
+          showCounts={true}
+        />
 
-            {/* Type Filter */}
-            {allTypes.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Type
-                </label>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="all">All Types</option>
-                  {allTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Species Filter */}
-            {allSpecies.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Species
-                </label>
-                <select
-                  value={speciesFilter}
-                  onChange={(e) => setSpeciesFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="all">All Species</option>
-                  {allSpecies.map(species => (
-                    <option key={species} value={species}>{species}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
+        {/* Type Filter */}
+        {allTypes.length > 0 && (
+          <FilterDropdown
+            label="Type"
+            options={allTypes.map(type => ({
+              value: type,
+              label: type,
+              count: recommendations.filter(r => r.recommendation_type === type).length
+            }))}
+            selectedValues={typeFilter}
+            onChange={setTypeFilter}
+            showCounts={true}
+          />
         )}
 
-        {/* Results Count */}
-        <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredRecommendations.length} of {recommendations.length} recommendations
-        </div>
+        {/* Species Filter */}
+        {allSpecies.length > 0 && (
+          <FilterDropdown
+            label="Species"
+            options={allSpecies.map(species => ({
+              value: species,
+              label: species,
+              count: recommendations.filter(r => r.species && r.species.includes(species)).length
+            }))}
+            selectedValues={speciesFilter}
+            onChange={setSpeciesFilter}
+            showCounts={true}
+          />
+        )}
+      </PageControlsContainer>
+
+      {/* Results Count */}
+      <div className="mt-6 mb-4 text-sm text-gray-600 dark:text-gray-400">
+        Showing {filteredRecommendations.length} of {recommendations.length} recommendations
       </div>
 
       {/* Recommendations List */}

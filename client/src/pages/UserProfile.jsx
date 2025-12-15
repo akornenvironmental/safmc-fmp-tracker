@@ -81,6 +81,14 @@ const UserProfile = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          View and manage your account information, notification preferences, and personal settings.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
+
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">My Profile</h1>
 
       {/* User Information Card */}

@@ -5,32 +5,30 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import PageHeader from '../../components/PageHeader';
-import { GraduationCap, TrendingUp, Filter, Search } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
 
 const CMODTopics = () => {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    council_name: '',
-    implementation_status: '',
-    search: ''
-  });
+  const [filterCouncil, setFilterCouncil] = useState([]);
+  const [filterStatus, setFilterStatus] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchTopics();
-  }, [filters]);
+  }, [filterCouncil, filterStatus, searchTerm]);
 
   const fetchTopics = async () => {
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams();
 
-      if (filters.council_name) params.append('council_name', filters.council_name);
-      if (filters.implementation_status) params.append('implementation_status', filters.implementation_status);
-      if (filters.search) params.append('topic', filters.search);
+      if (filterCouncil.length > 0) params.append('council_name', filterCouncil[0]);
+      if (filterStatus.length > 0) params.append('implementation_status', filterStatus[0]);
+      if (searchTerm) params.append('topic', searchTerm);
 
       const response = await fetch(`${API_BASE_URL}/api/cmod/topics?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -76,70 +74,50 @@ const CMODTopics = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={GraduationCap}
-        title="CMOD Topics"
-        subtitle="Educational topics"
-        description="Educational topics and resources for Council members."
-      />
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Educational topics and training materials for Council member professional development.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          <h2 className="font-semibold text-gray-900 dark:text-white">Filters</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Council
-            </label>
-            <select
-              value={filters.council_name}
-              onChange={(e) => setFilters({ ...filters, council_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-            >
-              <option value="">All Councils</option>
-              {councils.map((council) => (
-                <option key={council} value={council}>{council}</option>
-              ))}
-            </select>
-          </div>
+      <PageControlsContainer>
+        {/* Search input */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search topics..."
+          ariaLabel="Search topics"
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Implementation Status
-            </label>
-            <select
-              value={filters.implementation_status}
-              onChange={(e) => setFilters({ ...filters, implementation_status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-            >
-              <option value="">All Statuses</option>
-              {implementationStatuses.map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </div>
+        {/* Council Filter */}
+        <FilterDropdown
+          label="Council"
+          options={councils.map(council => ({
+            value: council,
+            label: council,
+            count: topics.filter(t => t.council_name === council).length
+          }))}
+          selectedValues={filterCouncil}
+          onChange={setFilterCouncil}
+          showCounts={true}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Search Topics
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                placeholder="Search topics..."
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* Implementation Status Filter */}
+        <FilterDropdown
+          label="Status"
+          options={implementationStatuses.map(status => ({
+            value: status,
+            label: status,
+            count: topics.filter(t => t.implementation_status === status).length
+          }))}
+          selectedValues={filterStatus}
+          onChange={setFilterStatus}
+          showCounts={true}
+        />
+      </PageControlsContainer>
 
       {/* Topics List */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -157,7 +135,7 @@ const CMODTopics = () => {
           <div className="text-center py-12">
             <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-600 dark:text-gray-400">
-              {filters.council_name || filters.implementation_status || filters.search
+              {filterCouncil.length > 0 || filterStatus.length > 0 || searchTerm
                 ? 'No topics match your filters'
                 : 'No topics tracked yet'}
             </p>

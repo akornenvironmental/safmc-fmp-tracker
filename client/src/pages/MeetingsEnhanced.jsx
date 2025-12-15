@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import FavoriteButton from '../components/FavoriteButton';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import { API_BASE_URL } from '../config';
 import {
   Calendar, MapPin, RefreshCw, Download, Settings, RotateCcw,
@@ -19,14 +19,10 @@ const MeetingsEnhanced = () => {
   const [sortDirection, setSortDirection] = useState('desc');
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedMeetings, setSelectedMeetings] = useState(new Set());
   const [organizationFilter, setOrganizationFilter] = useState([]);
   const [regionFilter, setRegionFilter] = useState([]);
   const [fmpFilter, setFmpFilter] = useState([]);
-  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
-  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
-  const [showFmpDropdown, setShowFmpDropdown] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
 
   // View mode: 'table', 'calendar', 'agenda'
@@ -63,22 +59,6 @@ const MeetingsEnhanced = () => {
   useEffect(() => {
     fetchMeetings();
   }, []);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('.relative')) {
-        setShowOrgDropdown(false);
-        setShowRegionDropdown(false);
-        setShowFmpDropdown(false);
-      }
-    };
-
-    if (showOrgDropdown || showRegionDropdown || showFmpDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showOrgDropdown, showRegionDropdown, showFmpDropdown]);
 
   const fetchMeetings = async () => {
     try {
@@ -146,7 +126,6 @@ const MeetingsEnhanced = () => {
     setSortDirection('desc');
     setCurrentPage(1);
     setSelectedMeetings(new Set());
-    setShowColumnSelector(false);
     setOrganizationFilter([]);
     setRegionFilter([]);
     setFmpFilter([]);
@@ -353,17 +332,6 @@ const MeetingsEnhanced = () => {
     });
   };
 
-  const toggleColumn = (columnKey) => {
-    if (columnKey === 'title' || columnKey === 'council') return;
-    const column = allColumns.find(col => col.key === columnKey);
-    if (column && !column.core) {
-      setVisibleColumns(prev => ({
-        ...prev,
-        [columnKey]: !prev[columnKey]
-      }));
-    }
-  };
-
   const getTypeColor = (type) => {
     if (!type) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
 
@@ -438,311 +406,213 @@ const MeetingsEnhanced = () => {
 
   return (
     <div>
-      {/* Page Header */}
-      <PageHeader
-        icon={Calendar}
-        title="Council Meetings"
-        subtitle={`${meetings.length} meetings tracked`}
-        description="Council and committee meetings, schedules, and materials."
-      />
+      {/* Description and Actions */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          View and track Council meeting schedules, agendas, and outcomes.
+        </p>
+        <div className="page-description-actions">
+          {/* View Toggle */}
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`inline-flex items-center gap-1.5 h-9 px-2.5 text-sm font-medium rounded-l-md border transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-brand-blue text-white border-brand-blue'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
+              }`}
+            >
+              <Table size={14} /> Table
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`inline-flex items-center gap-1.5 h-9 px-2.5 text-sm font-medium border-t border-b transition-colors ${
+                viewMode === 'calendar'
+                  ? 'bg-brand-blue text-white border-brand-blue'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
+              }`}
+            >
+              <LayoutGrid size={14} /> Calendar
+            </button>
+            <button
+              onClick={() => setViewMode('agenda')}
+              className={`inline-flex items-center gap-1.5 h-9 px-2.5 text-sm font-medium rounded-r-md border transition-colors ${
+                viewMode === 'agenda'
+                  ? 'bg-brand-blue text-white border-brand-blue'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
+              }`}
+            >
+              <List size={14} /> Agenda
+            </button>
+          </div>
 
-      <ButtonGroup>
-        {/* View Toggle */}
-        <div className="inline-flex rounded-md shadow-sm" role="group">
-          <button
-            onClick={() => setViewMode('table')}
-            className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-l-md border transition-colors ${
-              viewMode === 'table'
-                ? 'bg-brand-blue text-white border-brand-blue'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
-            }`}
-          >
-            <Table size={14} /> Table
-          </button>
-          <button
-            onClick={() => setViewMode('calendar')}
-            className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium border-t border-b transition-colors ${
-              viewMode === 'calendar'
-                ? 'bg-brand-blue text-white border-brand-blue'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
-            }`}
-          >
-            <LayoutGrid size={14} /> Calendar
-          </button>
-          <button
-            onClick={() => setViewMode('agenda')}
-            className={`inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-r-md border transition-colors ${
-              viewMode === 'agenda'
-                ? 'bg-brand-blue text-white border-brand-blue'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400'
-            }`}
-          >
-            <List size={14} /> Agenda
-          </button>
-        </div>
-        <div className="relative">
-          <Button
-            variant="secondary"
-            icon={Download}
-            onClick={(e) => {
-              const menu = e.currentTarget.nextElementSibling;
-              menu.classList.toggle('hidden');
-            }}
-          >
-            Export
-          </Button>
-          <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-10">
-            <div className="py-1">
-              <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-                {selectedMeetings.size > 0 ? `Export ${selectedMeetings.size} selected` : 'Export all meetings'}
+          {/* Export Dropdown */}
+          <div className="relative">
+            <Button
+              variant="secondary"
+              icon={Download}
+              onClick={(e) => {
+                const menu = e.currentTarget.nextElementSibling;
+                menu.classList.toggle('hidden');
+              }}
+              className="gap-1.5 px-2.5 h-9"
+            >
+              Export
+            </Button>
+            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
+              <div className="py-1">
+                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                  {selectedMeetings.size > 0 ? `Export ${selectedMeetings.size} selected` : 'Export all meetings'}
+                </div>
+                <button
+                  onClick={exportToCSV}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  CSV Format (.csv)
+                </button>
+                <button
+                  onClick={exportToTSV}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  TSV Format (.tsv)
+                </button>
+                <button
+                  onClick={exportToExcel}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  Excel Format (.xls)
+                </button>
               </div>
-              <button
-                onClick={exportToCSV}
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-              >
-                CSV Format (.csv)
-              </button>
-              <button
-                onClick={exportToTSV}
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-              >
-                TSV Format (.tsv)
-              </button>
-              <button
-                onClick={exportToExcel}
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-              >
-                Excel Format (.xls)
-              </button>
+            </div>
+          </div>
+
+          {/* Sync Dropdown - combining both sync options */}
+          <div className="relative">
+            <Button
+              variant="primary"
+              icon={RefreshCw}
+              onClick={(e) => {
+                const menu = e.currentTarget.nextElementSibling;
+                menu.classList.toggle('hidden');
+              }}
+              className="gap-1.5 px-2.5 h-9"
+            >
+              Sync
+            </Button>
+            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
+              <div className="py-1">
+                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                  Sync meetings from sources
+                </div>
+                <button
+                  onClick={() => {
+                    syncMeetings();
+                    document.querySelector('.hidden.absolute')?.classList.add('hidden');
+                  }}
+                  disabled={syncing}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left disabled:opacity-50"
+                >
+                  {syncing ? 'Syncing SAFMC...' : 'Sync SAFMC Meetings'}
+                </button>
+                <button
+                  onClick={() => {
+                    syncFisheryPulse();
+                    document.querySelector('.hidden.absolute')?.classList.add('hidden');
+                  }}
+                  disabled={syncingFisheryPulse}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left disabled:opacity-50"
+                >
+                  {syncingFisheryPulse ? 'Syncing All...' : 'Sync All Councils'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <Button
-          variant="primary"
-          icon={RefreshCw}
-          onClick={syncMeetings}
-          disabled={syncing}
-        >
-          {syncing ? 'Syncing...' : 'Sync SAFMC'}
-        </Button>
-        <Button
-          variant="primary"
-          icon={RefreshCw}
-          onClick={syncFisheryPulse}
-          disabled={syncingFisheryPulse}
-        >
-          {syncingFisheryPulse ? 'Syncing...' : 'Sync All'}
-        </Button>
-      </ButtonGroup>
-
-      {/* Column selector */}
-      {showColumnSelector && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Show/Hide Columns</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {allColumns.map(col => (
-              <label key={col.key} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={visibleColumns[col.key]}
-                  onChange={() => toggleColumn(col.key)}
-                  disabled={col.core}
-                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
-                />
-                <span className={`text-sm ${col.core ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
-                  {col.label} {col.core && '(required)'}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Single row: Search → Filters → Show → Reset */}
-      <div className="mt-6 flex flex-wrap items-center gap-2">
+      <PageControlsContainer>
         {/* Search input */}
-        <input
-          type="text"
-          placeholder="Search meetings, species, topics..."
+        <SearchBar
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
+          onChange={(value) => {
+            setSearchTerm(value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          aria-label="Search meetings by title, council, location, species, or topics"
+          placeholder="Search meetings, species, topics..."
+          ariaLabel="Search meetings by title, council, location, species, or topics"
         />
 
         {/* Organization multi-select filter */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setShowOrgDropdown(!showOrgDropdown);
-              setShowRegionDropdown(false);
-              setShowFmpDropdown(false);
-            }}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            Organization
-            {organizationFilter.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {organizationFilter.length}
-              </span>
-            )}
-          </button>
-          {showOrgDropdown && (
-            <div className="absolute z-50 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto">
-              <div className="p-2 space-y-1">
-                {[
-                  { val: 'south atlantic', label: 'South Atlantic Fishery Management Council' },
-                  { val: 'new england', label: 'New England Fishery Management Council' },
-                  { val: 'mid-atlantic', label: 'Mid-Atlantic Fishery Management Council' },
-                  { val: 'gulf of mexico', label: 'Gulf of Mexico Fishery Management Council' },
-                  { val: 'caribbean', label: 'Caribbean Fishery Management Council' },
-                  { val: 'pacific fishery', label: 'Pacific Fishery Management Council' },
-                  { val: 'north pacific', label: 'North Pacific Fishery Management Council' },
-                  { val: 'western pacific', label: 'Western Pacific Fishery Management Council' },
-                  { val: 'atlantic states', label: 'Atlantic States Marine Fisheries Commission' },
-                  { val: 'gulf states', label: 'Gulf States Marine Fisheries Commission' },
-                  { val: 'pacific states', label: 'Pacific States Marine Fisheries Commission' },
-                  { val: 'noaa', label: 'NOAA Fisheries' },
-                ].map(org => (
-                  <label key={org.val} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={organizationFilter.includes(org.val)}
-                      onChange={(e) => {
-                        setOrganizationFilter(prev =>
-                          e.target.checked ? [...prev, org.val] : prev.filter(v => v !== org.val)
-                        );
-                        setCurrentPage(1);
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{org.label}</span>
-                  </label>
-                ))}
-                <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
-                <div className="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">State Agencies</div>
-                {[
-                  { val: 'north carolina', label: 'North Carolina Division of Marine Fisheries' },
-                  { val: 'south carolina', label: 'South Carolina Department of Natural Resources' },
-                  { val: 'georgia', label: 'Georgia Department of Natural Resources' },
-                  { val: 'florida', label: 'Florida Fish and Wildlife Conservation Commission' },
-                ].map(org => (
-                  <label key={org.val} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={organizationFilter.includes(org.val)}
-                      onChange={(e) => {
-                        setOrganizationFilter(prev =>
-                          e.target.checked ? [...prev, org.val] : prev.filter(v => v !== org.val)
-                        );
-                        setCurrentPage(1);
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{org.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FilterDropdown
+          label="Organization"
+          options={[
+            { value: 'south atlantic', label: 'South Atlantic Fishery Management Council' },
+            { value: 'new england', label: 'New England Fishery Management Council' },
+            { value: 'mid-atlantic', label: 'Mid-Atlantic Fishery Management Council' },
+            { value: 'gulf of mexico', label: 'Gulf of Mexico Fishery Management Council' },
+            { value: 'caribbean', label: 'Caribbean Fishery Management Council' },
+            { value: 'pacific fishery', label: 'Pacific Fishery Management Council' },
+            { value: 'north pacific', label: 'North Pacific Fishery Management Council' },
+            { value: 'western pacific', label: 'Western Pacific Fishery Management Council' },
+            { value: 'atlantic states', label: 'Atlantic States Marine Fisheries Commission' },
+            { value: 'gulf states', label: 'Gulf States Marine Fisheries Commission' },
+            { value: 'pacific states', label: 'Pacific States Marine Fisheries Commission' },
+            { value: 'noaa', label: 'NOAA Fisheries' },
+            { value: 'north carolina', label: 'North Carolina Division of Marine Fisheries', section: 'State Agencies' },
+            { value: 'south carolina', label: 'South Carolina Department of Natural Resources', section: 'State Agencies' },
+            { value: 'georgia', label: 'Georgia Department of Natural Resources', section: 'State Agencies' },
+            { value: 'florida', label: 'Florida Fish and Wildlife Conservation Commission', section: 'State Agencies' },
+          ]}
+          selectedValues={organizationFilter}
+          onChange={(values) => {
+            setOrganizationFilter(values);
+            setCurrentPage(1);
+          }}
+          showCounts={false}
+        />
 
         {/* Region multi-select filter */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setShowRegionDropdown(!showRegionDropdown);
-              setShowOrgDropdown(false);
-              setShowFmpDropdown(false);
-            }}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            Region
-            {regionFilter.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {regionFilter.length}
-              </span>
-            )}
-          </button>
-          {showRegionDropdown && (
-            <div className="absolute z-50 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto">
-              <div className="p-2 space-y-1">
-                {['northeast', 'mid-atlantic', 'southeast', 'gulf of mexico', 'caribbean', 'west coast', 'alaska', 'pacific islands', 'atlantic coast', 'gulf states', 'pacific states', 'north carolina', 'south carolina', 'georgia', 'florida'].map(region => (
-                  <label key={region} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={regionFilter.includes(region)}
-                      onChange={(e) => {
-                        setRegionFilter(prev =>
-                          e.target.checked ? [...prev, region] : prev.filter(v => v !== region)
-                        );
-                        setCurrentPage(1);
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
-                    />
-                    <span className="text-sm capitalize text-gray-700 dark:text-gray-300">{region}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FilterDropdown
+          label="Region"
+          options={['northeast', 'mid-atlantic', 'southeast', 'gulf of mexico', 'caribbean', 'west coast', 'alaska', 'pacific islands', 'atlantic coast', 'gulf states', 'pacific states', 'north carolina', 'south carolina', 'georgia', 'florida'].map(region => ({
+            value: region,
+            label: region.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+          }))}
+          selectedValues={regionFilter}
+          onChange={(values) => {
+            setRegionFilter(values);
+            setCurrentPage(1);
+          }}
+          showCounts={false}
+        />
 
         {/* FMP multi-select filter */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setShowFmpDropdown(!showFmpDropdown);
-              setShowOrgDropdown(false);
-              setShowRegionDropdown(false);
-            }}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            FMP
-            {fmpFilter.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {fmpFilter.length}
-              </span>
-            )}
-          </button>
-          {showFmpDropdown && (
-            <div className="absolute z-50 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto">
-              <div className="p-2 space-y-1">
-                {[
-                  'Snapper Grouper',
-                  'Coastal Migratory Pelagics',
-                  'Dolphin Wahoo',
-                  'Spiny Lobster',
-                  'Golden Crab',
-                  'Shrimp',
-                  'Coral',
-                  'Sargassum'
-                ].map(fmp => (
-                  <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={fmpFilter.includes(fmp)}
-                      onChange={(e) => {
-                        setFmpFilter(prev =>
-                          e.target.checked ? [...prev, fmp] : prev.filter(v => v !== fmp)
-                        );
-                        setCurrentPage(1);
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-brand-green focus:ring-brand-green"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{fmp}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FilterDropdown
+          label="FMP"
+          options={[
+            'Snapper Grouper',
+            'Coastal Migratory Pelagics',
+            'Dolphin Wahoo',
+            'Spiny Lobster',
+            'Golden Crab',
+            'Shrimp',
+            'Coral',
+            'Sargassum'
+          ].map(fmp => ({
+            value: fmp,
+            label: fmp
+          }))}
+          selectedValues={fmpFilter}
+          onChange={(values) => {
+            setFmpFilter(values);
+            setCurrentPage(1);
+          }}
+          showCounts={false}
+        />
 
         {/* Upcoming only filter */}
-        <label className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+        <label className="inline-flex items-center gap-1.5 h-9 px-2.5 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
           <input
             type="checkbox"
             checked={upcomingOnly}
@@ -755,7 +625,7 @@ const MeetingsEnhanced = () => {
           <span className="whitespace-nowrap">Upcoming only</span>
         </label>
 
-        {/* Page size selector */}
+        {/* Page Size */}
         <select
           value={pageSize}
           onChange={(e) => {
@@ -771,27 +641,47 @@ const MeetingsEnhanced = () => {
           <option value={999999}>Show ALL</option>
         </select>
 
+        {/* Columns Dropdown (table view only) */}
+        {viewMode === 'table' && (
+          <FilterDropdown
+            label="Columns"
+            options={allColumns.filter(col => !col.core).map(col => ({
+              value: col.key,
+              label: col.label
+            }))}
+            selectedValues={Object.entries(visibleColumns)
+              .filter(([key, visible]) => {
+                const col = allColumns.find(c => c.key === key);
+                return visible && col && !col.core;
+              })
+              .map(([key]) => key)
+            }
+            onChange={(selectedKeys) => {
+              const newVisibleColumns = { ...visibleColumns };
+              // Set all non-core columns to false first
+              allColumns.filter(col => !col.core).forEach(col => {
+                newVisibleColumns[col.key] = false;
+              });
+              // Set selected columns to true
+              selectedKeys.forEach(key => {
+                newVisibleColumns[key] = true;
+              });
+              setVisibleColumns(newVisibleColumns);
+            }}
+            showCounts={false}
+          />
+        )}
+
         {/* Reset Button */}
         <button
           onClick={handleReset}
-          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 hover:border-red-400 dark:hover:border-red-500 transition-colors"
           title="Reset filters, sorting, and selection"
         >
           <RotateCcw size={14} />
           Reset
         </button>
-
-        {/* Columns Button (table view only) */}
-        {viewMode === 'table' && (
-          <button
-            onClick={() => setShowColumnSelector(!showColumnSelector)}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            <Settings size={14} />
-            Columns
-          </button>
-        )}
-      </div>
+      </PageControlsContainer>
 
       {/* Table View */}
       {viewMode === 'table' && (
@@ -873,32 +763,32 @@ const MeetingsEnhanced = () => {
                                 href={meeting.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs font-medium text-brand-blue hover:text-brand-green hover:underline"
+                                className="text-sm font-medium text-brand-blue hover:text-brand-green hover:underline"
                               >
                                 {meeting.title}
                               </a>
                             ) : (
-                              <div className="text-xs font-medium text-gray-900">{meeting.title}</div>
+                              <div className="text-sm font-medium text-gray-900">{meeting.title}</div>
                             )}
                           </div>
                           <FavoriteButton itemType="meeting" itemId={meeting.meeting_id} />
                         </div>
                       ) : col.key === 'council' ? (
                         <div>
-                          <div className="text-xs font-semibold text-brand-blue">{meeting.council || 'SAFMC'}</div>
+                          <div className="text-sm font-semibold text-brand-blue">{meeting.council || 'SAFMC'}</div>
                           {meeting.organization_type && visibleColumns.organization_type && (
-                            <div className="text-xs text-gray-500">{meeting.organization_type}</div>
+                            <div className="text-sm text-gray-500">{meeting.organization_type}</div>
                           )}
                         </div>
                       ) : col.key === 'start_date' ? (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
                           <div>
-                            <div className="text-xs text-gray-900">
+                            <div className="text-sm text-gray-900">
                               {meeting.start_date ? new Date(meeting.start_date).toLocaleDateString() : 'TBD'}
                             </div>
                             {meeting.end_date && meeting.end_date !== meeting.start_date && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-sm text-gray-500">
                                 to {new Date(meeting.end_date).toLocaleDateString()}
                               </div>
                             )}

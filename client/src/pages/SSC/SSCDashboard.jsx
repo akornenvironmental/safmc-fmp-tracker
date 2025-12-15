@@ -47,6 +47,14 @@ const SSCDashboard = () => {
 
   return (
     <div>
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          The SSC provides independent scientific advice on fishery management decisions and stock assessments.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
+
       {/* Admin Actions */}
       <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div className="flex items-center justify-between">

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import PageHeader from '../components/PageHeader';
 import { MessageSquare, Filter, CheckCircle, Clock, Archive, AlertCircle, Trash2, Check } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../contexts/AuthContext';
@@ -185,13 +184,13 @@ const FeedbackManagement = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={MessageSquare}
-        title="Feedback Management"
-        subtitle="User feedback"
-        description="User feedback submissions and issue reports."
-      />
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Review and respond to user feedback, feature requests, and system improvement suggestions.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
         {/* Stats Cards */}
         {stats && (

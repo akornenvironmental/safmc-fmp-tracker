@@ -67,23 +67,12 @@ const CMODDashboard = () => {
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <GraduationCap className="w-8 h-8 text-brand-blue" />
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-              Council Member Ongoing Development (CMOD)
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Cross-Council Professional Development & Training
-            </p>
-          </div>
-        </div>
-        <p className="text-base text-gray-700 dark:text-gray-300 max-w-3xl">
-          CMOD workshops provide professional development and training for council members across all eight
-          Regional Fishery Management Councils, focusing on emerging fishery management topics and skills development.
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Council Member Ongoing Development program providing training and resources for effective fishery management governance.
         </p>
+        <div className="page-description-actions"></div>
       </div>
 
       {/* Stats Grid */}

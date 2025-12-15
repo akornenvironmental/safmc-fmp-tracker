@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
 import { API_BASE_URL } from '../config';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import {
   Calendar, Filter, Search, ChevronDown, ChevronRight,
   FileText, Users, MessageSquare, TrendingUp, Clock, ExternalLink, GitBranch
@@ -244,61 +244,30 @@ const Timeline = () => {
 
   return (
     <div>
-      {/* Page Header */}
-      <PageHeader
-        icon={GitBranch}
-        title="Timeline"
-        subtitle="Chronological view"
-        description="Chronological view of fishery management actions and milestones."
-      />
-
-      {/* Filters and Controls */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Search */}
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search actions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-blue focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* FMP Filter */}
-          <select
-            value={selectedFMP}
-            onChange={(e) => setSelectedFMP(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-blue"
-          >
-            <option value="">All FMPs</option>
-            {uniqueFMPs.map(fmp => (
-              <option key={fmp} value={fmp}>{fmp}</option>
-            ))}
-          </select>
-
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Chronological visualization of FMP amendments, actions, and regulatory milestones.
+        </p>
+        <div className="page-description-actions">
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 rounded-md">
+          <div className="flex items-center gap-0 border border-gray-300 dark:border-gray-600 rounded-md h-9">
             <button
               onClick={() => setViewMode('grouped')}
-              className={`px-4 py-2 text-sm font-medium rounded-l-md transition-colors ${
+              className={`px-4 h-9 text-sm font-medium rounded-l-md transition-colors ${
                 viewMode === 'grouped'
                   ? 'bg-brand-blue text-white'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
               By Action
             </button>
             <button
               onClick={() => setViewMode('chronological')}
-              className={`px-4 py-2 text-sm font-medium rounded-r-md transition-colors ${
+              className={`px-4 h-9 text-sm font-medium rounded-r-md transition-colors ${
                 viewMode === 'chronological'
                   ? 'bg-brand-blue text-white'
-                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
               Chronological
@@ -306,6 +275,31 @@ const Timeline = () => {
           </div>
         </div>
       </div>
+
+      {/* Filters and Controls */}
+      <PageControlsContainer>
+        {/* Search */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search actions..."
+          ariaLabel="Search actions by title, ID, or description"
+        />
+
+        {/* FMP Filter */}
+        <FilterDropdown
+          label="FMP"
+          options={uniqueFMPs.map(fmp => ({
+            value: fmp,
+            label: fmp,
+            count: actions.filter(a => a.fmp === fmp).length
+          }))}
+          selectedValues={selectedFMP ? [selectedFMP] : []}
+          onChange={(values) => setSelectedFMP(values[0] || '')}
+          showCounts={true}
+          multiSelect={false}
+        />
+      </PageControlsContainer>
 
       {/* Timeline Content */}
       {viewMode === 'grouped' ? (

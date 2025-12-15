@@ -18,46 +18,68 @@ export const useSidebar = () => {
 };
 
 export const SidebarProvider = ({ children }) => {
-  // Load initial state from localStorage
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    const saved = localStorage.getItem('sidebar_collapsed');
-    return saved === 'true';
-  });
+  // Always start expanded (ignore localStorage)
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Load navigation favorites from localStorage
+  // Load navigation favorites from localStorage with validation
   const [navFavorites, setNavFavorites] = useState(() => {
-    const saved = localStorage.getItem('navFavorites');
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+    try {
+      const saved = localStorage.getItem('navFavorites');
+      if (!saved) return new Set();
+      const parsed = JSON.parse(saved);
+      // Validate: must be array of strings starting with '/'
+      if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string' && item.startsWith('/'))) {
+        return new Set(parsed);
+      }
+    } catch (error) {
+      console.error('Failed to load nav favorites from localStorage:', error);
+    }
+    return new Set();
   });
 
-  // Effective collapsed state - expanded if hovered while collapsed
-  const effectiveCollapsed = isCollapsed && !isHovered;
+  // Load hidden pages from localStorage with validation
+  const [hiddenPages, setHiddenPages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('hiddenPages');
+      if (!saved) return new Set();
+      const parsed = JSON.parse(saved);
+      // Validate: must be array of strings starting with '/'
+      if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string' && item.startsWith('/'))) {
+        return new Set(parsed);
+      }
+    } catch (error) {
+      console.error('Failed to load hidden pages from localStorage:', error);
+    }
+    return new Set();
+  });
+
+  // Effective collapsed state - no hover expand behavior
+  const effectiveCollapsed = isCollapsed;
 
   // Persist favorites to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('navFavorites', JSON.stringify(Array.from(navFavorites)));
   }, [navFavorites]);
 
-  // Toggle sidebar collapse state
+  // Persist hidden pages to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('hiddenPages', JSON.stringify(Array.from(hiddenPages)));
+  }, [hiddenPages]);
+
+  // Toggle sidebar collapse state (no localStorage)
   const toggleSidebar = useCallback(() => {
-    setIsCollapsed(prev => {
-      const newValue = !prev;
-      localStorage.setItem('sidebar_collapsed', String(newValue));
-      return newValue;
-    });
+    setIsCollapsed(prev => !prev);
   }, []);
 
   // Collapse sidebar
   const collapseSidebar = useCallback(() => {
     setIsCollapsed(true);
-    localStorage.setItem('sidebar_collapsed', 'true');
   }, []);
 
   // Expand sidebar
   const expandSidebar = useCallback(() => {
     setIsCollapsed(false);
-    localStorage.setItem('sidebar_collapsed', 'false');
   }, []);
 
   // Handle hover events
@@ -88,6 +110,24 @@ export const SidebarProvider = ({ children }) => {
   const isNavFavorited = useCallback((path) => {
     return navFavorites.has(path);
   }, [navFavorites]);
+
+  // Toggle hidden page
+  const toggleHiddenPage = useCallback((path) => {
+    setHiddenPages(prev => {
+      const newHidden = new Set(prev);
+      if (newHidden.has(path)) {
+        newHidden.delete(path);
+      } else {
+        newHidden.add(path);
+      }
+      return newHidden;
+    });
+  }, []);
+
+  // Check if page is hidden
+  const isPageHidden = useCallback((path) => {
+    return hiddenPages.has(path);
+  }, [hiddenPages]);
 
   // Keyboard shortcut to toggle sidebar ([ key or Cmd+\)
   useEffect(() => {
@@ -124,6 +164,9 @@ export const SidebarProvider = ({ children }) => {
     navFavorites,
     toggleNavFavorite,
     isNavFavorited,
+    hiddenPages,
+    toggleHiddenPage,
+    isPageHidden,
   };
 
   return (

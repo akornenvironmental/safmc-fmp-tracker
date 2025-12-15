@@ -114,6 +114,14 @@ const SpeciesProfile = () => {
 
   return (
     <div>
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          View detailed species information, management timeline, status breakdowns, and related fishery management actions.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
+
       {/* Breadcrumb */}
       <nav className="mb-6">
         <ol className="flex items-center space-x-2 text-sm">

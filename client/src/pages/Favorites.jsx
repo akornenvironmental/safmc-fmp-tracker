@@ -103,6 +103,13 @@ const Favorites = () => {
 
   return (
     <div>
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Manage and organize your favorited items including actions, meetings, assessments, and documents for quick access and reference.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       <div className="mb-6">
         <div className="flex items-center justify-between">

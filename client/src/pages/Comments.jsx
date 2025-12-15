@@ -66,21 +66,19 @@ const Comments = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Public Comments</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            {comments.length} comments total • {filteredComments.length} displayed
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Public comments submitted on fishery management actions and regulatory proposals.
+        </p>
+        <div className="page-description-actions">
           <button
             onClick={syncComments}
             disabled={syncing}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 px-2.5 h-9 justify-center rounded-md border border-transparent bg-brand-blue text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Comments'}
+            {syncing ? 'Syncing...' : 'Sync'}
           </button>
         </div>
       </div>

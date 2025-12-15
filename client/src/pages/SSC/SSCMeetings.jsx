@@ -5,8 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
-import PageHeader from '../../components/PageHeader';
 import Button from '../../components/Button';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
 import {
   Calendar,
   MapPin,
@@ -15,8 +15,6 @@ import {
   Download,
   Video,
   Clock,
-  Filter,
-  ChevronDown,
   AlertCircle,
   ExternalLink,
   Users,
@@ -30,9 +28,8 @@ const SSCMeetings = () => {
   const [error, setError] = useState(null);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [yearFilter, setYearFilter] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilter, setStatusFilter] = useState([]);
+  const [yearFilter, setYearFilter] = useState([]);
   const [sortOrder, setSortOrder] = useState('desc'); // desc = newest first
 
   // Fetch SSC meetings
@@ -73,15 +70,15 @@ const SSCMeetings = () => {
     let filtered = [...meetings];
 
     // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(meeting => meeting.status === statusFilter);
+    if (statusFilter.length > 0) {
+      filtered = filtered.filter(meeting => statusFilter.includes(meeting.status));
     }
 
     // Year filter
-    if (yearFilter !== 'all') {
+    if (yearFilter.length > 0) {
       filtered = filtered.filter(meeting => {
-        const year = new Date(meeting.meeting_date_start).getFullYear();
-        return year === parseInt(yearFilter);
+        const year = new Date(meeting.meeting_date_start).getFullYear().toString();
+        return yearFilter.includes(year);
       });
     }
 
@@ -145,13 +142,13 @@ const SSCMeetings = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={Calendar}
-        title="SSC Meetings"
-        subtitle="Meeting schedule"
-        description="SSC meeting dates, agendas, and summary reports."
-      />
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Access SSC meeting schedules, agendas, presentations, and scientific recommendations.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       {/* Error Alert */}
       {error && (
@@ -164,79 +161,47 @@ const SSCMeetings = () => {
         </div>
       )}
 
-      {/* Filters Bar */}
-      <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Filters & Sorting
-          </h3>
-          <Button
-            variant="ghost"
-            icon={Filter}
-            onClick={() => setShowFilters(!showFilters)}
-            className="text-brand-blue hover:text-brand-blue-light"
-          >
-            {showFilters ? 'Hide' : 'Show'} Filters
-          </Button>
-        </div>
+      {/* Filters and Controls */}
+      <PageControlsContainer>
+        {/* Status Filter */}
+        <FilterDropdown
+          label="Status"
+          options={[
+            { value: 'scheduled', label: 'Scheduled', count: meetings.filter(m => m.status === 'scheduled').length },
+            { value: 'completed', label: 'Completed', count: meetings.filter(m => m.status === 'completed').length },
+            { value: 'cancelled', label: 'Cancelled', count: meetings.filter(m => m.status === 'cancelled').length }
+          ]}
+          selectedValues={statusFilter}
+          onChange={setStatusFilter}
+          showCounts={true}
+        />
 
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Status
-              </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Statuses</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
+        {/* Year Filter */}
+        <FilterDropdown
+          label="Year"
+          options={years.map(year => ({
+            value: year.toString(),
+            label: year.toString(),
+            count: meetings.filter(m => new Date(m.meeting_date_start).getFullYear() === year).length
+          }))}
+          selectedValues={yearFilter}
+          onChange={setYearFilter}
+          showCounts={true}
+        />
 
-            {/* Year Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Year
-              </label>
-              <select
-                value={yearFilter}
-                onChange={(e) => setYearFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Years</option>
-                {years.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
+        {/* Sort Order */}
+        <button
+          onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors text-gray-900 dark:text-gray-100"
+        >
+          <ArrowUpDown size={16} />
+          {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+        </button>
+      </PageControlsContainer>
 
-            {/* Sort Order */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Sort Order
-              </label>
-              <Button
-                variant="secondary"
-                icon={ArrowUpDown}
-                onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-                className="w-full justify-between"
-              >
-                {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Results Count */}
-        <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredMeetings.length} of {meetings.length} meetings
-        </div>
+      {/* Results Count */}
+      <div className="mt-6 mb-2 text-sm text-gray-600 dark:text-gray-400">
+        Showing {filteredMeetings.length} of {meetings.length} meetings
       </div>
 
       {/* Meetings List */}

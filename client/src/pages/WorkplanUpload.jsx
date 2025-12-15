@@ -135,6 +135,14 @@ const WorkplanUpload = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Upload and import SAFMC workplan Excel files to track amendments, milestones, and quarterly progress across all fishery management plans.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -277,7 +285,7 @@ const WorkplanUpload = () => {
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}
               placeholder="e.g., Q3 2025 Workplan"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              className="w-full h-9 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
               required
               disabled={isUploading}
             />
@@ -295,7 +303,7 @@ const WorkplanUpload = () => {
               onChange={(e) => setFiscalYear(parseInt(e.target.value))}
               min="2020"
               max="2030"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+              className="w-full h-9 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
               disabled={isUploading}
             />
           </div>
@@ -310,7 +318,7 @@ const WorkplanUpload = () => {
             id="quarter"
             value={quarter}
             onChange={(e) => setQuarter(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
+            className="w-full h-9 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue focus:border-transparent"
             disabled={isUploading}
           >
             <option value="">Select quarter...</option>
@@ -326,7 +334,7 @@ const WorkplanUpload = () => {
           <button
             type="submit"
             disabled={!file || !versionName || isUploading}
-            className="px-6 py-2.5 bg-brand-blue text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="h-9 px-6 bg-brand-blue text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {isUploading ? (
               <>
@@ -344,7 +352,7 @@ const WorkplanUpload = () => {
           <button
             type="button"
             onClick={() => navigate('/workplan')}
-            className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="h-9 px-6 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             disabled={isUploading}
           >
             Cancel

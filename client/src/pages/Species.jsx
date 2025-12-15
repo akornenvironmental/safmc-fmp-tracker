@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, Download, Search, Fish, ChevronDown, X } from 'lucide-react';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import { RefreshCw, Download, Fish, X } from 'lucide-react';
 
 const Species = () => {
   const navigate = useNavigate();
@@ -11,24 +12,9 @@ const Species = () => {
   const [filterFMP, setFilterFMP] = useState([]);
   const [sortField, setSortField] = useState('actionCount');
   const [sortDirection, setSortDirection] = useState('desc');
-  const [showFMPDropdown, setShowFMPDropdown] = useState(false);
-
-  const fmpDropdownRef = useRef(null);
 
   useEffect(() => {
     fetchSpecies();
-  }, []);
-
-  // Click outside handler for dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (fmpDropdownRef.current && !fmpDropdownRef.current.contains(event.target)) {
-        setShowFMPDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchSpecies = async () => {
@@ -55,15 +41,9 @@ const Species = () => {
     return Array.from(fmpSet).sort();
   }, [species]);
 
-  // Toggle FMP filter
+  // Toggle FMP filter (for active filter badges)
   const toggleFMPFilter = (fmp) => {
-    setFilterFMP(prev => {
-      if (prev.includes(fmp)) {
-        return prev.filter(f => f !== fmp);
-      } else {
-        return [...prev, fmp];
-      }
-    });
+    setFilterFMP(prev => prev.filter(f => f !== fmp));
   };
 
   // Handle sorting
@@ -173,28 +153,22 @@ const Species = () => {
 
   return (
     <div>
-      {/* Header */}
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Fish className="w-8 h-8 text-brand-blue" />
-            Species Profiles
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            {filteredSpecies.length} species tracked across {stats.totalActions} management actions
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-wrap gap-2">
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Browse species profiles and their associated management actions across all FMPs.
+        </p>
+        <div className="page-description-actions">
           <button
             onClick={exportToCSV}
-            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-2.5 h-9 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
           >
             <Download size={14} />
             Export CSV
           </button>
           <button
             onClick={fetchSpecies}
-            className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2"
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-transparent bg-brand-blue px-2.5 h-9 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh
@@ -256,64 +230,27 @@ const Species = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search species..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          />
-        </div>
+      <PageControlsContainer>
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search species..."
+          ariaLabel="Search species by name or FMP"
+        />
 
         {/* FMP Filter Dropdown */}
-        <div className="relative" ref={fmpDropdownRef}>
-          <button
-            onClick={() => setShowFMPDropdown(!showFMPDropdown)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-          >
-            Filter by FMP
-            {filterFMP.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {filterFMP.length}
-              </span>
-            )}
-            <ChevronDown size={16} />
-          </button>
-          {showFMPDropdown && (
-            <div className="absolute z-10 mt-1 w-72 bg-white rounded-md shadow-lg border border-gray-200">
-              <div className="p-2 max-h-60 overflow-y-auto">
-                {uniqueFMPs.map(fmp => (
-                  <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filterFMP.includes(fmp)}
-                      onChange={() => toggleFMPFilter(fmp)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{fmp}</span>
-                    <span className="ml-auto text-xs text-gray-500">
-                      ({species.filter(sp => sp.fmps?.includes(fmp)).length})
-                    </span>
-                  </label>
-                ))}
-              </div>
-              {filterFMP.length > 0 && (
-                <div className="border-t p-2">
-                  <button
-                    onClick={() => setFilterFMP([])}
-                    className="text-xs text-blue-600 hover:text-blue-800"
-                  >
-                    Clear filters
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+        <FilterDropdown
+          label="Filter by FMP"
+          options={uniqueFMPs.map(fmp => ({
+            value: fmp,
+            label: fmp,
+            count: species.filter(sp => sp.fmps?.includes(fmp)).length
+          }))}
+          selectedValues={filterFMP}
+          onChange={setFilterFMP}
+          showCounts={true}
+        />
+      </PageControlsContainer>
 
       {/* Active Filters */}
       {filterFMP.length > 0 && (

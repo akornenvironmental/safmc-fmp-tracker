@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
-import ButtonGroup from '../components/ButtonGroup';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import { API_BASE_URL } from '../config';
 import {
   RefreshCw,
@@ -13,12 +12,10 @@ import {
   ChevronRight,
   ChevronDown,
   History,
-  Filter,
   RotateCcw,
   FileText,
   ExternalLink,
-  Upload,
-  ClipboardList
+  Upload
 } from 'lucide-react';
 
 const Workplan = () => {
@@ -207,13 +204,35 @@ const Workplan = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        icon={ClipboardList}
-        title="Workplan"
-        subtitle="Management priorities"
-        description="Council workplan showing current and upcoming management priorities."
-      />
+      {/* Description and Actions */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Track and manage the Council's strategic workplan, priorities, and project timelines.
+        </p>
+        <div className="page-description-actions">
+          <Link to="/workplan/upload">
+            <Button variant="secondary" icon={Upload} className="gap-1.5 px-2.5 h-9">
+              Upload Workplan
+            </Button>
+          </Link>
+          <Button
+            variant="secondary"
+            icon={History}
+            onClick={() => setShowVersionHistory(!showVersionHistory)}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            Version History
+          </Button>
+          <Button
+            variant="primary"
+            icon={RefreshCw}
+            onClick={fetchWorkplan}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            Refresh
+          </Button>
+        </div>
+      </div>
 
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-start justify-between">
@@ -228,28 +247,6 @@ const Workplan = () => {
               </span>
             )}
           </div>
-
-          <ButtonGroup>
-            <Link to="/workplan/upload">
-              <Button variant="secondary" icon={Upload}>
-                Upload Workplan
-              </Button>
-            </Link>
-            <Button
-              variant="secondary"
-              icon={History}
-              onClick={() => setShowVersionHistory(!showVersionHistory)}
-            >
-              Version History
-            </Button>
-            <Button
-              variant="primary"
-              icon={RefreshCw}
-              onClick={fetchWorkplan}
-            >
-              Refresh
-            </Button>
-          </ButtonGroup>
         </div>
       </div>
 
@@ -319,45 +316,42 @@ const Workplan = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search amendments..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+      <PageControlsContainer>
+        {/* Search input */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search amendments..."
+          ariaLabel="Search amendments by ID, topic, or lead staff"
+        />
 
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-500" />
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="UNDERWAY">Underway</option>
-              <option value="PLANNED">Planned</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="DEFERRED">Deferred</option>
-            </select>
-          </div>
+        {/* Status Filter */}
+        <FilterDropdown
+          label="Status"
+          options={[
+            { value: 'UNDERWAY', label: 'Underway', count: itemsByStatus['UNDERWAY']?.length || 0 },
+            { value: 'PLANNED', label: 'Planned', count: itemsByStatus['PLANNED']?.length || 0 },
+            { value: 'COMPLETED', label: 'Completed', count: itemsByStatus['COMPLETED']?.length || 0 },
+            { value: 'DEFERRED', label: 'Deferred', count: itemsByStatus['DEFERRED']?.length || 0 }
+          ]}
+          selectedValues={selectedStatus === 'all' ? [] : [selectedStatus]}
+          onChange={(values) => setSelectedStatus(values.length > 0 ? values[0] : 'all')}
+          showCounts={true}
+        />
 
-          <Button
-            variant="secondary"
-            icon={RotateCcw}
-            onClick={() => {
-              setSearchTerm('');
-              setSelectedStatus('all');
-            }}
-          >
-            Reset
-          </Button>
-        </div>
-      </div>
+        {/* Reset Button */}
+        <button
+          onClick={() => {
+            setSearchTerm('');
+            setSelectedStatus('all');
+          }}
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 hover:border-red-400 dark:hover:border-red-500 transition-colors"
+          title="Reset filters and search"
+        >
+          <RotateCcw size={14} />
+          Reset
+        </button>
+      </PageControlsContainer>
 
       {/* Amendments List */}
       <div className="space-y-4">

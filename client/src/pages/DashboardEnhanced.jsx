@@ -3,9 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import {
   RefreshCw, FileText, Calendar, MessageSquare, Fish,
-  TrendingUp, Clock, AlertCircle, ChevronRight, BarChart3, LayoutDashboard
+  TrendingUp, Clock, AlertCircle, ChevronRight, BarChart3
 } from 'lucide-react';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 
 const DashboardEnhanced = () => {
@@ -273,100 +272,120 @@ const DashboardEnhanced = () => {
 
   return (
     <div>
-      <PageHeader
-        icon={LayoutDashboard}
-        title="Dashboard"
-        subtitle="Real-time overview"
-        description="Monitor active amendments, upcoming meetings, and FMP progress across all fishery management plans in the South Atlantic region."
-      />
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Monitor active amendments, upcoming meetings, and FMP progress across all fishery management plans in the South Atlantic region.
+        </p>
+        <div className="page-description-actions">
+          <Button
+            variant="primary"
+            icon={RefreshCw}
+            onClick={triggerScrape}
+            disabled={scraping}
+            className="h-9"
+          >
+            {scraping ? 'Syncing...' : 'Sync'}
+          </Button>
+        </div>
+      </div>
 
-      <Button
-        variant="primary"
-        icon={RefreshCw}
-        onClick={triggerScrape}
-        disabled={scraping}
-        className="mb-6"
-      >
-        {scraping ? 'Updating...' : 'Update Data'}
-      </Button>
-
-      <div className="space-y-3">
+      <div className="space-y-2">
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-        <Link to="/actions" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Total Actions</p>
-              <p className="text-2xl font-bold text-brand-blue dark:text-blue-400">{loading ? '-' : stats.totalActions}</p>
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-1.5">
+        <Link to="/actions" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-body-sm font-medium text-gray-500 dark:text-gray-400">Actions</p>
+              <FileText className="w-4 h-4 text-blue-300 dark:text-blue-700" />
             </div>
-            <FileText className="w-8 h-8 text-blue-200 dark:text-blue-800" />
+            <p className="text-h3 text-brand-blue dark:text-blue-400">{loading ? '-' : stats.totalActions}</p>
           </div>
         </Link>
 
-        <Link to="/meetings" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Upcoming Meetings</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{loading ? '-' : stats.upcomingMeetings}</p>
+        <Link to="/meetings" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-body-sm font-medium text-gray-500 dark:text-gray-400">Meetings</p>
+              <Calendar className="w-4 h-4 text-green-300 dark:text-green-700" />
             </div>
-            <Calendar className="w-8 h-8 text-green-200 dark:text-green-800" />
+            <p className="text-h3 text-green-600 dark:text-green-400">{loading ? '-' : stats.upcomingMeetings}</p>
           </div>
         </Link>
 
-        <Link to="/comments" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Recent Comments</p>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{loading ? '-' : stats.recentComments}</p>
+        <Link to="/comments" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-body-sm font-medium text-gray-500 dark:text-gray-400">Comments</p>
+              <MessageSquare className="w-4 h-4 text-purple-300 dark:text-purple-700" />
             </div>
-            <MessageSquare className="w-8 h-8 text-purple-200 dark:text-purple-800" />
+            <p className="text-h3 text-purple-600 dark:text-purple-400">{loading ? '-' : stats.recentComments}</p>
           </div>
         </Link>
 
-        <Link to="/stocks" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Species & Stocks</p>
-              <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
+        <Link to="/stocks" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-body-sm font-medium text-gray-500 dark:text-gray-400">Species</p>
+              <Fish className="w-4 h-4 text-cyan-300 dark:text-cyan-700" />
             </div>
-            <Fish className="w-8 h-8 text-cyan-200 dark:text-cyan-800" />
+            <p className="text-h3 text-cyan-600 dark:text-cyan-400">{loading ? '-' : (speciesStats?.totalSpecies || 0)}</p>
+          </div>
+        </Link>
+
+        <Link to="/ssc" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-body-sm font-medium text-gray-500 dark:text-gray-400">SSC</p>
+              <AlertCircle className="w-4 h-4 text-orange-300 dark:text-orange-700" />
+            </div>
+            <p className="text-h3 text-orange-600 dark:text-orange-400">{loading ? '-' : '12'}</p>
+          </div>
+        </Link>
+
+        <Link to="/cmod" className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-2 hover:shadow-md transition-shadow">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-body-sm font-medium text-gray-500 dark:text-gray-400">CMOD</p>
+              <TrendingUp className="w-4 h-4 text-pink-300 dark:text-pink-700" />
+            </div>
+            <p className="text-h3 text-pink-600 dark:text-pink-400">{loading ? '-' : '8'}</p>
           </div>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 border-t-2 border-gray-200 dark:border-gray-700 pt-2">
         {/* FMP Progress */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded shadow-sm border-2 border-gray-200 dark:border-gray-700 p-2">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <h2 className="text-h4 text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
               <BarChart3 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               FMP Progress Overview
             </h2>
-            <Link to="/actions" className="text-sm text-brand-blue dark:text-blue-400 hover:underline">
+            <Link to="/actions" className="text-body text-brand-blue dark:text-blue-400 hover:underline">
               View all
             </Link>
           </div>
 
           {loading ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+            <div className="text-center py-6 text-body-sm text-gray-500 dark:text-gray-400">Loading...</div>
           ) : fmpStats.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">No FMP data available</div>
+            <div className="text-center py-6 text-body-sm text-gray-500 dark:text-gray-400">No FMP data available</div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-3">
               {fmpStats.slice(0, 6).map(fmp => (
-                <div key={fmp.fmp} className="space-y-2">
+                <div key={fmp.fmp} className="space-y-1.5">
                   {/* FMP Header */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{fmp.total} total</span>
+                    <span className="text-h5 font-semibold text-gray-900 dark:text-gray-100">{fmp.fmp}</span>
+                    <span className="text-body font-medium text-gray-500 dark:text-gray-400">{fmp.total} total</span>
                   </div>
 
                   {/* Stacked Bar Chart */}
-                  <div className="relative w-full h-8 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden flex">
+                  <div className="relative w-full h-8 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden flex">
                     {fmp.completed > 0 && (
                       <div
-                        className="bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-xs font-medium text-white"
+                        className="bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-body-sm font-medium text-white"
                         style={{ width: `${(fmp.completed / fmp.total) * 100}%` }}
                         title={`${fmp.completed} completed`}
                       >
@@ -375,7 +394,7 @@ const DashboardEnhanced = () => {
                     )}
                     {fmp.inProgress > 0 && (
                       <div
-                        className="bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-xs font-medium text-white"
+                        className="bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-body-sm font-medium text-white"
                         style={{ width: `${(fmp.inProgress / fmp.total) * 100}%` }}
                         title={`${fmp.inProgress} in progress`}
                       >
@@ -384,7 +403,7 @@ const DashboardEnhanced = () => {
                     )}
                     {fmp.planned > 0 && (
                       <div
-                        className="bg-yellow-500 dark:bg-yellow-600 flex items-center justify-center text-xs font-medium text-white"
+                        className="bg-yellow-500 dark:bg-yellow-600 flex items-center justify-center text-body-sm font-medium text-white"
                         style={{ width: `${(fmp.planned / fmp.total) * 100}%` }}
                         title={`${fmp.planned} planned`}
                       >
@@ -394,21 +413,21 @@ const DashboardEnhanced = () => {
                   </div>
 
                   {/* Legend */}
-                  <div className="flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-gray-400 dark:bg-gray-600 rounded"></div>
+                  <div className="flex items-center gap-3 text-body-sm">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2.5 h-2.5 bg-gray-400 dark:bg-gray-600 rounded"></div>
                       <span className="text-gray-700 dark:text-gray-300">
                         <span className="font-semibold">{fmp.completed}</span> Done
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-blue-500 dark:bg-blue-600 rounded"></div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2.5 h-2.5 bg-blue-500 dark:bg-blue-600 rounded"></div>
                       <span className="text-gray-700 dark:text-gray-300">
                         <span className="font-semibold">{fmp.inProgress}</span> Active
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-yellow-500 dark:bg-yellow-600 rounded"></div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2.5 h-2.5 bg-yellow-500 dark:bg-yellow-600 rounded"></div>
                       <span className="text-gray-700 dark:text-gray-300">
                         <span className="font-semibold">{fmp.planned}</span> Planned
                       </span>
@@ -421,18 +440,18 @@ const DashboardEnhanced = () => {
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
-          <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-2 text-sm">
-            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+        <div className="bg-white dark:bg-gray-800 rounded shadow-sm border-2 border-gray-200 dark:border-gray-700 p-2">
+          <h2 className="text-h4 text-gray-900 dark:text-gray-100 flex items-center gap-1.5 mb-2">
+            <Clock className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             Recent Activity
           </h2>
 
           {loading ? (
-            <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">Loading...</div>
+            <div className="text-center py-3 text-body-sm text-gray-500 dark:text-gray-400">Loading...</div>
           ) : recentActivity.length === 0 ? (
-            <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">No recent activity</div>
+            <div className="text-center py-3 text-body-sm text-gray-500 dark:text-gray-400">No recent activity</div>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               {recentActivity.map((item, idx) => {
                 const Icon = item.icon;
                 return (
@@ -444,17 +463,17 @@ const DashboardEnhanced = () => {
                     <div className={`p-1 rounded ${
                       item.type === 'action' ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-green-100 dark:bg-green-900/50'
                     }`}>
-                      <Icon className={`w-3 h-3 ${
+                      <Icon className={`w-4 h-4 ${
                         item.type === 'action' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-body-lg font-medium text-gray-900 dark:text-gray-100 truncate">
                         {item.title}
                       </p>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
+                      <p className="text-body-sm text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
                     </div>
-                    <ChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   </Link>
                 );
               })}
@@ -464,68 +483,40 @@ const DashboardEnhanced = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5 border-t-2 border-gray-200 dark:border-gray-700 pt-2">
         <Link
           to="/stocks"
-          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="flex items-center gap-1.5 p-2 bg-white dark:bg-gray-800 rounded shadow-sm border-2 border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
-          <Fish className="w-6 h-6 text-cyan-500" />
+          <Fish className="w-5 h-5 text-cyan-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Species & Stock Status</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">View species and assessments</p>
+            <p className="text-body font-medium text-gray-900 dark:text-gray-100">Species & Stock Status</p>
+            <p className="text-overline text-gray-500 dark:text-gray-400">View species and assessments</p>
           </div>
         </Link>
 
         <Link
           to="/compare"
-          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="flex items-center gap-1.5 p-2 bg-white dark:bg-gray-800 rounded shadow-sm border-2 border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
-          <TrendingUp className="w-6 h-6 text-purple-500" />
+          <TrendingUp className="w-5 h-5 text-purple-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Compare Actions</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">Side-by-side analysis</p>
+            <p className="text-body font-medium text-gray-900 dark:text-gray-100">Compare Actions</p>
+            <p className="text-overline text-gray-500 dark:text-gray-400">Side-by-side analysis</p>
           </div>
         </Link>
 
         <Link
           to="/workplan"
-          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+          className="flex items-center gap-1.5 p-2 bg-white dark:bg-gray-800 rounded shadow-sm border-2 border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
         >
-          <FileText className="w-6 h-6 text-orange-500" />
+          <FileText className="w-5 h-5 text-orange-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Workplan</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">Amendment schedule</p>
+            <p className="text-body font-medium text-gray-900 dark:text-gray-100">Workplan</p>
+            <p className="text-overline text-gray-500 dark:text-gray-400">Amendment schedule</p>
           </div>
         </Link>
       </div>
-
-      {/* Top Species */}
-      {speciesStats && speciesStats.topSpecies && (
-        <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 p-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 text-sm">
-              <Fish className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-              Most Active Species
-            </h2>
-            <Link to="/stocks" className="text-xs text-brand-blue dark:text-blue-400 hover:underline">
-              View all
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            {speciesStats.topSpecies.slice(0, 5).map((sp, idx) => (
-              <Link
-                key={idx}
-                to={`/species/${sp.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="p-2 bg-gray-50 dark:bg-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-center"
-              >
-                <p className="font-medium text-gray-900 dark:text-gray-100">{sp.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{sp.actionCount} actions</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
       </div>
     </div>
   );

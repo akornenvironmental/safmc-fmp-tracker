@@ -6,7 +6,6 @@
  */
 
 import { Link } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
 import {
   TrendingUp, ExternalLink, Database, FileText, Activity,
   Waves, Thermometer, Fish, Users, AlertCircle, Download, BarChart3
@@ -127,14 +126,14 @@ const Ecosystem = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        icon={Waves}
-        title="Ecosystem Assessment"
-        subtitle="Ecosystem indicators"
-        description="Ecosystem-based fishery management indicators and assessments for the South Atlantic region."
-      />
+    <div>
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          NOAA Integrated Ecosystem Assessment indicators and State of the Ecosystem reports for fishery management.
+        </p>
+        <div className="page-description-actions"></div>
+      </div>
 
       {/* Ecosystem Indicator Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
+import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import { RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
 
 const ActionsNew = () => {
-  const [filterStage, setFilterStage] = useState('all');
+  const [filterStage, setFilterStage] = useState([]);
   const [actions, setActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -12,7 +13,6 @@ const ActionsNew = () => {
   const [sortDirection, setSortDirection] = useState('desc');
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedActions, setSelectedActions] = useState(new Set());
 
   // Column visibility state
@@ -87,8 +87,7 @@ const ActionsNew = () => {
     setSortDirection('desc');
     setCurrentPage(1);
     setSelectedActions(new Set());
-    setShowColumnSelector(false);
-    setFilterStage('all');
+    setFilterStage([]);
   };
 
   // Handle sorting
@@ -101,23 +100,33 @@ const ActionsNew = () => {
     }
   };
 
+  // Get unique values for filters
+  const uniqueStages = useMemo(() => {
+    const stages = new Set(actions.map(a => a.progress_stage).filter(Boolean));
+    return Array.from(stages).sort();
+  }, [actions]);
+
   // Filter and sort actions
   const filteredAndSortedActions = useMemo(() => {
-    // First apply stage filter
-    const stageFiltered = actions.filter(action => {
-      if (filterStage === 'all') return true;
-      return action.progress_stage && action.progress_stage.toLowerCase().includes(filterStage.toLowerCase());
-    });
+    // Apply all filters
+    const filtered = actions.filter(action => {
+      // Stage filter
+      if (filterStage.length > 0 && !filterStage.includes(action.progress_stage)) {
+        return false;
+      }
 
-    // Then apply search filter
-    const filtered = stageFiltered.filter(action => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        action.title?.toLowerCase().includes(searchLower) ||
-        action.fmp?.toLowerCase().includes(searchLower) ||
-        action.progress_stage?.toLowerCase().includes(searchLower) ||
-        action.description?.toLowerCase().includes(searchLower)
-      );
+      // Search filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          action.title?.toLowerCase().includes(searchLower) ||
+          action.fmp?.toLowerCase().includes(searchLower) ||
+          action.progress_stage?.toLowerCase().includes(searchLower) ||
+          action.description?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      return true;
     });
 
     // Then sort
@@ -265,17 +274,6 @@ const ActionsNew = () => {
     });
   };
 
-  const toggleColumn = (columnKey) => {
-    if (columnKey === 'title' || columnKey === 'fmp') return;
-    const column = columnOrder.find(col => col.key === columnKey);
-    if (column && !column.core) {
-      setVisibleColumns(prev => ({
-        ...prev,
-        [columnKey]: !prev[columnKey]
-      }));
-    }
-  };
-
   // Column reordering handlers
   const handleDragStart = (e, columnIndex) => {
     const col = getDisplayColumns()[columnIndex];
@@ -336,167 +334,109 @@ const ActionsNew = () => {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="sm:flex-auto">
-          <h1 className="font-heading text-3xl font-bold text-gray-900">Actions & Amendments</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Showing {filteredAndSortedActions.length} of {actions.length} actions
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            Amendments are automatically synced weekly from SAFMC.
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-col gap-2 items-end">
-          <div className="flex flex-wrap gap-2">
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Advanced table view for managing and exporting amendment data with customizable columns and filters.
+        </p>
+        <div className="page-description-actions">
+          <button
+            onClick={handleReset}
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-2.5 h-9 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
+            title="Reset filters, sorting, and selection"
+          >
+            <RotateCcw size={14} />
+            Reset
+          </button>
+          <button
+            onClick={() => setShowColumnSelector(!showColumnSelector)}
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-2.5 h-9 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
+          >
+            <Settings size={14} />
+            Columns
+          </button>
+          <div className="relative">
             <button
-              onClick={handleReset}
-              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-slate-300 bg-gradient-to-r from-slate-50 to-gray-50 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:from-slate-100 hover:to-gray-100 hover:border-slate-400 transition-all"
-              title="Reset filters, sorting, and selection"
+              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-2.5 h-9 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
+              onClick={(e) => {
+                const menu = e.currentTarget.nextElementSibling;
+                menu.classList.toggle('hidden');
+              }}
             >
-              <RotateCcw size={14} />
-              Reset
+              <Download size={14} />
+              Export
             </button>
-            <button
-              onClick={() => setShowColumnSelector(!showColumnSelector)}
-              className="inline-flex items-center gap-1.5 justify-center rounded-md border border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 px-3 py-1.5 text-xs font-medium text-indigo-700 shadow-sm hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-400 transition-all"
-            >
-              <Settings size={14} />
-              Columns
-            </button>
-            <div className="relative">
-              <button
-                className="inline-flex items-center gap-1.5 justify-center rounded-md border border-teal-300 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1.5 text-xs font-medium text-teal-700 shadow-sm hover:from-teal-100 hover:to-cyan-100 hover:border-teal-400 transition-all"
-                onClick={(e) => {
-                  const menu = e.currentTarget.nextElementSibling;
-                  menu.classList.toggle('hidden');
-                }}
-              >
-                <Download size={14} />
-                Export
-              </button>
-              <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                <div className="py-1">
-                  <div className="px-4 py-2 text-xs text-gray-500 border-b">
-                    {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
-                  </div>
-                  <button
-                    onClick={exportToCSV}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    CSV Format (.csv)
-                  </button>
-                  <button
-                    onClick={exportToTSV}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    TSV Format (.tsv)
-                  </button>
-                  <button
-                    onClick={exportToExcel}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  >
-                    Excel Format (.xls)
-                  </button>
+            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+              <div className="py-1">
+                <div className="px-4 py-2 text-xs text-gray-500 border-b">
+                  {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
                 </div>
+                <button
+                  onClick={exportToCSV}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                >
+                  CSV Format (.csv)
+                </button>
+                <button
+                  onClick={exportToTSV}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                >
+                  TSV Format (.tsv)
+                </button>
+                <button
+                  onClick={exportToExcel}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                >
+                  Excel Format (.xls)
+                </button>
               </div>
-            </div>
-            <button
-              onClick={syncActions}
-              disabled={syncing}
-              className="inline-flex items-center gap-2 justify-center rounded-md border border-transparent bg-brand-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-              {syncing ? 'Syncing...' : 'Sync Actions'}
-            </button>
+      </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => setFilterStage('all')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'all'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              All ({actions.length})
-            </button>
-            <button
-              onClick={() => setFilterStage('scoping')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'scoping'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Scoping ({actions.filter(a => a.progress_stage?.toLowerCase().includes('scoping')).length})
-            </button>
-            <button
-              onClick={() => setFilterStage('hearing')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'hearing'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Public Hearing ({actions.filter(a => a.progress_stage?.toLowerCase().includes('hearing')).length})
-            </button>
-            <button
-              onClick={() => setFilterStage('approval')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md ${
-                filterStage === 'approval'
-                  ? 'bg-brand-blue text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Approval ({actions.filter(a => a.progress_stage?.toLowerCase().includes('approval')).length})
-            </button>
-          </div>
+          <button
+            onClick={syncActions}
+            disabled={syncing}
+            className="inline-flex items-center gap-1.5 justify-center rounded-md border border-transparent bg-brand-blue px-2.5 h-9 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-light focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync'}
+          </button>
         </div>
       </div>
 
-      {/* Column selector */}
-      {showColumnSelector && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Show/Hide Columns</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {columnOrder.map(col => (
-              <label key={col.key} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={visibleColumns[col.key]}
-                  onChange={() => toggleColumn(col.key)}
-                  disabled={col.core}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className={`text-sm ${col.core ? 'text-gray-400' : 'text-gray-700'}`}>
-                  {col.label} {col.core && '(required)'}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Search and page size */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Search actions..."
+      {/* Single row: Search → Filters → Show → Columns → Reset */}
+      <PageControlsContainer>
+        {/* Search input */}
+        <SearchBar
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
+          onChange={(value) => {
+            setSearchTerm(value);
             setCurrentPage(1);
           }}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
-          aria-label="Search actions by title, FMP, progress stage, or description"
+          placeholder="Search actions..."
+          ariaLabel="Search actions by title, FMP, progress stage, or description"
         />
+
+        {/* Progress Stage Filter */}
+        <FilterDropdown
+          label="Progress Stage"
+          options={uniqueStages.map(stage => ({
+            value: stage,
+            label: stage,
+            count: actions.filter(a => a.progress_stage === stage).length
+          }))}
+          selectedValues={filterStage}
+          onChange={setFilterStage}
+          showCounts={true}
+        />
+
+        {/* Page Size */}
         <select
           value={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2 border bg-white"
+          className="h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
           aria-label="Number of actions to display per page"
         >
           <option value={20}>Show 20</option>
@@ -504,6 +444,52 @@ const ActionsNew = () => {
           <option value={100}>Show 100</option>
           <option value={999999}>Show ALL</option>
         </select>
+
+        {/* Columns Dropdown */}
+        <FilterDropdown
+          label="Columns"
+          options={columnOrder.filter(col => !col.core).map(col => ({
+            value: col.key,
+            label: col.label
+          }))}
+          selectedValues={Object.entries(visibleColumns)
+            .filter(([key, visible]) => {
+              const col = columnOrder.find(c => c.key === key);
+              return visible && col && !col.core;
+            })
+            .map(([key]) => key)
+          }
+          onChange={(selectedKeys) => {
+            const newVisibleColumns = { ...visibleColumns };
+            // Set all non-core columns to false first
+            columnOrder.filter(col => !col.core).forEach(col => {
+              newVisibleColumns[col.key] = false;
+            });
+            // Set selected columns to true
+            selectedKeys.forEach(key => {
+              newVisibleColumns[key] = true;
+            });
+            setVisibleColumns(newVisibleColumns);
+          }}
+          showCounts={false}
+        />
+
+        {/* Reset Button */}
+        <button
+          onClick={handleReset}
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 hover:border-red-400 dark:hover:border-red-500 transition-colors"
+          title="Reset filters, sorting, and selection"
+        >
+          <RotateCcw size={14} />
+          Reset
+        </button>
+      </PageControlsContainer>
+
+      {/* Table Count */}
+      <div className="mt-6 mb-2 flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing <span className="font-medium text-gray-900 dark:text-gray-100">{filteredAndSortedActions.length}</span> of <span className="font-medium text-gray-900 dark:text-gray-100">{actions.length}</span> actions
+        </p>
       </div>
 
       {/* Actions Table with Interview System padding pattern */}
@@ -589,7 +575,7 @@ const ActionsNew = () => {
                             <div className="text-sm font-medium text-gray-900">{action.title}</div>
                           )}
                           {action.description && visibleColumns.description && (
-                            <div className="text-xs text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
+                            <div className="text-sm text-gray-500 mt-0.5">{action.description.substring(0, 100)}...</div>
                           )}
                         </>
                       ) : col.key === 'progress_stage' ? (
@@ -604,14 +590,14 @@ const ActionsNew = () => {
                               style={{ width: `${action.progress || 0}%` }}
                             ></div>
                           </div>
-                          <span className="text-xs text-gray-700">{action.progress || 0}%</span>
+                          <span className="text-sm text-gray-700">{action.progress || 0}%</span>
                         </div>
                       ) : col.key === 'last_updated' ? (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm text-gray-500">
                           {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                         </div>
                       ) : (
-                        <div className="text-xs text-gray-900">{action[col.key] || 'N/A'}</div>
+                        <div className="text-sm text-gray-900">{action[col.key] || 'N/A'}</div>
                       )}
                     </td>
                   ))}
@@ -624,25 +610,22 @@ const ActionsNew = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing {filteredAndSortedActions.length} of {actions.length} actions
-          </div>
-          <div className="flex gap-2">
+        <div className="mt-4 flex items-center justify-end">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-700">
+            <span className="px-3 text-sm text-gray-600 dark:text-gray-400">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>

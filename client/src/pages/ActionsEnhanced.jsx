@@ -2,9 +2,9 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import FavoriteButton from '../components/FavoriteButton';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
+import { SearchBar, FilterDropdown, ExportMenu, PageControlsContainer } from '../components/PageControls';
 import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X, FileText } from 'lucide-react';
 
 const ActionsEnhanced = () => {
@@ -22,16 +22,9 @@ const ActionsEnhanced = () => {
   const [sortDirection, setSortDirection] = useState('desc');
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [selectedActions, setSelectedActions] = useState(new Set());
-  const [showStageDropdown, setShowStageDropdown] = useState(false);
-  const [showFMPDropdown, setShowFMPDropdown] = useState(false);
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [highlightedActionId, setHighlightedActionId] = useState(null);
 
-  const stageDropdownRef = useRef(null);
-  const fmpDropdownRef = useRef(null);
-  const typeDropdownRef = useRef(null);
   const highlightedRowRef = useRef(null);
 
   // Column visibility state
@@ -86,24 +79,6 @@ const ActionsEnhanced = () => {
       });
     }
   }, [highlightedActionId, currentPage]);
-
-  // Click outside handler for dropdowns
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (stageDropdownRef.current && !stageDropdownRef.current.contains(event.target)) {
-        setShowStageDropdown(false);
-      }
-      if (fmpDropdownRef.current && !fmpDropdownRef.current.contains(event.target)) {
-        setShowFMPDropdown(false);
-      }
-      if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
-        setShowTypeDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const fetchActions = async () => {
     try {
@@ -160,47 +135,9 @@ const ActionsEnhanced = () => {
     setSortDirection('desc');
     setCurrentPage(1);
     setSelectedActions(new Set());
-    setShowColumnSelector(false);
     setFilterStage([]);
     setFilterFMP([]);
     setFilterType([]);
-    setShowStageDropdown(false);
-    setShowFMPDropdown(false);
-    setShowTypeDropdown(false);
-  };
-
-  // Toggle filter functions for multi-select
-  const toggleStageFilter = (stage) => {
-    setFilterStage(prev => {
-      if (prev.includes(stage)) {
-        return prev.filter(s => s !== stage);
-      } else {
-        return [...prev, stage];
-      }
-    });
-    setCurrentPage(1);
-  };
-
-  const toggleFMPFilter = (fmp) => {
-    setFilterFMP(prev => {
-      if (prev.includes(fmp)) {
-        return prev.filter(f => f !== fmp);
-      } else {
-        return [...prev, fmp];
-      }
-    });
-    setCurrentPage(1);
-  };
-
-  const toggleTypeFilter = (type) => {
-    setFilterType(prev => {
-      if (prev.includes(type)) {
-        return prev.filter(t => t !== type);
-      } else {
-        return [...prev, type];
-      }
-    });
-    setCurrentPage(1);
   };
 
   // Handle sorting
@@ -407,17 +344,6 @@ const ActionsEnhanced = () => {
     });
   };
 
-  const toggleColumn = (columnKey) => {
-    if (columnKey === 'title' || columnKey === 'fmp') return;
-    const column = columnOrder.find(col => col.key === columnKey);
-    if (column && !column.core) {
-      setVisibleColumns(prev => ({
-        ...prev,
-        [columnKey]: !prev[columnKey]
-      }));
-    }
-  };
-
   // Column reordering handlers
   const handleDragStart = (e, columnIndex) => {
     const col = getDisplayColumns()[columnIndex];
@@ -478,204 +404,113 @@ const ActionsEnhanced = () => {
 
   return (
     <div>
-      {/* Page Header */}
-      <PageHeader
-        icon={FileText}
-        title="Amendment Actions"
-        subtitle={`${actions.length} actions tracked`}
-        description="Track amendments and regulatory actions for fishery management plans."
-      />
-
-      <ButtonGroup>
-        <div className="relative">
-          <Button
-            variant="secondary"
-            icon={Download}
-            onClick={(e) => {
-              const menu = e.currentTarget.nextElementSibling;
-              menu.classList.toggle('hidden');
-            }}
-          >
-            Export
-          </Button>
-          <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
-            <div className="py-1">
-              <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
-                {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
+      {/* Description and Actions */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Track amendments and regulatory actions for fishery management plans.
+        </p>
+        <div className="page-description-actions">
+          <div className="relative">
+            <Button
+              variant="secondary"
+              icon={Download}
+              onClick={(e) => {
+                const menu = e.currentTarget.nextElementSibling;
+                menu.classList.toggle('hidden');
+              }}
+              className="gap-1.5 px-2.5 h-9"
+            >
+              Export
+            </Button>
+            <div className="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-600 z-10">
+              <div className="py-1">
+                <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                  {selectedActions.size > 0 ? `Export ${selectedActions.size} selected` : 'Export all actions'}
+                </div>
+                <button
+                  onClick={exportToCSV}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  CSV Format (.csv)
+                </button>
+                <button
+                  onClick={exportToTSV}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  TSV Format (.tsv)
+                </button>
+                <button
+                  onClick={exportToExcel}
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+                >
+                  Excel Format (.xls)
+                </button>
               </div>
-              <button
-                onClick={exportToCSV}
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-              >
-                CSV Format (.csv)
-              </button>
-              <button
-                onClick={exportToTSV}
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-              >
-                TSV Format (.tsv)
-              </button>
-              <button
-                onClick={exportToExcel}
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
-              >
-                Excel Format (.xls)
-              </button>
-            </div>
+      </div>
           </div>
+          <Button
+            variant="primary"
+            icon={RefreshCw}
+            onClick={syncActions}
+            disabled={syncing}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            {syncing ? 'Syncing...' : 'Sync'}
+          </Button>
         </div>
-        <Button
-          variant="primary"
-          icon={RefreshCw}
-          onClick={syncActions}
-          disabled={syncing}
-        >
-          {syncing ? 'Syncing...' : 'Sync Actions'}
-        </Button>
-      </ButtonGroup>
-
-      {/* Column selector */}
-      {showColumnSelector && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Show/Hide Columns</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {columnOrder.map(col => (
-              <label key={col.key} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={visibleColumns[col.key]}
-                  onChange={() => toggleColumn(col.key)}
-                  disabled={col.core}
-                  className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                />
-                <span className={`text-sm ${col.core ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
-                  {col.label} {col.core && '(required)'}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Single row: Search → Filters → Show → Reset */}
-      <div className="mt-6 flex flex-wrap items-center gap-2">
+      <PageControlsContainer>
         {/* Search input */}
-        <input
-          type="text"
-          placeholder="Search actions..."
+        <SearchBar
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
+          onChange={(value) => {
+            setSearchTerm(value);
             setCurrentPage(1);
           }}
-          className="flex-1 min-w-[150px] h-9 bg-white dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm px-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          aria-label="Search actions by title, FMP, progress stage, or description"
+          placeholder="Search actions..."
+          ariaLabel="Search actions by title, FMP, progress stage, or description"
         />
 
         {/* Progress Stage Filter */}
-        <div className="relative" ref={stageDropdownRef}>
-          <button
-            onClick={() => setShowStageDropdown(!showStageDropdown)}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            Progress Stage
-            {filterStage.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {filterStage.length}
-              </span>
-            )}
-          </button>
-          {showStageDropdown && (
-            <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
-              <div className="p-2 max-h-60 overflow-y-auto">
-                {uniqueStages.map(stage => (
-                  <label key={stage} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filterStage.includes(stage)}
-                      onChange={() => toggleStageFilter(stage)}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{stage}</span>
-                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                      ({actions.filter(a => a.progress_stage === stage).length})
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FilterDropdown
+          label="Progress Stage"
+          options={uniqueStages.map(stage => ({
+            value: stage,
+            label: stage,
+            count: actions.filter(a => a.progress_stage === stage).length
+          }))}
+          selectedValues={filterStage}
+          onChange={setFilterStage}
+          showCounts={true}
+        />
 
         {/* FMP Filter */}
-        <div className="relative" ref={fmpDropdownRef}>
-          <button
-            onClick={() => setShowFMPDropdown(!showFMPDropdown)}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            FMP
-            {filterFMP.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {filterFMP.length}
-              </span>
-            )}
-          </button>
-          {showFMPDropdown && (
-            <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
-              <div className="p-2 max-h-60 overflow-y-auto">
-                {uniqueFMPs.map(fmp => (
-                  <label key={fmp} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filterFMP.includes(fmp)}
-                      onChange={() => toggleFMPFilter(fmp)}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{fmp}</span>
-                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                      ({actions.filter(a => a.fmp === fmp).length})
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FilterDropdown
+          label="FMP"
+          options={uniqueFMPs.map(fmp => ({
+            value: fmp,
+            label: fmp,
+            count: actions.filter(a => a.fmp === fmp).length
+          }))}
+          selectedValues={filterFMP}
+          onChange={setFilterFMP}
+          showCounts={true}
+        />
 
         {/* Type Filter */}
-        <div className="relative" ref={typeDropdownRef}>
-          <button
-            onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-            className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-          >
-            Type
-            {filterType.length > 0 && (
-              <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-brand-blue rounded-full">
-                {filterType.length}
-              </span>
-            )}
-          </button>
-          {showTypeDropdown && (
-            <div className="absolute z-10 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700">
-              <div className="p-2 max-h-60 overflow-y-auto">
-                {uniqueTypes.map(type => (
-                  <label key={type} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={filterType.includes(type)}
-                      onChange={() => toggleTypeFilter(type)}
-                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{type}</span>
-                    <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                      ({actions.filter(a => a.type === type).length})
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <FilterDropdown
+          label="Type"
+          options={uniqueTypes.map(type => ({
+            value: type,
+            label: type,
+            count: actions.filter(a => a.type === type).length
+          }))}
+          selectedValues={filterType}
+          onChange={setFilterType}
+          showCounts={true}
+        />
 
         {/* Page Size */}
         <select
@@ -693,25 +528,45 @@ const ActionsEnhanced = () => {
           <option value={999999}>Show ALL</option>
         </select>
 
+        {/* Columns Dropdown */}
+        <FilterDropdown
+          label="Columns"
+          options={columnOrder.filter(col => !col.core).map(col => ({
+            value: col.key,
+            label: col.label
+          }))}
+          selectedValues={Object.entries(visibleColumns)
+            .filter(([key, visible]) => {
+              const col = columnOrder.find(c => c.key === key);
+              return visible && col && !col.core;
+            })
+            .map(([key]) => key)
+          }
+          onChange={(selectedKeys) => {
+            const newVisibleColumns = { ...visibleColumns };
+            // Set all non-core columns to false first
+            columnOrder.filter(col => !col.core).forEach(col => {
+              newVisibleColumns[col.key] = false;
+            });
+            // Set selected columns to true
+            selectedKeys.forEach(key => {
+              newVisibleColumns[key] = true;
+            });
+            setVisibleColumns(newVisibleColumns);
+          }}
+          showCounts={false}
+        />
+
         {/* Reset Button */}
         <button
           onClick={handleReset}
-          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 hover:border-red-400 dark:hover:border-red-500 transition-colors"
           title="Reset filters, sorting, and selection"
         >
           <RotateCcw size={14} />
           Reset
         </button>
-
-        {/* Columns Button */}
-        <button
-          onClick={() => setShowColumnSelector(!showColumnSelector)}
-          className="inline-flex items-center gap-2 h-9 px-3 text-sm font-medium rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
-        >
-          <Settings size={14} />
-          Columns
-        </button>
-      </div>
+      </PageControlsContainer>
 
       {/* Table Count */}
       <div className="mt-6 mb-2 flex items-center justify-between">
@@ -790,7 +645,7 @@ const ActionsEnhanced = () => {
                         ? 'bg-white dark:bg-gray-800'
                         : 'bg-gray-50 dark:bg-gray-850'
                   } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
-                  <td className="px-1.5 py-0.5">
+                  <td className="px-1.5 py-2 align-middle">
                     <input
                       type="checkbox"
                       checked={selectedActions.has(action.id)}
@@ -800,7 +655,7 @@ const ActionsEnhanced = () => {
                     />
                   </td>
                   {getDisplayColumns().map(col => (
-                    <td key={col.key} className={`px-1.5 py-0.5 ${col.minWidth || ''}`}>
+                    <td key={col.key} className={`px-1.5 py-2 align-middle ${col.minWidth || ''}`}>
                       {col.key === 'title' ? (
                         <div className="flex items-start gap-2">
                           <div className="flex-1">
@@ -809,15 +664,12 @@ const ActionsEnhanced = () => {
                                 href={action.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs font-medium text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-green-400 hover:underline"
+                                className="text-sm font-medium text-brand-blue dark:text-blue-400 hover:text-brand-green dark:hover:text-green-400 hover:underline"
                               >
                                 {action.title}
                               </a>
                             ) : (
-                              <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{action.title}</div>
-                            )}
-                            {action.description && visibleColumns.description && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{action.description.substring(0, 100)}...</div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{action.title}</div>
                             )}
                           </div>
                           <FavoriteButton itemType="action" itemId={action.action_id} />
@@ -852,7 +704,7 @@ const ActionsEnhanced = () => {
                               )}
                             </>
                           ) : (
-                            <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+                            <span className="text-sm text-gray-400 dark:text-gray-500">-</span>
                           )}
                         </div>
                       ) : col.key === 'progress_stage' ? (
@@ -867,14 +719,14 @@ const ActionsEnhanced = () => {
                               style={{ width: `${action.progress || 0}%` }}
                             ></div>
                           </div>
-                          <span className="text-xs text-gray-700 dark:text-gray-300">{action.progress || 0}%</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{action.progress || 0}%</span>
                         </div>
                       ) : col.key === 'last_updated' ? (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           {action.last_updated ? new Date(action.last_updated).toLocaleDateString() : 'N/A'}
                         </div>
                       ) : (
-                        <div className="text-xs text-gray-900 dark:text-gray-100">{action[col.key] || 'N/A'}</div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">{action[col.key] || 'N/A'}</div>
                       )}
                     </td>
                   ))}

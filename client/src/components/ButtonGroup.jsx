@@ -7,7 +7,7 @@
 
 const ButtonGroup = ({ children, className = '' }) => {
   return (
-    <div className={`flex items-center gap-2 mb-6 ${className}`}>
+    <div className={`flex items-center justify-end gap-2 mb-6 ${className}`}>
       {children}
     </div>
   );

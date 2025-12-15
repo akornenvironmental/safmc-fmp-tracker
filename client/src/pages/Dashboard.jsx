@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-import { RefreshCw, LayoutDashboard } from 'lucide-react';
-import PageHeader from '../components/PageHeader';
+import { RefreshCw } from 'lucide-react';
 import Button from '../components/Button';
-import ButtonGroup from '../components/ButtonGroup';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -79,24 +77,23 @@ const Dashboard = () => {
 
   return (
     <div>
-      <PageHeader
-        icon={LayoutDashboard}
-        title="Dashboard"
-        subtitle={`${recentActions.length} recent actions • Data synced weekly`}
-        description="Overview of amendment actions, meetings, and fishery management activities across all FMPs."
-      />
-
-      <ButtonGroup>
-        <Button
-          variant="primary"
-          onClick={triggerScrape}
-          disabled={scraping}
-          icon={scraping ? RefreshCw : RefreshCw}
-          className={scraping ? '[&_svg]:animate-spin' : ''}
-        >
-          {scraping ? 'Updating...' : 'Update Data'}
-        </Button>
-      </ButtonGroup>
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Overview of amendment actions, meetings, and fishery management activities across all FMPs.
+        </p>
+        <div className="page-description-actions">
+          <Button
+            variant="primary"
+            onClick={triggerScrape}
+            disabled={scraping}
+            icon={scraping ? RefreshCw : RefreshCw}
+            className={`gap-1.5 px-2.5 h-9 ${scraping ? '[&_svg]:animate-spin' : ''}`}
+          >
+            {scraping ? 'Syncing...' : 'Sync'}
+          </Button>
+        </div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -168,7 +165,7 @@ const Dashboard = () => {
               ) : recentActions.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
-                    No actions found. Click "Update Data" to scrape SAFMC website.
+                    No actions found. Click "Sync" to scrape SAFMC website.
                   </td>
                 </tr>
               ) : (

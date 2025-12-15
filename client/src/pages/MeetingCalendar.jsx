@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
 import { API_BASE_URL } from '../config';
@@ -148,30 +147,30 @@ const MeetingCalendar = () => {
 
   return (
     <div>
-      {/* Header */}
-      <PageHeader
-        icon={CalendarIcon}
-        title="Meeting Calendar"
-        subtitle="Upcoming meetings"
-        description="Schedule of upcoming Council and committee meetings."
-      />
-
-      <ButtonGroup>
-        <Button
-          variant={view === 'calendar' ? 'primary' : 'secondary'}
-          onClick={() => setView('calendar')}
-          icon={Grid}
-        >
-          Calendar
-        </Button>
-        <Button
-          variant={view === 'list' ? 'primary' : 'secondary'}
-          onClick={() => setView('list')}
-          icon={List}
-        >
-          List
-        </Button>
-      </ButtonGroup>
+      {/* Description and Actions */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Interactive calendar view of all upcoming Council meetings and important dates.
+        </p>
+        <div className="page-description-actions">
+          <Button
+            variant={view === 'calendar' ? 'primary' : 'secondary'}
+            onClick={() => setView('calendar')}
+            icon={Grid}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            Calendar
+          </Button>
+          <Button
+            variant={view === 'list' ? 'primary' : 'secondary'}
+            onClick={() => setView('list')}
+            icon={List}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            List
+          </Button>
+        </div>
+      </div>
 
       {view === 'calendar' ? (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

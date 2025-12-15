@@ -4,10 +4,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, Database, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { RefreshCw, Database, CheckCircle, XCircle, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
+import { PageControlsContainer } from '../components/PageControls';
 import { API_BASE_URL } from '../config';
 import { toast } from 'react-toastify';
 
@@ -56,6 +57,7 @@ const DataManagement = () => {
   ]);
 
   const [updatingAll, setUpdatingAll] = useState(false);
+  const [showInfoBanner, setShowInfoBanner] = useState(true);
 
   useEffect(() => {
     fetchScraperStatus();
@@ -178,35 +180,45 @@ const DataManagement = () => {
 
   return (
     <div>
-      <PageHeader
-        icon={Database}
-        title="Data Management"
-        subtitle="System utilities"
-        description="Manage automated data scrapers, monitor system health, and manually trigger data updates from external sources."
-      />
-
-      <ButtonGroup>
-        <Button
-          variant="primary"
-          icon={RefreshCw}
-          onClick={runAllScrapers}
-          disabled={updatingAll || scrapers.some(s => s.running)}
-        >
-          {updatingAll ? 'Updating All...' : 'Update All Data'}
-        </Button>
-      </ButtonGroup>
-
-      {/* Info Banner */}
-      <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">About Data Scrapers</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              The system automatically runs these scrapers on the schedule shown below. You can also manually trigger any scraper to fetch the latest data immediately. Running all scrapers may take several minutes to complete.
-            </p>
-          </div>
+      {/* Description and Action Buttons Row */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Manage automated data scrapers, monitor system health, and manually trigger data updates from external sources.
+        </p>
+        <div className="page-description-actions">
+          <Button
+            variant="primary"
+            icon={RefreshCw}
+            onClick={runAllScrapers}
+            disabled={updatingAll || scrapers.some(s => s.running)}
+            className="gap-1.5 px-2.5 h-9"
+          >
+            {updatingAll ? 'Updating All...' : 'Update All Data'}
+          </Button>
         </div>
+      </div>
+
+      {/* Collapsible Info Banner */}
+      <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <button
+          onClick={() => setShowInfoBanner(!showInfoBanner)}
+          className="w-full p-4 flex items-start gap-3 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors rounded-lg"
+        >
+          <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 text-left">
+            <h3 className="font-semibold text-gray-900 dark:text-white">About Data Scrapers</h3>
+            {showInfoBanner && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                The system automatically runs these scrapers on the schedule shown below. You can also manually trigger any scraper to fetch the latest data immediately. Running all scrapers may take several minutes to complete.
+              </p>
+            )}
+          </div>
+          {showInfoBanner ? (
+            <ChevronUp className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+          )}
+        </button>
       </div>
 
       {/* Scrapers List */}
@@ -248,6 +260,7 @@ const DataManagement = () => {
                 icon={RefreshCw}
                 onClick={() => runScraper(scraper)}
                 disabled={scraper.running || updatingAll}
+                className="h-9"
               >
                 {scraper.running ? 'Running...' : 'Run Now'}
               </Button>

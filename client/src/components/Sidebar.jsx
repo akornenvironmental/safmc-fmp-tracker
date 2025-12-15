@@ -29,57 +29,57 @@ import {
   LogOut,
   FlaskConical,
   GraduationCap,
-  Heart,
   Waves,
-  Star,
+  Minus,
+  Plus,
   RefreshCw,
 } from 'lucide-react';
 
 // Navigation item component
-const NavItem = ({ item, isActive, effectiveCollapsed, isFavorited, onToggleFavorite }) => {
+const NavItem = ({ item, isActive, effectiveCollapsed, isHidden, onToggleHidden }) => {
   const Icon = item.icon;
 
-  const handleFavoriteClick = (e) => {
+  const handleHideClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    onToggleFavorite(item.to);
+    onToggleHidden(item.to);
   };
 
   return (
     <Link
       to={item.to}
-      className={`flex items-center justify-between pl-[15px] pr-0 -my-[9px] rounded-md transition-all duration-200 group relative ${
+      className={`flex items-center justify-between pl-[10px] pr-1 h-4 rounded-md transition-all duration-200 group relative ${
         isActive
           ? 'bg-brand-blue text-white shadow-sm'
           : 'text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-brand-blue dark:hover:text-blue-400'
       }`}
       title={effectiveCollapsed ? item.label : undefined}
     >
-      <div className="flex items-center min-w-0 flex-1">
+      <div className="flex items-center min-w-0 flex-1 gap-2">
         <Icon
           className={`w-5 h-5 flex-shrink-0 ${
             isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-brand-blue dark:group-hover:text-blue-400'
           }`}
         />
         {!effectiveCollapsed && (
-          <span className="ml-1 text-base font-medium whitespace-nowrap truncate">{item.label}</span>
+          <span className="text-base font-medium whitespace-nowrap truncate leading-none">{item.label}</span>
         )}
       </div>
       {!effectiveCollapsed && (
         <button
-          onClick={handleFavoriteClick}
-          className={`p-0 rounded transition-colors flex-shrink-0 ml-2 -mr-[23px] ${
-            isFavorited
-              ? 'text-yellow-500 hover:text-yellow-600'
-              : 'text-gray-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100'
+          onClick={handleHideClick}
+          className={`p-0 rounded transition-colors flex-shrink-0 ml-1 -mr-[12px] w-4 h-4 flex items-center justify-center ${
+            isHidden
+              ? 'text-green-500 hover:text-green-600'
+              : 'text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100'
           }`}
-          title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+          title={isHidden ? 'Show page' : 'Hide page'}
         >
-          <Star
-            className="w-4 h-4"
-            fill={isFavorited ? 'currentColor' : 'none'}
-            strokeWidth={2}
-          />
+          {isHidden ? (
+            <Plus className="w-4 h-4" strokeWidth={2} />
+          ) : (
+            <Minus className="w-4 h-4" strokeWidth={2} />
+          )}
         </button>
       )}
       {/* Tooltip for collapsed state */}
@@ -93,8 +93,8 @@ const NavItem = ({ item, isActive, effectiveCollapsed, isFavorited, onToggleFavo
 };
 
 // Section component with collapse functionality
-const NavSection = ({ section, currentPath, effectiveCollapsed, isNavFavorited, onToggleFavorite }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+const NavSection = ({ section, currentPath, effectiveCollapsed, isPageHidden, onToggleHidden, defaultExpanded = true }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const isActive = (path) => {
     if (path === '/') return currentPath === '/';
@@ -105,7 +105,7 @@ const NavSection = ({ section, currentPath, effectiveCollapsed, isNavFavorited, 
   const hasTitle = Boolean(section.title);
 
   return (
-    <div className="mb-0">
+    <div className={`${hasTitle ? 'mt-4' : 'mb-0'}`}>
       {hasTitle && !effectiveCollapsed && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
@@ -119,15 +119,15 @@ const NavSection = ({ section, currentPath, effectiveCollapsed, isNavFavorited, 
         <div className="h-px bg-gray-200 dark:bg-gray-700 mx-2 mb-0" />
       )}
       {(isExpanded || !hasTitle) && (
-        <nav className="space-y-0 mt-0">
+        <nav className="-space-y-[8px] mt-0">
           {section.items.map((item) => (
             <NavItem
               key={item.to}
               item={item}
               isActive={isActive(item.to)}
               effectiveCollapsed={effectiveCollapsed}
-              isFavorited={isNavFavorited(item.to)}
-              onToggleFavorite={onToggleFavorite}
+              isHidden={isPageHidden(item.to)}
+              onToggleHidden={onToggleHidden}
             />
           ))}
         </nav>
@@ -145,9 +145,9 @@ const Sidebar = ({ user }) => {
     handleMouseEnter,
     handleMouseLeave,
     isCollapsed,
-    isNavFavorited,
-    toggleNavFavorite,
-    navFavorites,
+    hiddenPages,
+    toggleHiddenPage,
+    isPageHidden,
   } = useSidebar();
   const { logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -208,18 +208,34 @@ const Sidebar = ({ user }) => {
     ],
   } : null;
 
-  // Build favorites section from all navigation items
+  // Build filtered sections (exclude hidden pages from original sections)
+  const filteredMainNav = {
+    ...mainNav,
+    items: mainNav.items.filter(item => !hiddenPages.has(item.to)),
+  };
+
+  const filteredDataNav = {
+    ...dataNav,
+    items: dataNav.items.filter(item => !hiddenPages.has(item.to)),
+  };
+
+  const filteredAdminNav = adminNav ? {
+    ...adminNav,
+    items: adminNav.items.filter(item => !hiddenPages.has(item.to)),
+  } : null;
+
+  // Build hidden pages section from all navigation items
   const allNavItems = [
     ...mainNav.items,
     ...dataNav.items,
     ...(adminNav?.items || []),
   ];
 
-  const favoriteItems = allNavItems.filter(item => navFavorites.has(item.to));
+  const hiddenItems = allNavItems.filter(item => hiddenPages.has(item.to));
 
-  const favoritesNav = favoriteItems.length > 0 ? {
-    title: 'Favorites',
-    items: favoriteItems,
+  const hiddenNav = hiddenItems.length > 0 ? {
+    title: 'Hidden',
+    items: hiddenItems,
   } : null;
 
   return (
@@ -238,12 +254,13 @@ const Sidebar = ({ user }) => {
           </div>
           {!effectiveCollapsed && (
             <div className="min-w-0">
-              <h1 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">
+              <div className="text-caption-serif text-gray-900 dark:text-white m-0 p-0" style={{ fontSize: '24px', lineHeight: '0.9', marginLeft: '2px', position: 'relative', top: '3px' }}>
                 SAFMC FMP
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate leading-tight">
-                Tracker
-              </p>
+                <br />
+                <span className="text-overline-serif text-gray-500 dark:text-gray-400" style={{ fontSize: '18px' }}>
+                  Tracker
+                </span>
+              </div>
             </div>
           )}
         </Link>
@@ -252,26 +269,36 @@ const Sidebar = ({ user }) => {
       {/* Navigation Sections */}
       <div className="flex-1 overflow-hidden pt-[10px] pb-0 pl-0 pr-0">
         <NavSection
-          section={mainNav}
+          section={filteredMainNav}
           currentPath={location.pathname}
           effectiveCollapsed={effectiveCollapsed}
-          isNavFavorited={isNavFavorited}
-          onToggleFavorite={toggleNavFavorite}
+          isPageHidden={isPageHidden}
+          onToggleHidden={toggleHiddenPage}
         />
         <NavSection
-          section={dataNav}
+          section={filteredDataNav}
           currentPath={location.pathname}
           effectiveCollapsed={effectiveCollapsed}
-          isNavFavorited={isNavFavorited}
-          onToggleFavorite={toggleNavFavorite}
+          isPageHidden={isPageHidden}
+          onToggleHidden={toggleHiddenPage}
         />
-        {adminNav && adminNav.items.length > 0 && (
+        {filteredAdminNav && filteredAdminNav.items.length > 0 && (
           <NavSection
-            section={adminNav}
+            section={filteredAdminNav}
             currentPath={location.pathname}
             effectiveCollapsed={effectiveCollapsed}
-            isNavFavorited={isNavFavorited}
-            onToggleFavorite={toggleNavFavorite}
+            isPageHidden={isPageHidden}
+            onToggleHidden={toggleHiddenPage}
+          />
+        )}
+        {hiddenNav && (
+          <NavSection
+            section={hiddenNav}
+            currentPath={location.pathname}
+            effectiveCollapsed={effectiveCollapsed}
+            isPageHidden={isPageHidden}
+            onToggleHidden={toggleHiddenPage}
+            defaultExpanded={false}
           />
         )}
       </div>
@@ -369,22 +396,25 @@ const Sidebar = ({ user }) => {
         </div>
       )}
 
+      {/* Spacer */}
+      <div className="h-[10px] flex-shrink-0"></div>
+
       {/* Collapse Toggle */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-0 flex-shrink-0">
+      <div className="border-t border-gray-200 dark:border-gray-700 p-0 flex-shrink-0 mb-[10px]">
         <button
           onClick={toggleSidebar}
-          className={`flex items-center w-full pl-[10px] pr-0.5 -my-[3px] rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-            effectiveCollapsed ? 'justify-center' : ''
+          className={`group flex items-center w-full pl-[10px] pr-0.5 rounded-lg text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-brand-blue dark:hover:bg-gray-700 dark:hover:text-white transition-colors ${
+            effectiveCollapsed ? 'justify-center' : 'justify-end'
           }`}
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {effectiveCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 group-hover:text-brand-blue dark:group-hover:text-white" />
           ) : (
-            <>
-              <ChevronLeft className="w-4 h-4" />
-              <span className="ml-0.5 text-base">Collapse</span>
-            </>
+            <div className="flex items-center gap-0.5 -translate-x-[5px]">
+              <ChevronLeft className="w-4 h-4 group-hover:text-brand-blue dark:group-hover:text-white relative -top-px" />
+              <span className="text-base leading-none">COLLAPSE</span>
+            </div>
           )}
         </button>
       </div>
