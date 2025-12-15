@@ -309,19 +309,19 @@ const Sidebar = ({ user }) => {
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className={`flex items-center w-full pl-[10px] pr-0.5 py-[5px] rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-              effectiveCollapsed ? 'justify-center' : 'gap-1'
+              effectiveCollapsed ? 'justify-center' : 'gap-2'
             }`}
           >
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
               {(user.name || user.email || '?').charAt(0).toUpperCase()}
             </div>
             {!effectiveCollapsed && (
-              <>
-                <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1 text-left">
+              <div className="flex items-center flex-1 gap-2 min-w-0">
+                <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">
                   {user.name || user.email}
                 </span>
                 <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${showProfileMenu ? 'rotate-180' : ''}`} />
-              </>
+              </div>
             )}
           </button>
 
