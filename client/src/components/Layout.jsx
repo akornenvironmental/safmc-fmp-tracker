@@ -130,26 +130,26 @@ const Layout = () => {
             {/* Text Size Toggle */}
             <button
               onClick={cycleTextSize}
-              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="flex items-center justify-center w-10 h-10 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title={`Text size: ${textSize} (click to cycle)`}
               aria-label={`Text size: ${textSize}. Click to cycle through sizes.`}
             >
-              <Type className="w-4 h-4" />
+              <Type className="w-5 h-5" />
             </button>
 
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleTheme}
-              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="flex items-center justify-center w-10 h-10 text-gray-500 hover:text-brand-blue hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
               aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             >
-              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
 
             {/* Pipe Delimiter */}
             {user && (
-              <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+              <div className="h-7 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
             )}
 
             {/* User Profile Menu */}
@@ -157,7 +157,7 @@ const Layout = () => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 text-white text-sm font-medium hover:shadow-md transition-shadow"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 text-white text-base font-medium hover:shadow-md transition-shadow"
                   title="User menu"
                   aria-label="User menu"
                 >
