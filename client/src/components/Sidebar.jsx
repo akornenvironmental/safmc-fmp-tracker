@@ -5,10 +5,9 @@
  * Organizes navigation into logical sections.
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '../contexts/SidebarContext';
-import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
   FileText,
@@ -22,11 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  User,
   GitBranch,
-  Settings,
-  Shield,
-  LogOut,
   FlaskConical,
   GraduationCap,
   Waves,
@@ -138,7 +133,6 @@ const NavSection = ({ section, currentPath, effectiveCollapsed, isPageHidden, on
 
 const Sidebar = ({ user }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const {
     effectiveCollapsed,
     toggleSidebar,
@@ -149,29 +143,9 @@ const Sidebar = ({ user }) => {
     toggleHiddenPage,
     isPageHidden,
   } = useSidebar();
-  const { logout } = useAuth();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const profileMenuRef = useRef(null);
 
   const isSuperAdmin = user?.role === 'super_admin';
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
-
-  const handleLogout = async () => {
-    setShowProfileMenu(false);
-    await logout();
-    navigate('/login');
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
-        setShowProfileMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Main navigation items
   const mainNav = {
@@ -302,99 +276,6 @@ const Sidebar = ({ user }) => {
           />
         )}
       </div>
-
-      {/* User Profile Section */}
-      {user && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-0 flex-shrink-0" ref={profileMenuRef}>
-          <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className={`flex items-center w-full pl-[10px] pr-0.5 py-[5px] rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-              effectiveCollapsed ? 'justify-center' : 'gap-2'
-            }`}
-          >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-              {(user.name || user.email || '?').charAt(0).toUpperCase()}
-            </div>
-            {!effectiveCollapsed && (
-              <div className="flex items-center flex-1 gap-2 min-w-0">
-                <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">
-                  {user.name || user.email}
-                </span>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${showProfileMenu ? 'rotate-180' : ''}`} />
-              </div>
-            )}
-          </button>
-
-          {/* Profile Dropdown Menu */}
-          {showProfileMenu && (
-            <div className={`absolute ${effectiveCollapsed ? 'left-14' : 'left-1.5 right-1.5'} bottom-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50`}>
-              {/* User info header */}
-              <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name || 'User'}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
-                {user.role && (
-                  <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300 rounded">
-                    {user.role.replace('_', ' ')}
-                  </span>
-                )}
-              </div>
-
-              {/* Menu items */}
-              <div className="py-1">
-                <Link
-                  to="/profile"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <User className="w-4 h-4" />
-                  My Profile
-                </Link>
-                <Link
-                  to="/preferences"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <Settings className="w-4 h-4" />
-                  Preferences
-                </Link>
-                <Link
-                  to="/security"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <Shield className="w-4 h-4" />
-                  Security
-                </Link>
-              </div>
-
-              {/* Admin section */}
-              {isSuperAdmin && (
-                <div className="border-t border-gray-200 dark:border-gray-700 py-1">
-                  <Link
-                    to="/admin/users"
-                    onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <Users className="w-4 h-4" />
-                    User Management
-                  </Link>
-                </div>
-              )}
-
-              {/* Sign out */}
-              <div className="border-t border-gray-200 dark:border-gray-700 py-1">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Spacer */}
       <div className="h-[10px] flex-shrink-0"></div>

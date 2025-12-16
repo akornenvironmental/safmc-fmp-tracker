@@ -1,4 +1,5 @@
-import { Outlet, useLocation, Link } from 'react-router-dom';
+import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSidebar } from '../contexts/SidebarContext';
@@ -9,20 +10,46 @@ import Footer from './Footer';
 import {
   Sun, Moon, Type, Fish, ChevronRight, LayoutDashboard, FileText,
   Calendar, MessageSquare, GitCompare, ClipboardList, Activity,
-  Users, GitBranch, FlaskConical, GraduationCap, Waves, RefreshCw
+  Users, GitBranch, FlaskConical, GraduationCap, Waves, RefreshCw,
+  Shield, LogOut
 } from 'lucide-react';
 
 const Layout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme, textSize, setTextSize } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { effectiveCollapsed } = useSidebar();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
 
   const cycleTextSize = () => {
     const sizes = ['small', 'medium', 'large'];
     const currentIndex = sizes.indexOf(textSize);
     const nextIndex = (currentIndex + 1) % sizes.length;
     setTextSize(sizes[nextIndex]);
+  };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -77,7 +104,7 @@ const Layout = () => {
             })()}
           </div>
 
-          {/* Theme Controls */}
+          {/* Theme Controls & User Menu */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {/* Text Size Toggle */}
             <button
@@ -98,6 +125,50 @@ const Layout = () => {
             >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
+
+            {/* User Profile Menu */}
+            {user && (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-blue-600 text-white text-sm font-medium hover:shadow-md transition-shadow"
+                  title="User menu"
+                  aria-label="User menu"
+                >
+                  {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Signed in as</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate mt-1">
+                        {user.email}
+                      </p>
+                      {user.name && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {user.name}
+                        </p>
+                      )}
+                      {(user.role === 'admin' || user.role === 'super_admin') && (
+                        <span className="inline-flex items-center gap-1 mt-2 text-xs text-purple-600 dark:text-purple-400">
+                          <Shield className="w-3 h-3" />
+                          {user.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>
