@@ -52,6 +52,27 @@ const Layout = () => {
     navigate('/login');
   };
 
+  // Get user initials (first and last)
+  const getUserInitials = () => {
+    if (!user) return '?';
+
+    // Try to get initials from name first
+    if (user.name) {
+      const nameParts = user.name.trim().split(/\s+/);
+      if (nameParts.length >= 2) {
+        return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+      }
+      return nameParts[0].charAt(0).toUpperCase();
+    }
+
+    // Fallback to email
+    if (user.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+
+    return '?';
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 overflow-x-hidden">
       {/* Skip Navigation Links for 508 Compliance */}
@@ -126,6 +147,11 @@ const Layout = () => {
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
 
+            {/* Pipe Delimiter */}
+            {user && (
+              <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+            )}
+
             {/* User Profile Menu */}
             {user && (
               <div className="relative" ref={userMenuRef}>
@@ -135,7 +161,7 @@ const Layout = () => {
                   title="User menu"
                   aria-label="User menu"
                 >
-                  {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                  {getUserInitials()}
                 </button>
 
                 {/* Dropdown Menu */}
