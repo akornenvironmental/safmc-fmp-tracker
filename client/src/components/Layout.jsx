@@ -106,7 +106,7 @@ const Layout = () => {
                   {breadcrumb.path.map((segment, index) => (
                     <div key={index} className="flex items-center gap-2 flex-shrink-0">
                       {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
-                      <span className="text-body text-gray-600 dark:text-gray-400">
+                      <span className="text-base text-gray-600 dark:text-gray-400">
                         {segment}
                       </span>
                     </div>
@@ -117,7 +117,7 @@ const Layout = () => {
                   <Icon className="w-5 h-5 text-brand-blue flex-shrink-0" style={{ position: 'relative', top: '4px' }} />
 
                   {/* Page title */}
-                  <h1 className="font-heading text-gray-900 dark:text-white truncate mb-0 leading-none" style={{ fontSize: '24px', position: 'relative', top: '4px', margin: '0', padding: '0' }}>
+                  <h1 className="text-2xl font-semibold text-gray-900 dark:text-white truncate mb-0 leading-none" style={{ position: 'relative', top: '4px', margin: '0', padding: '0' }}>
                     {breadcrumb.label}
                   </h1>
                 </>
