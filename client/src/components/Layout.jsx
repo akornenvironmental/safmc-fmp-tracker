@@ -106,20 +106,20 @@ const Layout = () => {
                   {breadcrumb.path.map((segment, index) => (
                     <div key={index} className="flex items-center gap-2 flex-shrink-0">
                       {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
-                      <span className="font-heading text-gray-900 dark:text-white leading-none" style={{ fontSize: '24px', position: 'relative', top: '4px', margin: '0', padding: '0' }}>
+                      <div className="font-heading font-semibold text-gray-900 dark:text-white" style={{ fontSize: '24px', lineHeight: '1', fontWeight: '600' }}>
                         {segment}
-                      </span>
+                      </div>
                     </div>
                   ))}
                   {breadcrumb.path.length > 0 && <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />}
 
                   {/* Page icon */}
-                  <Icon className="w-5 h-5 text-brand-blue flex-shrink-0" style={{ position: 'relative', top: '4px' }} />
+                  <Icon className="w-5 h-5 text-brand-blue flex-shrink-0" />
 
                   {/* Page title */}
-                  <h1 className="font-heading text-gray-900 dark:text-white truncate mb-0 leading-none" style={{ fontSize: '24px', position: 'relative', top: '4px', margin: '0', padding: '0' }}>
+                  <div className="font-heading font-semibold text-gray-900 dark:text-white truncate" style={{ fontSize: '24px', lineHeight: '1', fontWeight: '600' }}>
                     {breadcrumb.label}
-                  </h1>
+                  </div>
                 </>
               );
             })()}
