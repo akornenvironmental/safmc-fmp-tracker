@@ -106,7 +106,7 @@ const Layout = () => {
                   {breadcrumb.path.map((segment, index) => (
                     <div key={index} className="flex items-center gap-2 flex-shrink-0">
                       {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
-                      <span className="font-heading text-gray-900 dark:text-white" style={{ fontSize: '24px', position: 'relative', top: '4px', margin: '0', padding: '0' }}>
+                      <span className="font-heading text-gray-900 dark:text-white leading-none" style={{ fontSize: '24px', position: 'relative', top: '4px', margin: '0', padding: '0' }}>
                         {segment}
                       </span>
                     </div>
