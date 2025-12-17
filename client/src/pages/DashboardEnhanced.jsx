@@ -6,6 +6,7 @@ import {
   TrendingUp, Clock, AlertCircle, ChevronRight, BarChart3
 } from 'lucide-react';
 import Button from '../components/Button';
+import { toast } from 'react-toastify';
 
 const DashboardEnhanced = () => {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ const DashboardEnhanced = () => {
       const token = localStorage.getItem('authToken');
 
       if (!token) {
-        alert('Please log in to update data.');
+        toast.error('Please log in to update data.', { autoClose: 3000 });
         setScraping(false);
         return;
       }
@@ -98,6 +99,9 @@ const DashboardEnhanced = () => {
 
       // Run all scrapers sequentially
       for (const scraper of scrapers) {
+        // Show "Starting..." toast
+        toast.info(`Starting: ${scraper.name}`, { autoClose: 3000 });
+
         try {
           const response = await fetch(`${API_BASE_URL}${scraper.endpoint}`, {
             method: 'POST',
@@ -112,12 +116,15 @@ const DashboardEnhanced = () => {
 
           if (response.ok && data.success) {
             successCount++;
+            toast.success(`Completed: ${scraper.name}`, { autoClose: 3000 });
           } else {
             failCount++;
+            toast.error(`Failed: ${scraper.name}`, { autoClose: 3000 });
             console.error(`${scraper.name} failed:`, data.error);
           }
         } catch (error) {
           failCount++;
+          toast.error(`Error: ${scraper.name}`, { autoClose: 3000 });
           console.error(`${scraper.name} error:`, error);
         }
 
@@ -130,16 +137,17 @@ const DashboardEnhanced = () => {
       // Refresh dashboard data after all scrapers complete
       setTimeout(() => fetchDashboardData(), 2000);
 
+      // Show final summary toast
       if (failCount === 0) {
-        alert(`All data updated successfully! (${successCount} scrapers completed)`);
+        toast.success(`All data updated successfully! (${successCount} scrapers completed)`, { autoClose: 3000 });
       } else if (successCount > 0) {
-        alert(`Partial update complete. ${successCount} succeeded, ${failCount} failed. Check console for details.`);
+        toast.warning(`Partial update complete. ${successCount} succeeded, ${failCount} failed.`, { autoClose: 3000 });
       } else {
-        alert('All scrapers failed. Please check your connection and try again.');
+        toast.error('All scrapers failed. Please check your connection and try again.', { autoClose: 3000 });
       }
     } catch (error) {
       console.error('Error triggering scrape:', error);
-      alert('Failed to update data. Please check your connection and try again.');
+      toast.error('Failed to update data. Please check your connection and try again.', { autoClose: 3000 });
     } finally {
       setScraping(false);
     }
