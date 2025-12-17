@@ -34,6 +34,7 @@ import Favorites from './pages/Favorites';
 import WorkplanUpload from './pages/WorkplanUpload';
 import Login from './pages/Login';
 import VerifyLogin from './pages/VerifyLogin';
+import DevLogin from './pages/DevLogin';
 
 // Build version to force new asset hash - DO NOT REMOVE
 const BUILD_VERSION = '2025-11-26-v20-dashboard-status-fix';
@@ -54,6 +55,7 @@ function App() {
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/auth/verify" element={<VerifyLogin />} />
+            <Route path="/dev-login" element={<DevLogin />} />
 
             {/* Protected routes */}
             <Route

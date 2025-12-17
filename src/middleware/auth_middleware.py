@@ -23,27 +23,35 @@ def get_current_user():
     """Extract user from JWT token in Authorization header"""
     try:
         auth_header = request.headers.get('Authorization')
+        logger.info(f"[DEBUG] get_current_user called for {request.path}")
+        logger.info(f"[DEBUG] Authorization header: {auth_header[:30] if auth_header else 'NONE'}...")
 
         if not auth_header or not auth_header.startswith('Bearer '):
             logger.warning(f"Missing or invalid Authorization header for {request.path}")
             return None
 
         token = auth_header.split(' ')[1]
+        logger.info(f"[DEBUG] Token extracted: {token[:20]}...")
+        logger.info(f"[DEBUG] JWT_SECRET being used: {JWT_SECRET[:10]}...")
 
         # Verify JWT
         decoded = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        logger.info(f"[DEBUG] JWT decoded successfully: {decoded}")
 
         # Get user from database to ensure they're still active
-        user = User.query.filter_by(id=decoded.get('user_id')).first()
+        user_id = decoded.get('user_id')
+        logger.info(f"[DEBUG] Looking up user with ID: {user_id}")
+        user = User.query.filter_by(id=user_id).first()
 
         if not user:
-            logger.warning(f"User not found for ID: {decoded.get('user_id')}")
+            logger.warning(f"User not found for ID: {user_id}")
             return None
 
         if not user.is_active:
             logger.warning(f"Inactive user attempted access: {user.email}")
             return None
 
+        logger.info(f"[DEBUG] User found and authenticated: {user.email}")
         return user
 
     except jwt.ExpiredSignatureError:

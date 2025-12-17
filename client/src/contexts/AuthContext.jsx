@@ -93,27 +93,40 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('authToken');
       const storedRefreshToken = localStorage.getItem('refreshToken');
 
+      console.log('[DEBUG] checkAuth called');
+      console.log('[DEBUG] authToken in localStorage:', token ? `${token.substring(0, 20)}...` : 'NONE');
+      console.log('[DEBUG] refreshToken in localStorage:', storedRefreshToken ? 'EXISTS' : 'NONE');
+
       if (!token) {
+        console.log('[DEBUG] No authToken found');
         // No JWT - try to get one using refresh token
         if (storedRefreshToken) {
+          console.log('[DEBUG] Attempting refresh token flow');
           const refreshed = await refreshToken();
           if (refreshed) {
             setLoading(false);
             return;
           }
         }
+        console.log('[DEBUG] No valid auth - setting unauthenticated');
         setUser(null);
         setAuthenticated(false);
         setLoading(false);
         return;
       }
 
+      console.log('[DEBUG] Checking auth with backend at:', `${API_BASE_URL}/api/auth/check`);
+      console.log('[DEBUG] Authorization header:', `Bearer ${token.substring(0, 20)}...`);
+
       const response = await fetch(`${API_BASE_URL}/api/auth/check`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
+
+      console.log('[DEBUG] Auth check response status:', response.status);
       const data = await response.json();
+      console.log('[DEBUG] Auth check response data:', data);
 
       if (data.authenticated && data.user) {
         setUser(data.user);
