@@ -310,7 +310,7 @@ const ResourceAllocation = () => {
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             {[2024, 2023, 2022, 2021, 2020].map(year => (
-              <key={year} value={year}>FY {year}</option>
+              <option key={year} value={year}>FY {year}</option>
             ))}
           </select>
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={fetchBudgetComparison}>
