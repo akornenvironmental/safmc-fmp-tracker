@@ -717,29 +717,30 @@ const ResourceAllocation = () => {
       </div>
 
       {/* Placeholder documents */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
-        <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border-2 border-blue-500 dark:border-blue-600">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+          <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
           Available Documents on Desktop
         </h4>
-        <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
-          <li className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+        <ul className="space-y-2 text-sm text-gray-900 dark:text-gray-100" role="list">
+          <li className="flex items-center gap-2 pl-7">
+            <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden="true" />
             SAFMC_Resource_Allocation_Analysis_Framework.docx
           </li>
-          <li className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <li className="flex items-center gap-2 pl-7">
+            <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden="true" />
             SAFMC_Resource_Analysis_Strategic_Implications.docx
           </li>
-          <li className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <li className="flex items-center gap-2 pl-7">
+            <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden="true" />
             SAFMC_Resource_Allocation_Data_Collection.xlsx
           </li>
-          <li className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
+          <li className="flex items-center gap-2 pl-7">
+            <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" aria-hidden="true" />
             SAFMC_Resource_Analysis_Quick_Reference.md
           </li>
         </ul>
-        <p className="mt-3 text-xs text-blue-700 dark:text-blue-300">
+        <p className="mt-3 text-xs text-gray-700 dark:text-gray-300 pl-7">
           These files are ready to be uploaded to the document repository for team access.
         </p>
       </div>
