@@ -28,6 +28,7 @@ import {
   Minus,
   Plus,
   RefreshCw,
+  TrendingUp,
 } from 'lucide-react';
 
 // Navigation item component
@@ -165,6 +166,7 @@ const Sidebar = ({ user }) => {
       { to: '/ecosystem', label: 'Ecosystem', icon: Waves },
       { to: '/ssc', label: 'SSC', icon: FlaskConical },
       { to: '/cmod', label: 'CMOD Workshops', icon: GraduationCap },
+      { to: '/resource-allocation', label: 'Resource Allocation', icon: TrendingUp },
       { to: '/timeline', label: 'Timeline', icon: GitBranch },
       { to: '/compare', label: 'Compare Actions', icon: GitCompare },
       { to: '/workplan', label: 'Workplan', icon: ClipboardList },

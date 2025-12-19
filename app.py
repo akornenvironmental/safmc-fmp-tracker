@@ -812,6 +812,7 @@ from src.routes.export_routes import bp as export_bp
 from src.routes.ssc_routes import bp as ssc_bp
 from src.routes.cmod_routes import bp as cmod_bp
 from src.routes.user_routes import bp as user_bp
+from src.routes.resource_allocation_routes import bp as resource_allocation_bp
 
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(auth_bp)
@@ -826,6 +827,7 @@ app.register_blueprint(export_bp)
 app.register_blueprint(ssc_bp)
 app.register_blueprint(cmod_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(resource_allocation_bp)
 
 # Initialize scheduler for automated scraping
 from src.services.scheduler import init_scheduler

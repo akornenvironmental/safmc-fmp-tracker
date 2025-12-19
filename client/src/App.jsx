@@ -29,6 +29,7 @@ import SSCRecommendations from './pages/SSC/SSCRecommendations';
 import CMODDashboard from './pages/CMOD/CMODDashboard';
 import CMODWorkshops from './pages/CMOD/CMODWorkshops';
 import CMODTopics from './pages/CMOD/CMODTopics';
+import ResourceAllocation from './pages/ResourceAllocation';
 import UserProfile from './pages/UserProfile';
 import Favorites from './pages/Favorites';
 import WorkplanUpload from './pages/WorkplanUpload';
@@ -81,6 +82,7 @@ function App() {
               <Route path="ecosystem" element={<Ecosystem />} />
               <Route path="species/:speciesName" element={<SpeciesProfile />} />
               <Route path="compare" element={<Compare />} />
+              <Route path="resource-allocation" element={<ResourceAllocation />} />
               <Route path="ssc" element={<SSCDashboard />} />
               <Route path="ssc/members" element={<SSCMembers />} />
               <Route path="ssc/meetings" element={<SSCMeetings />} />

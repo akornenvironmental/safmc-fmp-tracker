@@ -11,7 +11,7 @@ import {
   Sun, Moon, Type, Fish, ChevronRight, LayoutDashboard, FileText,
   Calendar, MessageSquare, GitCompare, ClipboardList, Activity,
   Users, GitBranch, FlaskConical, GraduationCap, Waves, RefreshCw,
-  Shield, LogOut
+  Shield, LogOut, TrendingUp
 } from 'lucide-react';
 
 const Layout = () => {
@@ -239,6 +239,7 @@ function getBreadcrumbPath(pathname) {
     // Data & Analysis section
     '/stocks': { label: 'Stock Assessments', path: ['Data & Analysis'], icon: Fish },
     '/ecosystem': { label: 'Ecosystem Assessment', path: ['Data & Analysis'], icon: Waves },
+    '/resource-allocation': { label: 'Resource Allocation', path: ['Data & Analysis'], icon: TrendingUp },
     '/timeline': { label: 'Timeline', path: ['Data & Analysis'], icon: GitBranch },
     '/compare': { label: 'Compare Actions', path: ['Data & Analysis'], icon: GitCompare },
     '/workplan': { label: 'Workplan', path: ['Data & Analysis'], icon: ClipboardList },
