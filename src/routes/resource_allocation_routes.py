@@ -30,6 +30,66 @@ bp = Blueprint('resource_allocation', __name__, url_prefix='/api/resource-alloca
 # MIGRATION & SETUP
 # =====================================================
 
+@bp.route('/cleanup', methods=['POST'])
+def cleanup_tables():
+    """Drop all resource allocation tables to enable fresh migration"""
+    import psycopg2
+    import os
+
+    try:
+        logger.info("Cleaning up resource allocation tables...")
+
+        # Get database URL from environment
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            return jsonify({'success': False, 'error': 'DATABASE_URL not configured'}), 500
+
+        # Use psycopg2 directly with autocommit
+        conn = psycopg2.connect(database_url)
+        conn.autocommit = True
+        cursor = conn.cursor()
+
+        # Drop views first (they depend on tables)
+        cursor.execute("DROP VIEW IF EXISTS v_resource_efficiency_metrics CASCADE")
+        cursor.execute("DROP VIEW IF EXISTS v_regional_resource_comparison CASCADE")
+
+        # Drop tables in reverse dependency order
+        tables_to_drop = [
+            'resource_analysis_documents',
+            'resource_data_sources',
+            'resource_workload_metrics',
+            'resource_sc_capacity',
+            'resource_ro_capacity',
+            'resource_council_staffing',
+            'resource_council_budgets',
+            'resource_science_centers',
+            'resource_regional_offices',
+            'resource_councils'
+        ]
+
+        dropped = []
+        for table in tables_to_drop:
+            try:
+                cursor.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
+                dropped.append(table)
+                logger.info(f"Dropped table: {table}")
+            except Exception as e:
+                logger.warning(f"Error dropping {table}: {e}")
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': 'Cleanup completed successfully',
+            'tables_dropped': dropped
+        })
+
+    except Exception as e:
+        logger.error(f"Cleanup error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @bp.route('/migrate', methods=['POST'])
 def run_migration():
     """Run the resource allocation system migration"""
