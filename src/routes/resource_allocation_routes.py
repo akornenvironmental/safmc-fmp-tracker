@@ -33,6 +33,9 @@ bp = Blueprint('resource_allocation', __name__, url_prefix='/api/resource-alloca
 @bp.route('/migrate', methods=['POST'])
 def run_migration():
     """Run the resource allocation system migration"""
+    import psycopg2
+    import os
+
     try:
         logger.info("Running resource allocation migration...")
 
@@ -41,51 +44,50 @@ def run_migration():
         with open(migration_file, 'r') as f:
             migration_sql = f.read()
 
-        # Execute migration
-        statements = [s.strip() for s in migration_sql.split(';') if s.strip()]
-        created_tables = []
-        errors = []
+        # Get database URL from environment
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            return jsonify({'success': False, 'error': 'DATABASE_URL not configured'}), 500
 
-        for statement in statements:
-            if statement.startswith('--') or statement.startswith('/*') or not statement:
-                continue
+        # Use psycopg2 directly with autocommit to bypass failed transaction
+        conn = psycopg2.connect(database_url)
+        conn.autocommit = True  # Critical: avoid transaction errors
+        cursor = conn.cursor()
 
-            try:
-                db.session.execute(text(statement))
-                db.session.commit()
+        try:
+            # Execute the full migration script
+            cursor.execute(migration_sql)
 
-                if 'CREATE TABLE' in statement:
-                    table_name = statement.split('CREATE TABLE')[1].split('(')[0].strip()
-                    if 'IF NOT EXISTS' in statement:
-                        table_name = table_name.replace('IF NOT EXISTS', '').strip()
-                    created_tables.append(table_name)
+            logger.info("Migration SQL executed successfully")
 
-            except Exception as e:
-                if 'already exists' not in str(e).lower():
-                    errors.append(str(e))
-                    logger.warning(f"Migration statement error: {e}")
+            # Verify tables were created
+            cursor.execute("""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name LIKE 'resource_%'
+                ORDER BY table_name
+            """)
 
-        # Verify tables
-        result = db.session.execute(text("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-            AND table_name LIKE 'resource_%'
-            ORDER BY table_name
-        """))
+            tables = [row[0] for row in cursor.fetchall()]
 
-        tables = [row[0] for row in result]
+            cursor.close()
+            conn.close()
 
-        return jsonify({
-            'success': True,
-            'created_tables': created_tables,
-            'existing_tables': tables,
-            'errors': errors
-        })
+            return jsonify({
+                'success': True,
+                'message': 'Migration completed successfully',
+                'tables_created': tables,
+                'total_tables': len(tables)
+            })
+
+        except Exception as e:
+            cursor.close()
+            conn.close()
+            raise e
 
     except Exception as e:
         logger.error(f"Migration error: {e}")
-        db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
