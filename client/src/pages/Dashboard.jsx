@@ -96,6 +96,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Grid */}
+      <h2 className="text-2xl font-heading font-semibold text-gray-900 dark:text-white mb-4">Key Statistics</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow">
           <div className="text-3xl font-bold text-brand-blue mb-2">
@@ -133,6 +134,7 @@ const Dashboard = () => {
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
+            <caption className="sr-only">Recent fishery management actions and amendments</caption>
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase">

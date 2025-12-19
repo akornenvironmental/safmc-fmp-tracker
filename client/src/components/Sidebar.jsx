@@ -290,12 +290,13 @@ const Sidebar = ({ user }) => {
             effectiveCollapsed ? 'justify-center' : 'justify-end'
           }`}
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {effectiveCollapsed ? (
-            <ChevronRight className="w-4 h-4 group-hover:text-brand-blue dark:group-hover:text-white" />
+            <ChevronRight className="w-4 h-4 group-hover:text-brand-blue dark:group-hover:text-white" aria-hidden="true" />
           ) : (
             <div className="flex items-center gap-0.5 -translate-x-[5px]">
-              <ChevronLeft className="w-4 h-4 group-hover:text-brand-blue dark:group-hover:text-white relative -top-px" />
+              <ChevronLeft className="w-4 h-4 group-hover:text-brand-blue dark:group-hover:text-white relative -top-px" aria-hidden="true" />
               <span className="text-base leading-none">COLLAPSE</span>
             </div>
           )}

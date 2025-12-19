@@ -85,7 +85,8 @@ const Actions = () => {
       </div>
 
       {/* Filter Buttons */}
-      <div className="mt-6">
+      <h2 className="text-2xl font-heading font-semibold text-gray-900 dark:text-white mb-4 mt-6">Management Actions</h2>
+      <div className="mt-4">
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilterStage('all')}
@@ -133,6 +134,7 @@ const Actions = () => {
       {/* Actions Table */}
       <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
+          <caption className="sr-only">Fishery management actions filtered by progress stage</caption>
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

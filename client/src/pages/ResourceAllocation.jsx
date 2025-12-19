@@ -792,7 +792,7 @@ const ResourceAllocation = () => {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-8" role="tablist" aria-label="Resource allocation analysis sections">
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'budget', label: 'Budget Analysis', icon: DollarSign },
@@ -802,6 +802,11 @@ const ResourceAllocation = () => {
           ].map((tab) => (
             <button
               key={tab.id}
+              id={`${tab.id}-tab`}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`${tab.id}-panel`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
               onClick={() => setActiveTab(tab.id)}
               className={`
                 flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
@@ -811,7 +816,7 @@ const ResourceAllocation = () => {
                 }
               `}
             >
-              <tab.icon className="h-5 w-5" />
+              <tab.icon className="h-5 w-5" aria-hidden="true" />
               {tab.label}
             </button>
           ))}
@@ -820,11 +825,31 @@ const ResourceAllocation = () => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === 'overview' && renderOverviewTab()}
-        {activeTab === 'budget' && renderBudgetTab()}
-        {activeTab === 'staffing' && renderStaffingTab()}
-        {activeTab === 'data-collection' && renderDataCollectionTab()}
-        {activeTab === 'documents' && renderDocumentsTab()}
+        {activeTab === 'overview' && (
+          <div id="overview-panel" role="tabpanel" aria-labelledby="overview-tab" tabIndex={0}>
+            {renderOverviewTab()}
+          </div>
+        )}
+        {activeTab === 'budget' && (
+          <div id="budget-panel" role="tabpanel" aria-labelledby="budget-tab" tabIndex={0}>
+            {renderBudgetTab()}
+          </div>
+        )}
+        {activeTab === 'staffing' && (
+          <div id="staffing-panel" role="tabpanel" aria-labelledby="staffing-tab" tabIndex={0}>
+            {renderStaffingTab()}
+          </div>
+        )}
+        {activeTab === 'data-collection' && (
+          <div id="data-collection-panel" role="tabpanel" aria-labelledby="data-collection-tab" tabIndex={0}>
+            {renderDataCollectionTab()}
+          </div>
+        )}
+        {activeTab === 'documents' && (
+          <div id="documents-panel" role="tabpanel" aria-labelledby="documents-tab" tabIndex={0}>
+            {renderDocumentsTab()}
+          </div>
+        )}
       </div>
     </div>
   );
