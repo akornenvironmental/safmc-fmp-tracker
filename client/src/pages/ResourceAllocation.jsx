@@ -771,9 +771,11 @@ const ResourceAllocation = () => {
             </p>
           </div>
           {isDatabaseInitialized ? (
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg border border-green-200 dark:border-green-800">
-              <CheckCircle2 className="h-5 w-5" />
-              <span className="text-sm font-medium">Database Ready ({councils.length} councils loaded)</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-gray-800 rounded-lg border border-green-600 dark:border-green-500">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden="true" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                Database Ready ({councils.length} councils loaded)
+              </span>
             </div>
           ) : (
             <Button
