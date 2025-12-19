@@ -21,6 +21,7 @@ import {
 const ResourceAllocation = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [isDatabaseInitialized, setIsDatabaseInitialized] = useState(false);
 
   // Dashboard data
   const [dashboardSummary, setDashboardSummary] = useState(null);
@@ -88,11 +89,15 @@ const ResourceAllocation = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/resource-allocation/councils`);
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.councils && data.councils.length > 0) {
         setCouncils(data.councils);
+        setIsDatabaseInitialized(true);
+      } else {
+        setIsDatabaseInitialized(false);
       }
     } catch (error) {
       console.error('Error fetching councils:', error);
+      setIsDatabaseInitialized(false);
     }
   };
 
@@ -160,7 +165,8 @@ const ResourceAllocation = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert(`Migration successful! Created tables: ${data.created_tables.join(', ')}`);
+        alert(`Migration successful! Created ${data.total_tables} tables.`);
+        setIsDatabaseInitialized(true);
         fetchInitialData();
       } else {
         alert(`Migration failed: ${data.error}`);
@@ -764,13 +770,20 @@ const ResourceAllocation = () => {
               Comparative analysis of resource allocation across fishery management councils
             </p>
           </div>
-          <Button
-            variant="outline"
-            icon={Database}
-            onClick={runMigration}
-          >
-            Run Migration
-          </Button>
+          {isDatabaseInitialized ? (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg border border-green-200 dark:border-green-800">
+              <CheckCircle2 className="h-5 w-5" />
+              <span className="text-sm font-medium">Database Ready ({councils.length} councils loaded)</span>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              icon={Database}
+              onClick={runMigration}
+            >
+              Run Migration
+            </Button>
+          )}
         </div>
       </div>
 
