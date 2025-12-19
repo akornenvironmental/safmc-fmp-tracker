@@ -583,7 +583,7 @@ const UserManagement = () => {
                   Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                   <input
                     type="email"
                     id="email"
@@ -592,6 +592,10 @@ const UserManagement = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
                     disabled={modalMode === 'edit'}
+                    required
+                    aria-required="true"
+                    aria-invalid={!!formErrors.email}
+                    aria-describedby={formErrors.email ? "email-error" : undefined}
                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                       formErrors.email ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                     } ${modalMode === 'edit' ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed' : ''}`}
@@ -599,7 +603,7 @@ const UserManagement = () => {
                   />
                 </div>
                 {formErrors.email && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.email}</p>
+                  <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">{formErrors.email}</p>
                 )}
               </div>
 
@@ -609,7 +613,7 @@ const UserManagement = () => {
                   Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                   <input
                     type="text"
                     id="name"
@@ -617,6 +621,10 @@ const UserManagement = () => {
                     autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    aria-required="true"
+                    aria-invalid={!!formErrors.name}
+                    aria-describedby={formErrors.name ? "name-error" : undefined}
                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                       formErrors.name ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                     }`}
@@ -624,7 +632,7 @@ const UserManagement = () => {
                   />
                 </div>
                 {formErrors.name && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.name}</p>
+                  <p id="name-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">{formErrors.name}</p>
                 )}
               </div>
 
@@ -634,7 +642,7 @@ const UserManagement = () => {
                   Organization
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                   <input
                     type="text"
                     id="organization"
@@ -654,11 +662,15 @@ const UserManagement = () => {
                   Role <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" aria-hidden="true" />
                   <select
                     id="role"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    required
+                    aria-required="true"
+                    aria-invalid={!!formErrors.role}
+                    aria-describedby={formErrors.role ? "role-error" : undefined}
                     className={`w-full pl-10 pr-4 py-2 border rounded-md focus:ring-brand-blue focus:border-brand-blue bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                       formErrors.role ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
                     }`}
@@ -669,7 +681,7 @@ const UserManagement = () => {
                   </select>
                 </div>
                 {formErrors.role && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.role}</p>
+                  <p id="role-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">{formErrors.role}</p>
                 )}
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {formData.role === 'super_admin' && 'Full system access including user management'}

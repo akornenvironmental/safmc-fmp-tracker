@@ -14,7 +14,7 @@ const SearchBar = ({
 }) => {
   return (
     <div className={`relative flex-1 min-w-[150px] ${className}`}>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none z-10" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none z-10" aria-hidden="true" />
       <input
         type="text"
         placeholder={placeholder}
