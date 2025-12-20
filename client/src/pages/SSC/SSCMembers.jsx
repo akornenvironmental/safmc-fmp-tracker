@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
+import StatusBadge from '../../components/StatusBadge';
 import {
   Users,
   Mail,
@@ -96,36 +97,43 @@ const SSCMembers = () => {
   // Get unique seat types
   const seatTypes = [...new Set(members.map(m => m.seat_type))].filter(Boolean).sort();
 
-  // Get role badge
+  // Get role badge variant
+  const getRoleVariant = (member) => {
+    if (member.is_chair) return 'warning';
+    if (member.is_vice_chair) return 'info';
+    return null;
+  };
+
+  // Get role badge content
   const getRoleBadge = (member) => {
     if (member.is_chair) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-          <Crown className="w-3 h-3" />
+        <StatusBadge variant="warning" size="sm" className="gap-1">
+          <Crown className="w-3 h-3" aria-hidden="true" />
           Chair
-        </span>
+        </StatusBadge>
       );
     }
     if (member.is_vice_chair) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-          <Shield className="w-3 h-3" />
+        <StatusBadge variant="info" size="sm" className="gap-1">
+          <Shield className="w-3 h-3" aria-hidden="true" />
           Vice-Chair
-        </span>
+        </StatusBadge>
       );
     }
     return null;
   };
 
-  // Get seat type badge color
-  const getSeatTypeBadge = (seatType) => {
-    const colors = {
-      'At-large': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-      'State-designated': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      'Economist': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-      'Social Scientist': 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300'
+  // Get seat type badge variant
+  const getSeatTypeVariant = (seatType) => {
+    const variants = {
+      'At-large': 'neutral',
+      'State-designated': 'success',
+      'Economist': 'purple',
+      'Social Scientist': 'error'
     };
-    return colors[seatType] || 'bg-gray-100 text-gray-800';
+    return variants[seatType] || 'neutral';
   };
 
   // Get initials for avatar
@@ -239,9 +247,9 @@ const SSCMembers = () => {
             <div className="p-4 space-y-3">
               {/* Seat Type */}
               <div>
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getSeatTypeBadge(member.seat_type)}`}>
+                <StatusBadge variant={getSeatTypeVariant(member.seat_type)} size="sm">
                   {member.seat_type}
-                </span>
+                </StatusBadge>
               </div>
 
               {/* State */}

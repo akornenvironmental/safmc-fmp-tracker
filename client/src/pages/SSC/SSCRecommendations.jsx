@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 import Button from '../../components/Button';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
+import StatusBadge from '../../components/StatusBadge';
 import {
   FileText,
   AlertCircle,
@@ -105,15 +106,15 @@ const SSCRecommendations = () => {
     recommendations.map(r => r.recommendation_type).filter(Boolean)
   )].sort();
 
-  // Get status badge
+  // Get status badge variant and icon
   const getStatusBadge = (status) => {
     const badges = {
-      'pending': { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', icon: Clock },
-      'adopted': { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', icon: CheckCircle2 },
-      'rejected': { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', icon: XCircle },
-      'modified': { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: Edit3 }
+      'pending': { variant: 'warning', icon: Clock },
+      'adopted': { variant: 'success', icon: CheckCircle2 },
+      'rejected': { variant: 'error', icon: XCircle },
+      'modified': { variant: 'info', icon: Edit3 }
     };
-    return badges[status] || { color: 'bg-gray-100 text-gray-800', icon: Clock };
+    return badges[status] || { variant: 'neutral', icon: Clock };
   };
 
   // Format ABC value
@@ -232,10 +233,10 @@ const SSCRecommendations = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex-1 pr-4">
                     {rec.title}
                   </h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 ${statusInfo.color} flex-shrink-0`}>
-                    <StatusIcon className="w-3 h-3" />
+                  <StatusBadge variant={statusInfo.variant} size="sm" className="gap-1 flex-shrink-0">
+                    <StatusIcon className="w-3 h-3" aria-hidden="true" />
                     {rec.status}
-                  </span>
+                  </StatusBadge>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -245,14 +246,14 @@ const SSCRecommendations = () => {
                     </span>
                   )}
                   {rec.recommendation_type && (
-                    <span className="px-2 py-1 rounded-md text-xs bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300">
+                    <StatusBadge variant="purple" size="sm">
                       {rec.recommendation_type}
-                    </span>
+                    </StatusBadge>
                   )}
                   {rec.fmp && (
-                    <span className="px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                    <StatusBadge variant="info" size="sm">
                       {rec.fmp}
-                    </span>
+                    </StatusBadge>
                   )}
                 </div>
               </div>
@@ -298,13 +299,10 @@ const SSCRecommendations = () => {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {rec.species.map((species, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                        >
-                          <Fish className="w-3 h-3" />
+                        <StatusBadge key={idx} variant="info" size="sm" className="gap-1">
+                          <Fish className="w-3 h-3" aria-hidden="true" />
                           {species}
-                        </span>
+                        </StatusBadge>
                       ))}
                     </div>
                   </div>

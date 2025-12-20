@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 import Button from '../../components/Button';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../../components/PageControls';
+import StatusBadge from '../../components/StatusBadge';
 import {
   Calendar,
   MapPin,
@@ -113,15 +114,15 @@ const SSCMeetings = () => {
     return `${startStr} - ${endStr}`;
   };
 
-  // Get status badge
-  const getStatusBadge = (status) => {
-    const badges = {
-      'scheduled': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-      'completed': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-      'in-progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+  // Get status badge variant
+  const getStatusVariant = (status) => {
+    const variants = {
+      'scheduled': 'info',
+      'completed': 'success',
+      'cancelled': 'error',
+      'in-progress': 'warning'
     };
-    return badges[status] || 'bg-gray-100 text-gray-800';
+    return variants[status] || 'neutral';
   };
 
   // Check if meeting is upcoming
@@ -224,9 +225,9 @@ const SSCMeetings = () => {
                       {meeting.title}
                     </h3>
                     {isUpcoming(meeting.meeting_date_start) && (
-                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-brand-blue text-white">
+                      <StatusBadge variant="info" size="sm">
                         Upcoming
-                      </span>
+                      </StatusBadge>
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -248,9 +249,9 @@ const SSCMeetings = () => {
                     )}
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(meeting.status)}`}>
+                <StatusBadge variant={getStatusVariant(meeting.status)} size="sm">
                   {meeting.status}
-                </span>
+                </StatusBadge>
               </div>
             </div>
 
@@ -272,12 +273,9 @@ const SSCMeetings = () => {
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {meeting.topics.map((topic, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
-                        >
+                        <StatusBadge key={idx} variant="info" size="sm">
                           {topic}
-                        </span>
+                        </StatusBadge>
                       ))}
                     </div>
                   </div>
@@ -289,12 +287,9 @@ const SSCMeetings = () => {
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {meeting.species_discussed.map((species, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 rounded-md text-xs bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
-                        >
+                        <StatusBadge key={idx} variant="success" size="sm">
                           {species}
-                        </span>
+                        </StatusBadge>
                       ))}
                     </div>
                   </div>
