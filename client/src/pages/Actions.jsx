@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 import { RefreshCw } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 const Actions = () => {
   const [filterStage, setFilterStage] = useState('all');
@@ -54,15 +55,15 @@ const Actions = () => {
     return action.progress_stage && action.progress_stage.toLowerCase().includes(filterStage.toLowerCase());
   });
 
-  const getStageColor = (stage) => {
-    if (!stage) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  const getStageVariant = (stage) => {
+    if (!stage) return 'neutral';
 
     const stageLower = stage.toLowerCase();
-    if (stageLower.includes('scoping')) return 'bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100';
-    if (stageLower.includes('hearing')) return 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100';
-    if (stageLower.includes('approval')) return 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100';
-    if (stageLower.includes('implementation')) return 'bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100';
-    return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    if (stageLower.includes('scoping')) return 'warning';
+    if (stageLower.includes('hearing')) return 'info';
+    if (stageLower.includes('approval')) return 'success';
+    if (stageLower.includes('implementation')) return 'purple';
+    return 'neutral';
   };
 
   return (
@@ -158,7 +159,10 @@ const Actions = () => {
             {loading ? (
               <tr>
                 <td colSpan="5" className="px-3 py-8 text-center text-sm text-gray-500">
-                  Loading actions...
+                  <div role="status" aria-live="polite">
+                    <span className="sr-only">Loading actions, please wait...</span>
+                    Loading actions...
+                  </div>
                 </td>
               </tr>
             ) : filteredActions.length === 0 ? (
@@ -191,9 +195,9 @@ const Actions = () => {
                     <div className="text-sm text-gray-900">{action.fmp || 'N/A'}</div>
                   </td>
                   <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
+                    <StatusBadge variant={getStageVariant(action.progress_stage)} size="sm">
                       {action.progress_stage || 'Unknown'}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
                     <div className="flex items-center gap-1">

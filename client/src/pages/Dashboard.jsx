@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import { RefreshCw } from 'lucide-react';
 import Button from '../components/Button';
+import StatusBadge from '../components/StatusBadge';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -161,7 +162,10 @@ const Dashboard = () => {
               {loading ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
-                    Loading actions...
+                    <div role="status" aria-live="polite">
+                      <span className="sr-only">Loading actions, please wait...</span>
+                      Loading actions...
+                    </div>
                   </td>
                 </tr>
               ) : recentActions.length === 0 ? (
@@ -200,9 +204,9 @@ const Dashboard = () => {
                       <span className="text-xs text-gray-900">{action.fmp || 'N/A'}</span>
                     </td>
                     <td className="px-2 py-0.5 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <StatusBadge variant="info" size="sm">
                         {action.progress_stage || 'Unknown'}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-2 py-0.5 whitespace-nowrap">
                       <div className="flex items-center gap-1">
