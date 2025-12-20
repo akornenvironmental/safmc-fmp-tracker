@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import Button from '../components/Button';
+import StatusBadge from '../components/StatusBadge';
 import {
   DollarSign,
   Users,
@@ -525,27 +526,26 @@ const ResourceAllocation = () => {
       }
     };
 
-    const getStatusBadgeColor = (status) => {
+    const getStatusVariant = (status) => {
       switch (status) {
         case 'Verified':
-          return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
         case 'Completed':
-          return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+          return 'success';
         case 'In Progress':
-          return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+          return 'warning';
         default:
-          return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+          return 'neutral';
       }
     };
 
-    const getPriorityBadgeColor = (priority) => {
+    const getPriorityVariant = (priority) => {
       switch (priority) {
         case 'Tier 1':
-          return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+          return 'error';
         case 'Tier 2':
-          return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+          return 'warning';
         default:
-          return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+          return 'info';
       }
     };
 
@@ -585,12 +585,12 @@ const ResourceAllocation = () => {
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                           {source.sourceName}
                         </h4>
-                        <span className={`px-2 py-1 text-xs font-medium rounded ${getPriorityBadgeColor(source.priority)}`}>
+                        <StatusBadge variant={getPriorityVariant(source.priority)} size="sm">
                           {source.priority}
-                        </span>
-                        <span className={`px-2 py-1 text-xs font-medium rounded ${getStatusBadgeColor(source.collectionStatus)}`}>
+                        </StatusBadge>
+                        <StatusBadge variant={getStatusVariant(source.collectionStatus)} size="sm">
                           {source.collectionStatus}
-                        </span>
+                        </StatusBadge>
                       </div>
                       <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         {source.sourceType && <span>Type: {source.sourceType}</span>}
@@ -670,9 +670,9 @@ const ResourceAllocation = () => {
                         {doc.title}
                       </h4>
                       {doc.documentType && (
-                        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
+                        <StatusBadge variant="info" size="sm">
                           {doc.documentType}
-                        </span>
+                        </StatusBadge>
                       )}
                     </div>
                     {doc.description && (
@@ -683,12 +683,9 @@ const ResourceAllocation = () => {
                     {doc.tags && doc.tags.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {doc.tags.map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
-                          >
+                          <StatusBadge key={idx} variant="neutral" size="sm">
                             {tag}
-                          </span>
+                          </StatusBadge>
                         ))}
                       </div>
                     )}
