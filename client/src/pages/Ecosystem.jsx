@@ -10,6 +10,7 @@ import {
   TrendingUp, ExternalLink, Database, FileText, Activity,
   Waves, Thermometer, Fish, Users, AlertCircle, Download, BarChart3
 } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 const Ecosystem = () => {
 
@@ -100,17 +101,17 @@ const Ecosystem = () => {
   const getStatusBadge = (status) => {
     if (status === 'integrated') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded">
+        <StatusBadge variant="success" size="sm">
           <Activity className="w-3 h-3" />
           Integrated
-        </span>
+        </StatusBadge>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded">
+      <StatusBadge variant="neutral" size="sm">
         <ExternalLink className="w-3 h-3" />
         External
-      </span>
+      </StatusBadge>
     );
   };
 

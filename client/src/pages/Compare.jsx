@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../config';
 import Button from '../components/Button';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import { GitCompare, Plus, X, Check, AlertCircle, ArrowRight } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 const Compare = () => {
   const [actions, setActions] = useState([]);
@@ -342,19 +343,16 @@ const Compare = () => {
                         <p className="text-sm text-gray-500 mt-1">{item.action.fmp}</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {item.matchReasons.map((reason, ridx) => (
-                            <span
-                              key={ridx}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600"
-                            >
+                            <StatusBadge key={ridx} variant="neutral" size="sm">
                               {reason}
-                            </span>
+                            </StatusBadge>
                           ))}
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <StatusBadge variant="info" size="sm">
                           {item.similarityScore}% match
-                        </span>
+                        </StatusBadge>
                         <button
                           onClick={() => addAction(item.action)}
                           className="mt-2 block text-xs text-brand-blue hover:underline"

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Filter, X, FileText, Calendar, Users, File, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import StatusBadge from '../components/StatusBadge';
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
@@ -175,9 +176,9 @@ const Favorites = () => {
                           {favorite.item_type}
                         </span>
                         {favorite.flagged_as && (
-                          <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">
+                          <StatusBadge variant="info" size="sm">
                             {favorite.flagged_as}
-                          </span>
+                          </StatusBadge>
                         )}
                       </div>
                       <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
