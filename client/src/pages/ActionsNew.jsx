@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { API_BASE_URL } from '../config';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
 import { RefreshCw, Download, Settings, RotateCcw } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 const ActionsNew = () => {
   const [filterStage, setFilterStage] = useState([]);
@@ -14,6 +15,7 @@ const ActionsNew = () => {
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedActions, setSelectedActions] = useState(new Set());
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -321,15 +323,15 @@ const ActionsNew = () => {
     setDraggedColumn(null);
   };
 
-  const getStageColor = (stage) => {
-    if (!stage) return 'bg-gray-100 text-gray-800';
+  const getStageVariant = (stage) => {
+    if (!stage) return 'neutral';
 
     const stageLower = stage.toLowerCase();
-    if (stageLower.includes('scoping')) return 'bg-yellow-100 text-yellow-800';
-    if (stageLower.includes('hearing')) return 'bg-blue-100 text-blue-800';
-    if (stageLower.includes('approval')) return 'bg-green-100 text-green-800';
-    if (stageLower.includes('implementation')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
+    if (stageLower.includes('scoping')) return 'warning';
+    if (stageLower.includes('hearing')) return 'info';
+    if (stageLower.includes('approval')) return 'success';
+    if (stageLower.includes('implementation')) return 'purple';
+    return 'neutral';
   };
 
   return (
@@ -579,9 +581,9 @@ const ActionsNew = () => {
                           )}
                         </>
                       ) : col.key === 'progress_stage' ? (
-                        <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
+                        <StatusBadge variant={getStageVariant(action.progress_stage)} size="sm">
                           {action.progress_stage || 'Unknown'}
-                        </span>
+                        </StatusBadge>
                       ) : col.key === 'progress' ? (
                         <div className="flex items-center gap-1">
                           <div className="w-16 bg-gray-200 rounded-full h-1.5">
