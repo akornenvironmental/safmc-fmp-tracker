@@ -9,6 +9,7 @@ import {
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ArrowUpDown,
   LayoutGrid, Table
 } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 // Species name synonyms and aliases for better matching
 const SPECIES_SYNONYMS = {
@@ -265,13 +266,13 @@ const SpeciesStocks = () => {
     return 'unknown';
   }
 
-  const getStatusColor = (status) => {
+  const getStatusVariant = (status) => {
     switch (status) {
-      case 'critical': return 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200';
-      case 'overfished': return 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200';
-      case 'overfishing': return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
-      case 'healthy': return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
-      default: return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+      case 'critical': return 'error';
+      case 'overfished': return 'warning';
+      case 'overfishing': return 'warning';
+      case 'healthy': return 'success';
+      default: return 'neutral';
     }
   };
 
@@ -298,18 +299,18 @@ const SpeciesStocks = () => {
     }
   };
 
-  const getFMPColor = (fmp) => {
-    const colors = {
-      'Snapper Grouper': 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200',
-      'Coastal Migratory Pelagics': 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200',
-      'Dolphin Wahoo': 'bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-200',
-      'Spiny Lobster': 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200',
-      'Golden Crab': 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200',
-      'Shrimp': 'bg-pink-100 dark:bg-pink-900/50 text-pink-800 dark:text-pink-200',
-      'Coral': 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200',
-      'Sargassum': 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200',
+  const getFMPVariant = (fmp) => {
+    const variants = {
+      'Snapper Grouper': 'info',
+      'Coastal Migratory Pelagics': 'purple',
+      'Dolphin Wahoo': 'info',
+      'Spiny Lobster': 'error',
+      'Golden Crab': 'warning',
+      'Shrimp': 'purple',
+      'Coral': 'warning',
+      'Sargassum': 'success',
     };
-    return colors[fmp] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+    return variants[fmp] || 'neutral';
   };
 
   const exportToCSV = () => {
@@ -498,10 +499,10 @@ const SpeciesStocks = () => {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-brand-blue dark:hover:text-blue-400">
                       {sp.name}
                     </h3>
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(sp.stockStatus)}`}>
+                    <StatusBadge variant={getStatusVariant(sp.stockStatus)} size="sm">
                       {getStatusIcon(sp.stockStatus)}
                       {getStatusLabel(sp.stockStatus)}
-                    </span>
+                    </StatusBadge>
                   </div>
 
                   {/* Stock Metrics */}
@@ -535,14 +536,14 @@ const SpeciesStocks = () => {
                   {/* FMP Tags */}
                   <div className="mt-3 flex flex-wrap gap-1">
                     {(sp.fmps || []).slice(0, 3).map(fmp => (
-                      <span key={fmp} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getFMPColor(fmp)}`}>
+                      <StatusBadge key={fmp} variant={getFMPVariant(fmp)} size="sm">
                         {fmp}
-                      </span>
+                      </StatusBadge>
                     ))}
                     {(sp.fmps?.length || 0) > 3 && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                      <StatusBadge variant="neutral" size="sm">
                         +{sp.fmps.length - 3} more
-                      </span>
+                      </StatusBadge>
                     )}
                   </div>
 
@@ -594,10 +595,10 @@ const SpeciesStocks = () => {
                   >
                     <td className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">{sp.name}</td>
                     <td className="px-3 py-2">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(sp.stockStatus)}`}>
+                      <StatusBadge variant={getStatusVariant(sp.stockStatus)} size="sm">
                         {getStatusIcon(sp.stockStatus)}
                         {getStatusLabel(sp.stockStatus)}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="px-3 py-2 text-sm">
                       {sp.b_bmsy ? (
@@ -618,9 +619,9 @@ const SpeciesStocks = () => {
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap gap-1">
                         {(sp.fmps || []).slice(0, 2).map(fmp => (
-                          <span key={fmp} className="inline-flex px-1.5 py-0.5 text-xs rounded bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
+                          <StatusBadge key={fmp} variant="info" size="sm">
                             {fmp.split(' ')[0]}
-                          </span>
+                          </StatusBadge>
                         ))}
                         {(sp.fmps?.length || 0) > 2 && <span className="text-xs text-gray-400">+{sp.fmps.length - 2}</span>}
                       </div>

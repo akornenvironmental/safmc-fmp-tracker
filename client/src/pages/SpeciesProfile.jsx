@@ -5,6 +5,7 @@ import {
   ArrowLeft, Fish, Calendar, Clock, FileText,
   ExternalLink, ChevronRight, AlertCircle
 } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 const SpeciesProfile = () => {
   const { speciesName } = useParams();
@@ -42,30 +43,30 @@ const SpeciesProfile = () => {
     }
   };
 
-  // Get status badge color
-  const getStatusColor = (status) => {
-    if (!status) return 'bg-gray-100 text-gray-800';
+  // Get status badge variant
+  const getStatusVariant = (status) => {
+    if (!status) return 'neutral';
     const statusLower = status.toLowerCase();
-    if (statusLower.includes('approved')) return 'bg-green-100 text-green-800';
-    if (statusLower.includes('comment')) return 'bg-blue-100 text-blue-800';
-    if (statusLower.includes('scoping')) return 'bg-yellow-100 text-yellow-800';
-    if (statusLower.includes('hearing')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
+    if (statusLower.includes('approved')) return 'success';
+    if (statusLower.includes('comment')) return 'info';
+    if (statusLower.includes('scoping')) return 'warning';
+    if (statusLower.includes('hearing')) return 'purple';
+    return 'neutral';
   };
 
-  // Get FMP badge color
-  const getFMPColor = (fmp) => {
-    const colors = {
-      'Snapper Grouper': 'bg-blue-100 text-blue-800',
-      'Coastal Migratory Pelagics': 'bg-purple-100 text-purple-800',
-      'Dolphin Wahoo': 'bg-cyan-100 text-cyan-800',
-      'Spiny Lobster': 'bg-red-100 text-red-800',
-      'Golden Crab': 'bg-yellow-100 text-yellow-800',
-      'Shrimp': 'bg-pink-100 text-pink-800',
-      'Coral': 'bg-orange-100 text-orange-800',
-      'Sargassum': 'bg-green-100 text-green-800',
+  // Get FMP badge variant
+  const getFMPVariant = (fmp) => {
+    const variants = {
+      'Snapper Grouper': 'info',
+      'Coastal Migratory Pelagics': 'purple',
+      'Dolphin Wahoo': 'info',
+      'Spiny Lobster': 'error',
+      'Golden Crab': 'warning',
+      'Shrimp': 'purple',
+      'Coral': 'warning',
+      'Sargassum': 'success',
     };
-    return colors[fmp] || 'bg-gray-100 text-gray-800';
+    return variants[fmp] || 'neutral';
   };
 
   // Format date
@@ -159,12 +160,9 @@ const SpeciesProfile = () => {
         {/* FMP Tags */}
         <div className="mt-4 flex flex-wrap gap-2">
           {profile.fmps?.map(fmp => (
-            <span
-              key={fmp}
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getFMPColor(fmp)}`}
-            >
+            <StatusBadge key={fmp} variant={getFMPVariant(fmp)} size="sm">
               {fmp}
-            </span>
+            </StatusBadge>
           ))}
         </div>
 
@@ -223,13 +221,15 @@ const SpeciesProfile = () => {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Status Breakdown</h2>
           <div className="flex flex-wrap gap-3">
             {Object.entries(profile.statusBreakdown).map(([status, count]) => (
-              <div
+              <StatusBadge
                 key={status}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${getStatusColor(status)}`}
+                variant={getStatusVariant(status)}
+                size="md"
+                className="gap-2 px-4 py-2"
               >
                 <span className="font-semibold">{count}</span>
                 <span>{status || 'Unknown'}</span>
-              </div>
+              </StatusBadge>
             ))}
           </div>
         </div>
@@ -285,19 +285,19 @@ const SpeciesProfile = () => {
                         )}
                         <div className="mt-2 flex flex-wrap items-center gap-2">
                           {item.status && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(item.status)}`}>
+                            <StatusBadge variant={getStatusVariant(item.status)} size="sm">
                               {item.status}
-                            </span>
+                            </StatusBadge>
                           )}
                           {item.fmp && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getFMPColor(item.fmp)}`}>
+                            <StatusBadge variant={getFMPVariant(item.fmp)} size="sm">
                               {item.fmp}
-                            </span>
+                            </StatusBadge>
                           )}
                           {item.type && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                            <StatusBadge variant="neutral" size="sm">
                               {item.type}
-                            </span>
+                            </StatusBadge>
                           )}
                         </div>
                       </div>

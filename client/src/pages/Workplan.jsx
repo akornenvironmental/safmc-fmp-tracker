@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Upload
 } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge';
 
 const Workplan = () => {
   const [workplan, setWorkplan] = useState(null);
@@ -142,17 +143,17 @@ const Workplan = () => {
     return icons[type] || '📌';
   };
 
-  const getMilestoneColor = (type) => {
-    const colors = {
-      'AR': 'bg-blue-100 text-blue-800 border-blue-300',
-      'S': 'bg-purple-100 text-purple-800 border-purple-300',
-      'DOC': 'bg-green-100 text-green-800 border-green-300',
-      'PH': 'bg-orange-100 text-orange-800 border-orange-300',
-      'A': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-      'SUBMIT': 'bg-cyan-100 text-cyan-800 border-cyan-300',
-      'IMPL': 'bg-teal-100 text-teal-800 border-teal-300'
+  const getMilestoneVariant = (type) => {
+    const variants = {
+      'AR': 'info',
+      'S': 'purple',
+      'DOC': 'success',
+      'PH': 'warning',
+      'A': 'success',
+      'SUBMIT': 'info',
+      'IMPL': 'success'
     };
-    return colors[type] || 'bg-gray-100 text-gray-800 border-gray-300';
+    return variants[type] || 'neutral';
   };
 
   const getStatusColor = (status) => {
@@ -242,9 +243,9 @@ const Workplan = () => {
               Effective: {new Date(workplan.version.effectiveDate).toLocaleDateString()}
             </p>
             {workplan.version.quarter && (
-              <span className="inline-block mt-2 px-3 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+              <StatusBadge variant="info" size="sm">
                 {workplan.version.quarter} {workplan.version.fiscalYear}
-              </span>
+              </StatusBadge>
             )}
           </div>
         </div>
@@ -276,14 +277,14 @@ const Workplan = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {version.isActive && (
-                      <span className="px-2 py-1 text-xs font-medium bg-green-600 text-white rounded">
+                      <StatusBadge variant="success" size="sm">
                         Current
-                      </span>
+                      </StatusBadge>
                     )}
                     {selectedVersionId === version.id && (
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-600 text-white rounded">
+                      <StatusBadge variant="info" size="sm">
                         Viewing
-                      </span>
+                      </StatusBadge>
                     )}
                   </div>
                 </div>
@@ -385,9 +386,9 @@ const Workplan = () => {
                               {item.amendmentId}
                             </span>
                             {item.seroPriority && (
-                              <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded">
+                              <StatusBadge variant="purple" size="sm">
                                 {item.seroPriority}
-                              </span>
+                              </StatusBadge>
                             )}
                           </div>
 
@@ -422,10 +423,10 @@ const Workplan = () => {
                             .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate))
                             .map((milestone, idx) => (
                               <div key={idx} className="flex items-start gap-3">
-                                <div className={`px-3 py-1 text-xs font-medium rounded border ${getMilestoneColor(milestone.milestoneType)}`}>
+                                <StatusBadge variant={getMilestoneVariant(milestone.milestoneType)} size="sm">
                                   <span className="mr-1">{getMilestoneIcon(milestone.milestoneType)}</span>
                                   {milestone.milestoneType}
-                                </div>
+                                </StatusBadge>
 
                                 <div className="flex-1">
                                   <div className="flex items-start justify-between gap-2">
@@ -484,10 +485,10 @@ const Workplan = () => {
             { code: 'IMPL', name: 'Implementation', desc: 'Rule implemented' }
           ].map(({ code, name, desc }) => (
             <div key={code} className="text-xs">
-              <div className={`inline-block px-2 py-1 rounded border ${getMilestoneColor(code)} mb-1`}>
+              <StatusBadge variant={getMilestoneVariant(code)} size="sm" className="mb-1">
                 <span className="mr-1">{getMilestoneIcon(code)}</span>
                 {code}
-              </div>
+              </StatusBadge>
               <p className="font-medium text-gray-900">{name}</p>
               <p className="text-gray-600">{desc}</p>
             </div>
