@@ -6,6 +6,7 @@ import {
   TrendingUp, Clock, AlertCircle, ChevronRight, BarChart3
 } from 'lucide-react';
 import Button from '../components/Button';
+import StatusBadge from '../components/StatusBadge';
 import { toast } from 'react-toastify';
 
 const DashboardEnhanced = () => {
@@ -271,15 +272,15 @@ const DashboardEnhanced = () => {
     }).slice(0, 8);
   }, [actions, meetings]);
 
-  // Get stage colors - with dark mode support
-  const getStageColor = (stage) => {
-    if (!stage) return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
+  // Get stage variant for StatusBadge
+  const getStageVariant = (stage) => {
+    if (!stage) return 'neutral';
     const s = stage.toLowerCase();
-    if (s.includes('scoping')) return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
-    if (s.includes('hearing')) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
-    if (s.includes('approval')) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
-    if (s.includes('implementation')) return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200';
-    return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
+    if (s.includes('scoping')) return 'warning';
+    if (s.includes('hearing')) return 'info';
+    if (s.includes('approval')) return 'success';
+    if (s.includes('implementation')) return 'purple';
+    return 'neutral';
   };
 
   return (

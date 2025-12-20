@@ -3,6 +3,7 @@ import FavoriteButton from '../components/FavoriteButton';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import StatusBadge from '../components/StatusBadge';
 import { API_BASE_URL } from '../config';
 import {
   Calendar, MapPin, RefreshCw, Download, Settings, RotateCcw,
@@ -332,15 +333,15 @@ const MeetingsEnhanced = () => {
     });
   };
 
-  const getTypeColor = (type) => {
-    if (!type) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+  const getTypeVariant = (type) => {
+    if (!type) return 'neutral';
 
     const typeLower = type.toLowerCase();
-    if (typeLower.includes('council')) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
-    if (typeLower.includes('committee')) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
-    if (typeLower.includes('workshop')) return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200';
-    if (typeLower.includes('webinar')) return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
-    return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+    if (typeLower.includes('council')) return 'info';
+    if (typeLower.includes('committee')) return 'success';
+    if (typeLower.includes('workshop')) return 'purple';
+    if (typeLower.includes('webinar')) return 'warning';
+    return 'neutral';
   };
 
   // Calendar view helpers
@@ -800,9 +801,9 @@ const MeetingsEnhanced = () => {
                           <div className="text-xs text-gray-900">{meeting.location || 'TBD'}</div>
                         </div>
                       ) : col.key === 'type' ? (
-                        <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getTypeColor(meeting.type)}`}>
+                        <StatusBadge variant={getTypeVariant(meeting.type)} size="sm">
                           {meeting.type || 'Meeting'}
-                        </span>
+                        </StatusBadge>
                       ) : col.key === 'description' ? (
                         meeting.description ? (
                           <div className="text-xs text-gray-500">{meeting.description.substring(0, 100)}...</div>

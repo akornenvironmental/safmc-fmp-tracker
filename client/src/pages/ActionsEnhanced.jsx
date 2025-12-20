@@ -5,6 +5,7 @@ import FavoriteButton from '../components/FavoriteButton';
 import Button from '../components/Button';
 import ButtonGroup from '../components/ButtonGroup';
 import { SearchBar, FilterDropdown, ExportMenu, PageControlsContainer } from '../components/PageControls';
+import StatusBadge from '../components/StatusBadge';
 import { RefreshCw, Download, Settings, RotateCcw, ChevronDown, X, FileText } from 'lucide-react';
 
 const ActionsEnhanced = () => {
@@ -400,15 +401,15 @@ const ActionsEnhanced = () => {
     setDraggedColumn(null);
   };
 
-  const getStageColor = (stage) => {
-    if (!stage) return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+  const getStageVariant = (stage) => {
+    if (!stage) return 'neutral';
 
     const stageLower = stage.toLowerCase();
-    if (stageLower.includes('scoping')) return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200';
-    if (stageLower.includes('hearing')) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200';
-    if (stageLower.includes('approval')) return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
-    if (stageLower.includes('implementation')) return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200';
-    return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
+    if (stageLower.includes('scoping')) return 'warning';
+    if (stageLower.includes('hearing')) return 'info';
+    if (stageLower.includes('approval')) return 'success';
+    if (stageLower.includes('implementation')) return 'purple';
+    return 'neutral';
   };
 
   return (
@@ -717,9 +718,9 @@ const ActionsEnhanced = () => {
                           )}
                         </div>
                       ) : col.key === 'progress_stage' ? (
-                        <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getStageColor(action.progress_stage)}`}>
+                        <StatusBadge variant={getStageVariant(action.progress_stage)} size="sm">
                           {action.progress_stage || 'Unknown'}
-                        </span>
+                        </StatusBadge>
                       ) : col.key === 'progress' ? (
                         <div className="flex items-center gap-1">
                           <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
