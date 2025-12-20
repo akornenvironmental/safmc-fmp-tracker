@@ -8,6 +8,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, Users, MapPin, FileText, ExternalLink, ChevronLeft } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
+import StatusBadge from '../../components/StatusBadge';
 
 const CMODWorkshops = () => {
   const { id } = useParams();
@@ -45,31 +46,32 @@ const CMODWorkshops = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      'completed': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-300', label: 'Completed' },
-      'scheduled': { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-300', label: 'Scheduled' },
-      'cancelled': { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-300', label: 'Cancelled' }
+  const getStatusVariant = (status) => {
+    const variants = {
+      'completed': 'success',
+      'scheduled': 'info',
+      'cancelled': 'error'
     };
-
-    const config = statusConfig[status] || statusConfig['scheduled'];
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
-        {config.label}
-      </span>
-    );
+    return variants[status] || 'info';
   };
 
-  const getSessionTypeColor = (type) => {
-    const typeColors = {
-      'Presentation': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
-      'Panel': 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
-      'Discussion': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-      'Skills Training': 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+  const getStatusLabel = (status) => {
+    const labels = {
+      'completed': 'Completed',
+      'scheduled': 'Scheduled',
+      'cancelled': 'Cancelled'
     };
+    return labels[status] || 'Scheduled';
+  };
 
-    return typeColors[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
+  const getSessionTypeVariant = (type) => {
+    const variants = {
+      'Presentation': 'info',
+      'Panel': 'purple',
+      'Discussion': 'success',
+      'Skills Training': 'warning'
+    };
+    return variants[type] || 'neutral';
   };
 
   if (loading) {
@@ -115,7 +117,9 @@ const CMODWorkshops = () => {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <span className="text-3xl font-bold text-brand-blue">{workshop.year}</span>
-            {getStatusBadge(workshop.status)}
+            <StatusBadge variant={getStatusVariant(workshop.status)} size="md">
+              {getStatusLabel(workshop.status)}
+            </StatusBadge>
           </div>
           {workshop.materials_url && (
             <a
@@ -184,12 +188,9 @@ const CMODWorkshops = () => {
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Focus Areas</h3>
             <div className="flex flex-wrap gap-2">
               {workshop.focus_areas.map((area, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-md"
-                >
+                <StatusBadge key={idx} variant="info" size="sm">
                   {area}
-                </span>
+                </StatusBadge>
               ))}
             </div>
           </div>
@@ -200,12 +201,9 @@ const CMODWorkshops = () => {
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Skills Components</h3>
             <div className="flex flex-wrap gap-2">
               {workshop.skills_components.map((skill, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm rounded-md"
-                >
+                <StatusBadge key={idx} variant="success" size="sm">
                   {skill}
-                </span>
+                </StatusBadge>
               ))}
             </div>
           </div>
@@ -218,12 +216,9 @@ const CMODWorkshops = () => {
             </h3>
             <div className="flex flex-wrap gap-2">
               {workshop.participating_councils.map((council, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded"
-                >
+                <StatusBadge key={idx} variant="neutral" size="sm">
                   {council}
-                </span>
+                </StatusBadge>
               ))}
             </div>
           </div>
@@ -244,9 +239,9 @@ const CMODWorkshops = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-lg font-semibold text-brand-blue">#{session.session_order || idx + 1}</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getSessionTypeColor(session.session_type)}`}>
+                    <StatusBadge variant={getSessionTypeVariant(session.session_type)} size="sm">
                       {session.session_type}
-                    </span>
+                    </StatusBadge>
                   </div>
                   {session.session_date && (
                     <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -265,12 +260,9 @@ const CMODWorkshops = () => {
                   <div className="mb-3">
                     <div className="flex flex-wrap gap-2">
                       {session.topics.map((topic, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded"
-                        >
+                        <StatusBadge key={idx} variant="neutral" size="sm">
                           {topic}
-                        </span>
+                        </StatusBadge>
                       ))}
                     </div>
                   </div>

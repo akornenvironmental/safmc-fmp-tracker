@@ -8,6 +8,7 @@ import { GraduationCap, Calendar, FileText, Users, TrendingUp, ExternalLink } fr
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../config';
 import { toast } from 'react-toastify';
+import StatusBadge from '../../components/StatusBadge';
 
 const CMODDashboard = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -49,20 +50,22 @@ const CMODDashboard = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      'completed': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-300', label: 'Completed' },
-      'scheduled': { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-300', label: 'Scheduled' },
-      'cancelled': { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-300', label: 'Cancelled' }
+  const getStatusVariant = (status) => {
+    const variants = {
+      'completed': 'success',
+      'scheduled': 'info',
+      'cancelled': 'error'
     };
+    return variants[status] || 'info';
+  };
 
-    const config = statusConfig[status] || statusConfig['scheduled'];
-
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-        {config.label}
-      </span>
-    );
+  const getStatusLabel = (status) => {
+    const labels = {
+      'completed': 'Completed',
+      'scheduled': 'Scheduled',
+      'cancelled': 'Cancelled'
+    };
+    return labels[status] || 'Scheduled';
   };
 
   return (
@@ -198,7 +201,9 @@ const CMODDashboard = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-lg font-bold text-brand-blue">{workshop.year}</span>
-                        {getStatusBadge(workshop.status)}
+                        <StatusBadge variant={getStatusVariant(workshop.status)} size="sm">
+                          {getStatusLabel(workshop.status)}
+                        </StatusBadge>
                       </div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
                         {workshop.title}
@@ -226,17 +231,14 @@ const CMODDashboard = () => {
                       {workshop.focus_areas && workshop.focus_areas.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2">
                           {workshop.focus_areas.slice(0, 5).map((area, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-md"
-                            >
+                            <StatusBadge key={idx} variant="info" size="sm">
                               {area}
-                            </span>
+                            </StatusBadge>
                           ))}
                           {workshop.focus_areas.length > 5 && (
-                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-md">
+                            <StatusBadge variant="neutral" size="sm">
                               +{workshop.focus_areas.length - 5} more
-                            </span>
+                            </StatusBadge>
                           )}
                         </div>
                       )}
