@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import StatusBadge from '../components/StatusBadge';
 import { RefreshCw, Download, Fish, X } from 'lucide-react';
 
 const Species = () => {
@@ -118,27 +119,27 @@ const Species = () => {
     a.click();
   };
 
-  // Get color based on action count
-  const getActionCountColor = (count) => {
-    if (count >= 20) return 'bg-red-100 text-red-800';
-    if (count >= 10) return 'bg-orange-100 text-orange-800';
-    if (count >= 5) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
+  // Get variant based on action count
+  const getActionCountVariant = (count) => {
+    if (count >= 20) return 'error';
+    if (count >= 10) return 'warning';
+    if (count >= 5) return 'warning';
+    return 'success';
   };
 
-  // Get FMP badge color
-  const getFMPColor = (fmp) => {
-    const colors = {
-      'Snapper Grouper': 'bg-blue-100 text-blue-800',
-      'Coastal Migratory Pelagics': 'bg-purple-100 text-purple-800',
-      'Dolphin Wahoo': 'bg-cyan-100 text-cyan-800',
-      'Spiny Lobster': 'bg-red-100 text-red-800',
-      'Golden Crab': 'bg-yellow-100 text-yellow-800',
-      'Shrimp': 'bg-pink-100 text-pink-800',
-      'Coral': 'bg-orange-100 text-orange-800',
-      'Sargassum': 'bg-green-100 text-green-800',
+  // Get FMP badge variant
+  const getFMPVariant = (fmp) => {
+    const variants = {
+      'Snapper Grouper': 'info',
+      'Coastal Migratory Pelagics': 'purple',
+      'Dolphin Wahoo': 'info',
+      'Spiny Lobster': 'error',
+      'Golden Crab': 'warning',
+      'Shrimp': 'error',
+      'Coral': 'warning',
+      'Sargassum': 'success',
     };
-    return colors[fmp] || 'bg-gray-100 text-gray-800';
+    return variants[fmp] || 'neutral';
   };
 
   // Calculate stats
@@ -256,18 +257,16 @@ const Species = () => {
       {filterFMP.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {filterFMP.map(fmp => (
-            <span
-              key={fmp}
-              className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-            >
+            <StatusBadge key={fmp} variant="info" size="sm" className="gap-1">
               {fmp}
               <button
                 onClick={() => toggleFMPFilter(fmp)}
-                className="hover:text-blue-600"
+                className="hover:opacity-70"
+                aria-label={`Remove ${fmp} filter`}
               >
-                <X size={14} />
+                <X size={14} aria-hidden="true" />
               </button>
-            </span>
+            </StatusBadge>
           ))}
         </div>
       )}
@@ -294,25 +293,22 @@ const Species = () => {
                   <h3 className="text-lg font-semibold text-gray-900 hover:text-brand-blue">
                     {sp.name}
                   </h3>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActionCountColor(sp.actionCount)}`}>
+                  <StatusBadge variant={getActionCountVariant(sp.actionCount)} size="sm">
                     {sp.actionCount} actions
-                  </span>
+                  </StatusBadge>
                 </div>
 
                 {/* FMP Tags */}
                 <div className="mt-3 flex flex-wrap gap-1">
                   {(sp.fmps || []).slice(0, 3).map(fmp => (
-                    <span
-                      key={fmp}
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getFMPColor(fmp)}`}
-                    >
+                    <StatusBadge key={fmp} variant={getFMPVariant(fmp)} size="sm">
                       {fmp}
-                    </span>
+                    </StatusBadge>
                   ))}
                   {(sp.fmps?.length || 0) > 3 && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                    <StatusBadge variant="neutral" size="sm">
                       +{sp.fmps.length - 3} more
-                    </span>
+                    </StatusBadge>
                   )}
                 </div>
 

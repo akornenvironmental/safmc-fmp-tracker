@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
+import StatusBadge from '../components/StatusBadge';
 import { Calendar, MapPin, RefreshCw } from 'lucide-react';
 
 const Meetings = () => {
@@ -48,15 +49,15 @@ const Meetings = () => {
     }
   };
 
-  const getTypeColor = (type) => {
-    if (!type) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  const getTypeVariant = (type) => {
+    if (!type) return 'neutral';
 
     const typeLower = type.toLowerCase();
-    if (typeLower.includes('council')) return 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100';
-    if (typeLower.includes('committee')) return 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100';
-    if (typeLower.includes('workshop')) return 'bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100';
-    if (typeLower.includes('webinar')) return 'bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100';
-    return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    if (typeLower.includes('council')) return 'info';
+    if (typeLower.includes('committee')) return 'success';
+    if (typeLower.includes('workshop')) return 'purple';
+    if (typeLower.includes('webinar')) return 'warning';
+    return 'neutral';
   };
 
   return (
@@ -161,9 +162,9 @@ const Meetings = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3 sm:px-6 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getTypeColor(meeting.type)}`}>
+                    <StatusBadge variant={getTypeVariant(meeting.type)} size="sm">
                       {meeting.type || 'Meeting'}
-                    </span>
+                    </StatusBadge>
                   </td>
                 </tr>
               ))

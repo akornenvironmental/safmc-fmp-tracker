@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import StatusBadge from '../components/StatusBadge';
 import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ArrowUpDown } from 'lucide-react';
 
 const StockAssessments = () => {
@@ -186,15 +187,15 @@ const StockAssessments = () => {
     }
   };
 
-  const getStatusColor = (assessment) => {
+  const getStatusVariant = (assessment) => {
     if (assessment.overfished && assessment.overfishing_occurring) {
-      return 'bg-red-100 text-red-800'; // Critical
+      return 'error'; // Critical
     } else if (assessment.overfished) {
-      return 'bg-orange-100 text-orange-800'; // Overfished
+      return 'warning'; // Overfished
     } else if (assessment.overfishing_occurring) {
-      return 'bg-yellow-100 text-yellow-800'; // Overfishing
+      return 'warning'; // Overfishing
     } else {
-      return 'bg-green-100 text-green-800'; // Healthy
+      return 'success'; // Healthy
     }
   };
 
@@ -477,10 +478,10 @@ const StockAssessments = () => {
                     <div className="text-sm text-gray-900">{assessment.sedar_number || 'N/A'}</div>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(assessment)}`}>
-                      {getStatusIcon(assessment)}
+                    <StatusBadge variant={getStatusVariant(assessment)} size="sm" className="gap-1">
+                      <span aria-hidden="true">{getStatusIcon(assessment)}</span>
                       {getStatusLabel(assessment)}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-2 py-0.5 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
@@ -508,9 +509,9 @@ const StockAssessments = () => {
                     {assessment.fmps_affected && assessment.fmps_affected.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {assessment.fmps_affected.map((fmp, idx) => (
-                          <span key={idx} className="inline-flex px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-800">
+                          <StatusBadge key={idx} variant="info" size="sm">
                             {fmp}
-                          </span>
+                          </StatusBadge>
                         ))}
                       </div>
                     ) : (
