@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
+import StatusBadge from '../components/StatusBadge';
 import { User, Building2, RefreshCw } from 'lucide-react';
 
 const Comments = () => {
@@ -54,14 +55,14 @@ const Comments = () => {
     return comment.position && comment.position.toLowerCase() === filterPosition.toLowerCase();
   });
 
-  const getPositionColor = (position) => {
-    if (!position) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  const getPositionVariant = (position) => {
+    if (!position) return 'neutral';
 
     const positionLower = position.toLowerCase();
-    if (positionLower.includes('support')) return 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100';
-    if (positionLower.includes('oppose')) return 'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200';
-    if (positionLower.includes('neutral')) return 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100';
-    return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    if (positionLower.includes('support')) return 'success';
+    if (positionLower.includes('oppose')) return 'error';
+    if (positionLower.includes('neutral')) return 'info';
+    return 'neutral';
   };
 
   return (
@@ -169,9 +170,9 @@ const Comments = () => {
                   )}
                 </div>
                 <div className="ml-3">
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${getPositionColor(comment.position)}`}>
+                  <StatusBadge variant={getPositionVariant(comment.position)} size="sm">
                     {comment.position || 'No Position'}
-                  </span>
+                  </StatusBadge>
                 </div>
               </div>
             </div>

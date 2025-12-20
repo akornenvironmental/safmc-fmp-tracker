@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
 import { SearchBar, FilterDropdown, PageControlsContainer } from '../components/PageControls';
+import StatusBadge from '../components/StatusBadge';
 import {
   Calendar, Filter, Search, ChevronDown, ChevronRight,
   FileText, Users, MessageSquare, TrendingUp, Clock, ExternalLink, GitBranch
@@ -333,13 +334,13 @@ const Timeline = () => {
                               {action.title || action.action_id}
                             </h3>
                             <div className="flex items-center gap-3 mt-1">
-                              <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded">
+                              <StatusBadge variant="info" size="sm">
                                 {action.action_id}
-                              </span>
+                              </StatusBadge>
                               {action.fmp && (
-                                <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 rounded">
+                                <StatusBadge variant="purple" size="sm">
                                   {action.fmp}
-                                </span>
+                                </StatusBadge>
                               )}
                               <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {timeline.length} event{timeline.length !== 1 ? 's' : ''}
@@ -450,13 +451,13 @@ const Timeline = () => {
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded">
+                              <StatusBadge variant="info" size="sm">
                                 {event.actionId}
-                              </span>
+                              </StatusBadge>
                               {event.fmp && (
-                                <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 rounded">
+                                <StatusBadge variant="purple" size="sm">
                                   {event.fmp}
-                                </span>
+                                </StatusBadge>
                               )}
                             </div>
                             <div className="flex items-center gap-2">
