@@ -756,23 +756,18 @@ const ResourceAllocation = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Resource Allocation Analysis
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Comparative analysis of resource allocation across fishery management councils
-            </p>
-          </div>
+    <div>
+      {/* Description */}
+      <div className="page-description-container">
+        <p className="page-description-text">
+          Comparative analysis of budget and staffing allocation across all regional fishery management councils to identify resource disparities.
+        </p>
+        <div className="page-description-actions">
           {isDatabaseInitialized ? (
             <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-gray-800 rounded-lg border border-green-600 dark:border-green-500">
               <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden="true" />
               <span className="text-sm font-medium text-gray-900 dark:text-white">
-                Database Ready ({councils.length} councils loaded)
+                Database Ready ({councils.length} councils)
               </span>
             </div>
           ) : (
